@@ -20,8 +20,8 @@
       "mrr_at_5": 0.9833,
       "ndcg_at_5": 0.9654,
       "hard_negative_avoidance_at_3": 0.7333,
-      "latency_p50_ms": 2.547,
-      "latency_p95_ms": 3.566
+      "latency_p50_ms": 3.537,
+      "latency_p95_ms": 6.72
     },
     "vector": {
       "case_count": 60,
@@ -30,8 +30,8 @@
       "mrr_at_5": 0.9358,
       "ndcg_at_5": 0.9078,
       "hard_negative_avoidance_at_3": 0.8167,
-      "latency_p50_ms": 1.77,
-      "latency_p95_ms": 2.925
+      "latency_p50_ms": 2.888,
+      "latency_p95_ms": 4.989
     },
     "hybrid": {
       "case_count": 60,
@@ -40,13 +40,13 @@
       "mrr_at_5": 0.9806,
       "ndcg_at_5": 0.9498,
       "hard_negative_avoidance_at_3": 0.7333,
-      "latency_p50_ms": 4.289,
-      "latency_p95_ms": 4.836
+      "latency_p50_ms": 6.747,
+      "latency_p95_ms": 13.437
     }
   },
   "embedding_evaluation": {
     "label": "offline_hash",
-    "index_build_ms": 438.917,
+    "index_build_ms": 3593.053,
     "usage": {
       "builtin_sync_requests": 1,
       "builtin_sync_successes": 1,
@@ -61,5 +61,5 @@
   },
   "memory_fact_recall": 1.0,
   "safety_pass_rate": 1.0,
-  "generated_at": "2026-08-20T02:25:18.760653+00:00"
+  "generated_at": "2026-08-30T11:13:47.749369+00:00"
 }

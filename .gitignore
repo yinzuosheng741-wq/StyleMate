@@ -20,9 +20,11 @@ artifacts/*
 !artifacts/evaluation.json
 !artifacts/agent_evaluation.json
 .pytest-tmp/
+.pytest-tmp-*/
 .pytest_cache/
 .ruff_cache/
 .test-tmp/
 .vscode/
 docs/STYLEMATE_HANDOFF.md
+docs/STYLEMATE_MOCK_INTERVIEW.md
 docs/assets/stylemate-main.png

@@ -1,6 +1,6 @@
 # StyleMate 个人衣橱助手
 
-StyleMate 是一个本地优先的个人衣橱应用。它使用 Streamlit 提供衣橱管理和穿搭界面，使用有边界的 LangGraph Agent 编排天气、库存、知识检索和写操作；库存真实性、穿搭约束与数据写入仍由确定性代码控制。
+StyleMate 是一个本地优先的个人衣橱应用。它使用 Streamlit 提供衣橱管理和穿搭界面，使用有边界的 LangGraph Agent 编排天气、库存、知识检索和写操作；库存真实性、穿搭约束与数据写入由确定性代码控制。
 
 项目面向单用户本地使用和面试展示，不包含账号系统，也不作为多用户 SaaS 部署。
 
@@ -13,14 +13,14 @@ StyleMate 是一个本地优先的个人衣橱应用。它使用 Streamlit 提�
 - **衣橱助手**：支持连续对话、历史会话、天气穿搭、购买建议、洗护问答和旅行行李规划。
 - **知识检索**：对内置知识和当前会话文档执行 BM25 与向量召回，通过 RRF 融合结果并返回来源。
 - **写操作保护**：Agent 的新增、修改和删除请求先生成待确认操作，用户确认后才写入本地数据库。
-- **服务降级**：文本模型、Embedding、Chroma 或天气接口不可用时，尽量保留确定性规则和 BM25 能力；多模态模型不可用时不会接受图片入库。
+- **服务降级**：文本模型、Embedding、Chroma 或天气接口不可用时，保留确定性规则和 BM25 能力；多模态模型不可用时不会接受图片入库。
 
 ## 快速开始
 
 推荐使用 Python 3.11。以下命令以 PowerShell 为例：
 
 ```powershell
-git clone https://github.com/yinzuosheng/StyleMate.git
+git clone https://github.com/yinzuosheng741-wq/StyleMate.git
 cd StyleMate
 python -m venv .venv
 .venv\Scripts\Activate.ps1
@@ -73,7 +73,7 @@ local 模式下的编辑和删除会永久保存。用户删除的演示衣物�
 - 源码、测试、知识库和离线评测脚本；
 - 128 张 768 x 768 WebP 演示图片；
 - 演示衣物 manifest、素材作者、原图地址、尺寸和授权信息；
-- 可复现的离线评测结果。
+- 固定测试集生成的离线评测结果。
 
 以下内容只保留在本地，并已通过 `.gitignore` 排除：
 
@@ -137,6 +137,5 @@ python -m evaluation.run_agent_eval --output artifacts/agent_evaluation.json
 | RAG Recall@5 | 0.9500 |
 | RAG MRR@5 | 0.9806 |
 | RAG nDCG@5 | 0.9498 |
-| 离线混合检索 P95 | 4.836 ms |
 
-RAG 指标来自仓库内固定用例和可复现的本地 Hash Embedding，只用于验证检索、排序和融合链路，不代表某个在线 Embedding 模型的实际效果。在线模型需要单独配置并重新评测。
+RAG 指标来自仓库内 60 条固定用例和可复现的本地 Hash Embedding，只用于验证检索、排序和融合链路，不代表某个在线 Embedding 模型的实际效果。延迟会受运行环境影响，因此不在项目介绍中承诺固定数值。在线模型需要单独配置并重新评测。
