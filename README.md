@@ -132,8 +132,8 @@ python -m evaluation.run_agent_eval --output artifacts/agent_evaluation.json
 | 演示衣物审计 | 128 件，7 个类别，全部 CC BY 4.0 |
 | 穿搭规则离线用例 | 10 条 |
 | Agent / RAG 离线用例 | 101 条 |
-| 工具选择准确率 | 1.0000 |
-| 写操作待确认保护率 | 1.0000 |
+| 固定用例工具选择准确率 | 100% |
+| 固定用例写操作保护率 | 100% |
 | RAG Recall@5 | 0.9500 |
 | RAG MRR@5 | 0.9806 |
 | RAG nDCG@5 | 0.9498 |
