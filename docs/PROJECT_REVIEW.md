@@ -21,6 +21,9 @@ python 6sv/6sv/verge/test_safety.py
 cd cloth_ai
 python -m pytest -q
 python -m ruff check .
+python scripts/healthcheck.py
 ```
+
+`scripts/healthcheck.py` 可作为 CI、定时任务或部署后的轻量监测入口；它只检查知识库、演示 manifest 和评测产物是否存在，退出码可直接接入流水线。
 
 当前工作机缺少 `cloth_ai` 开发依赖（`langchain_core`、`chromadb`、`pypdf` 等），因此完整 pytest 需要先按 `requirements-dev.txt` 安装；静态编译和 6SV 安全回归已通过。
