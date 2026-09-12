@@ -13,6 +13,7 @@ from pydantic import ValidationError
 
 from stylemate.agent.tools.location_weather import WeatherResult
 from stylemate.config.runtime import RuntimeSettings
+from stylemate.diagnostics import runtime_diagnostics
 from stylemate.domain.models import ConversationMessage, Garment, OutfitRecommendation, OutfitRequest
 from stylemate.ui.components import (
     inject_style,
@@ -792,6 +793,20 @@ def _about_tab(context: AppContext) -> None:
         f"<div class='stylemate-privacy'>{mode_text}<br>上传图片仅用于识别与衣橱保存；"
         "页面不会展示图片字节或 API 密钥。</div>",
         unsafe_allow_html=True,
+    )
+    st.markdown("#### 运行时诊断")
+    diagnostics = runtime_diagnostics(context.settings, context.agent_service.retriever)
+    readiness = (
+        ("文本模型", diagnostics["text_model_configured"]),
+        ("视觉识别", diagnostics["vision_configured"]),
+        ("向量检索", diagnostics["embedding_configured"]),
+        ("天气服务", diagnostics["weather_configured"]),
+    )
+    cols = st.columns(4)
+    for col, (label, configured) in zip(cols, readiness):
+        col.metric(label, "已配置" if configured else "规则降级")
+    st.caption(
+        f"当前 RAG 路径：{diagnostics['rag_mode']}；诊断信息只显示能力状态和计数，不包含密钥、原文或向量。"
     )
 
 

@@ -126,6 +126,8 @@ python -m evaluation.run_agent_eval --output artifacts/agent_evaluation.json
 
 当前仓库的最近一次验证结果：
 
+> 运行时可在“关于项目 → 运行时诊断”查看文本模型、视觉识别、向量检索和天气服务是否已配置。诊断只输出能力状态与检索计数，不包含密钥、对话原文或向量。
+
 | 检查项 | 结果 |
 | --- | ---: |
 | 自动化测试 | 202 passed |
