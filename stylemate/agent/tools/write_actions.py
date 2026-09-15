@@ -11,7 +11,7 @@ from pydantic import BaseModel, ConfigDict, Field, ValidationError, model_valida
 from stylemate.domain.models import Garment, PendingAction
 from stylemate.repositories.agent_base import AgentRepository
 from stylemate.repositories.base import WardrobeRepository
-from stylemate.services.wardrobe_service import WardrobeService
+from stylemate.services.wardrobe_service import ImageCleanupError, WardrobeService
 
 PENDING_ACTION_TTL = timedelta(minutes=10)
 UPDATE_FIELDS = frozenset({"name", "category", "primary_color", "material", "seasons", "styles"})
@@ -112,6 +112,22 @@ def confirm_action(*, action_id: str, owner_id: str, conversation_id: str, agent
 
     try:
         _apply_through_wardrobe_service(action, wardrobe_service)
+    except ImageCleanupError:
+        # The authoritative garment write already succeeded.  Clearing the snapshot
+        # prevents a stale confirmation from being retried as though it had failed.
+        try:
+            agent_repository.clear_pending(owner_id, conversation_id)
+        except Exception:
+            return ActionResult(
+                status="confirmed",
+                user_message="衣物记录已删除，但图片清理和确认记录清理都失败；请不要重复确认。",
+                action=action,
+            )
+        return ActionResult(
+            status="confirmed",
+            user_message="衣物记录已删除，但关联图片清理失败；请在本地检查后再清理该图片。",
+            action=action,
+        )
     except Exception:
         return ActionResult(status="rejected", user_message="执行失败，请检查衣橱状态后重试。", action=action)
 

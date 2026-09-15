@@ -6,7 +6,11 @@ import pytest
 from PIL import Image
 
 from stylemate.domain.models import Garment
-from stylemate.services.wardrobe_service import UploadValidationError, WardrobeService
+from stylemate.services.wardrobe_service import (
+    ImageCleanupError,
+    UploadValidationError,
+    WardrobeService,
+)
 from stylemate.storage.images import SessionImageStore
 
 
@@ -118,3 +122,32 @@ def test_update_confirmed_does_not_save_a_noop(repo, monkeypatch):
 
     assert updated == garment
     save_call.assert_not_called()
+
+
+def test_delete_confirmed_removes_owned_image_after_deleting_record(repo, jpeg_bytes):
+    store = SessionImageStore({})
+    service = WardrobeService(repo, store, max_upload_bytes=8 * 1024 * 1024)
+    garment = confirmed_garment(service.image_hash(jpeg_bytes))
+    saved = service.save_confirmed("owner-1", garment, jpeg_bytes, "image/jpeg")
+
+    service.delete_confirmed("owner-1", saved.id)
+
+    assert repo.get_garment("owner-1", saved.id) is None
+    assert saved.image_ref is not None
+    assert store.read("owner-1", saved.image_ref) is None
+
+
+def test_delete_confirmed_reports_image_cleanup_failure_after_record_delete(repo, jpeg_bytes):
+    class FailingImageStore(SessionImageStore):
+        def delete(self, owner_id, image_ref):
+            raise OSError("storage unavailable")
+
+    store = FailingImageStore({})
+    service = WardrobeService(repo, store, max_upload_bytes=8 * 1024 * 1024)
+    garment = confirmed_garment(service.image_hash(jpeg_bytes))
+    saved = service.save_confirmed("owner-1", garment, jpeg_bytes, "image/jpeg")
+
+    with pytest.raises(ImageCleanupError, match="record deleted"):
+        service.delete_confirmed("owner-1", saved.id)
+
+    assert repo.get_garment("owner-1", saved.id) is None

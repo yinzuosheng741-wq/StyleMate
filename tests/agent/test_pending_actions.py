@@ -305,3 +305,22 @@ def test_cleanup_failure_after_noop_update_keeps_pending_without_repeat_write(ha
     assert "\u786e\u8ba4\u8bb0\u5f55\u6e05\u7406\u5931\u8d25" in first.user_message
     assert harness.agent.get_pending(OWNER, CONVERSATION) == action
     save_call.assert_not_called()
+
+
+def test_image_cleanup_failure_after_delete_is_confirmed_and_consumes_pending(harness, monkeypatch):
+    action = harness.prepare_delete()
+
+    def fail_after_delete(owner_id, garment_id):
+        harness.wardrobe.delete_garment(owner_id, garment_id)
+        from stylemate.services.wardrobe_service import ImageCleanupError
+
+        raise ImageCleanupError("image cleanup failed")
+
+    monkeypatch.setattr(harness.service, "delete_confirmed", fail_after_delete)
+
+    result = harness.confirm(action.id)
+
+    assert result.status == "confirmed"
+    assert "图片清理失败" in result.user_message
+    assert harness.wardrobe.get_garment(OWNER, "g-1") is None
+    assert harness.agent.get_pending(OWNER, CONVERSATION) is None

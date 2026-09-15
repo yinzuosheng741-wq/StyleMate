@@ -113,7 +113,9 @@ StyleMate/
 
 ## 验证
 
-安装开发依赖后运行：
+仓库通过 GitHub Actions 在 `main` 推送和 Pull Request 时使用 Python 3.11 执行 healthcheck、素材授权审计、静态编译、Ruff 和自动化测试。CI 不配置真实模型、视觉服务、Embedding 或天气 Key，因此验证的是可重复的本地逻辑、输入边界与降级路径，不替代线上服务联调。
+
+本地安装开发依赖后运行：
 
 ```powershell
 python -m pip install -r requirements-dev.txt
@@ -124,13 +126,15 @@ python -m evaluation.run_eval --output artifacts/evaluation.json
 python -m evaluation.run_agent_eval --output artifacts/agent_evaluation.json
 ```
 
-当前仓库的最近一次验证结果：
+每次代码或依赖变化后，应以最新 CI 和本地命令输出为准，不把历史的固定通过数写成当前结论。
 
 > 运行时可在“关于项目 → 运行时诊断”查看文本模型、视觉识别、向量检索和天气服务是否已配置。诊断只输出能力状态与检索计数，不包含密钥、对话原文或向量。
 
+随仓库保留的离线评估样例：
+
 | 检查项 | 结果 |
 | --- | ---: |
-| 自动化测试 | 202 passed |
+| 自动化测试 | 由 GitHub Actions 和本地 `pytest` 验证 |
 | 演示衣物审计 | 128 件，7 个类别，全部 CC BY 4.0 |
 | 穿搭规则离线用例 | 10 条 |
 | Agent / RAG 离线用例 | 101 条 |

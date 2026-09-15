@@ -21,6 +21,10 @@ class UploadValidationError(ValueError):
     """Raised when a submitted garment image cannot be safely accepted."""
 
 
+class ImageCleanupError(RuntimeError):
+    """The garment record was removed, but its local image could not be purged."""
+
+
 class WardrobeService:
     def __init__(
         self,
@@ -102,7 +106,22 @@ class WardrobeService:
         return updated
 
     def delete_confirmed(self, owner_id: str, garment_id: str) -> None:
-        """Delete an already revalidated garment through the service boundary."""
-        if self.repository.get_garment(owner_id, garment_id) is None:
+        """Delete a garment record and then remove its owned local image.
+
+        The database mutation is the authoritative business operation.  Image cleanup
+        runs afterwards so a storage failure cannot leave a visible garment pointing
+        at a missing image.  Callers receive ``ImageCleanupError`` when the record
+        was deleted but the file needs explicit follow-up.
+        """
+        current = self.repository.get_garment(owner_id, garment_id)
+        if current is None:
             raise ValueError("Garment no longer exists")
         self.repository.delete_garment(owner_id, garment_id)
+        if not current.image_ref:
+            return
+        try:
+            self.image_store.delete(owner_id, current.image_ref)
+        except Exception as exc:
+            raise ImageCleanupError(
+                "Garment record deleted but image cleanup failed"
+            ) from exc
