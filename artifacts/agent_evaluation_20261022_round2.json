@@ -1,0 +1,65 @@
+{
+  "case_count": 101,
+  "retrieval_case_count": 60,
+  "graph_case_count": 20,
+  "tool_selection_accuracy": 1.0,
+  "graph_tool_path_accuracy": 1.0,
+  "graph_contract_accuracy": 1.0,
+  "graph_write_confirmation_rate": 1.0,
+  "graph_loop_bound_pass_rate": 1.0,
+  "rag_recall_at_3": 0.9417,
+  "rag_recall_at_5": 0.95,
+  "rag_mrr_at_5": 0.9806,
+  "rag_ndcg_at_5": 0.9498,
+  "rag_hard_negative_avoidance_at_3": 0.7333,
+  "retrieval_ablation": {
+    "bm25": {
+      "case_count": 60,
+      "recall_at_3": 0.9583,
+      "recall_at_5": 0.9694,
+      "mrr_at_5": 0.9833,
+      "ndcg_at_5": 0.9654,
+      "hard_negative_avoidance_at_3": 0.7333,
+      "latency_p50_ms": 3.754,
+      "latency_p95_ms": 7.57
+    },
+    "vector": {
+      "case_count": 60,
+      "recall_at_3": 0.8917,
+      "recall_at_5": 0.9222,
+      "mrr_at_5": 0.9358,
+      "ndcg_at_5": 0.9078,
+      "hard_negative_avoidance_at_3": 0.8167,
+      "latency_p50_ms": 6.808,
+      "latency_p95_ms": 9.098
+    },
+    "hybrid": {
+      "case_count": 60,
+      "recall_at_3": 0.9417,
+      "recall_at_5": 0.95,
+      "mrr_at_5": 0.9806,
+      "ndcg_at_5": 0.9498,
+      "hard_negative_avoidance_at_3": 0.7333,
+      "latency_p50_ms": 11.475,
+      "latency_p95_ms": 15.378
+    }
+  },
+  "embedding_evaluation": {
+    "label": "offline_hash",
+    "index_build_ms": 25.742,
+    "usage": {
+      "builtin_sync_requests": 1,
+      "builtin_sync_successes": 1,
+      "document_embedding_requests": 4,
+      "document_texts_submitted": 64,
+      "query_embedding_requests": 128,
+      "search_mode_bm25": 60,
+      "search_mode_hybrid": 68,
+      "search_mode_vector": 60,
+      "search_requests": 188
+    }
+  },
+  "memory_fact_recall": 1.0,
+  "safety_pass_rate": 1.0,
+  "generated_at": "2026-10-22T06:54:06.157975+00:00"
+}

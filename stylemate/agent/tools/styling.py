@@ -82,13 +82,14 @@ def rag_search(arguments: dict[str, Any], context: ToolContext) -> dict[str, Any
 def recommend_open_outfit(
     arguments: dict[str, Any], context: ToolContext
 ) -> dict[str, Any]:
-    """Generate a knowledge-first outfit plan that does not require inventory."""
+    """Generate explicitly heuristic guidance without unrelated citations."""
     values = OpenOutfitArguments.model_validate(arguments)
     temperature = values.temperature_c
-    if temperature is None:
-        temperature = 24.0
     scene = values.scene or "日常"
-    if temperature >= 28:
+    if temperature is None:
+        top, bottom, shoes = "适合场景且便于增减的上装", "便于活动的下装", "适合活动的鞋履"
+        avoid = "在温度未知时直接确定衣物厚薄"
+    elif temperature >= 28:
         top, bottom, shoes = "透气短袖或亚麻衬衫", "轻薄长裤或五分裤", "透气运动鞋或凉鞋"
         avoid = "厚外套、厚针织和不透气面料"
     elif temperature <= 12:
@@ -103,13 +104,13 @@ def recommend_open_outfit(
         color = "米白、浅蓝或低饱和暖色"
     else:
         color = "白、浅蓝、灰绿等清爽配色"
-    knowledge = _rag_result(
-        f"{scene} {values.weather_condition or ''} {temperature:g}度 穿搭建议",
-        context,
-    )
+    del context
+    missing = ["temperature_c"] if temperature is None else []
+    temperature_note = "当前温度未知，以下仅提供类别建议；请补充温度后再判断厚薄。\n" if missing else ""
     return {
         "recommendation": (
-            "通用穿搭建议：\n"
+            "通用穿搭建议（搭配规则启发，可按个人喜好调整）：\n"
+            f"{temperature_note}"
             f"- 上装：{top}\n"
             f"- 下装：{bottom}\n"
             f"- 鞋履：{shoes}\n"
@@ -118,9 +119,14 @@ def recommend_open_outfit(
         ),
         "alternatives": [
             "如果不想上传衣物，可按以上类别选择已有同类单品。",
-            "出门前根据体感温度调整一层，优先选择透气、易活动的面料。",
+            "出门前结合实际天气、活动量和个人体感调整衣物。",
         ],
-        "sources": knowledge.get("sources", []),
+        "sources": [],
+        "recommendation_basis": "project_heuristic",
+        "conditions": {"temperature_c": temperature, "scene": scene,
+                       "weather_condition": values.weather_condition},
+        "missing_conditions": missing,
+        "rule_explanations": ["依据场景选择类别与配色；温度已提供时使用分段搭配规则。"],
     }
 
 
@@ -129,22 +135,30 @@ def recommend_purchases(
 ) -> dict[str, Any]:
     """Suggest purchase priorities from season/weather and current category gaps."""
     values = PurchaseArguments.model_validate(arguments)
-    temperature = values.temperature_c if values.temperature_c is not None else 24.0
-    season = values.season or _season_for_temperature(temperature)
+    temperature = values.temperature_c
+    season = values.season or (_season_for_temperature(temperature) if temperature is not None else "")
     owned = context.wardrobe_repository.list_garments(context.owner_id)
     categories = {garment.category for garment in owned}
+    if not season:
+        return {
+            "season": "", "priorities": [], "sources": [],
+            "recommendation_basis": "project_heuristic", "temperature_c": temperature,
+            "missing_conditions": ["season_or_temperature"],
+            "message": "请补充季节或实际温度，再结合已有衣物判断购买缺口。",
+        }
     basics = _purchase_basics(season, temperature)
     missing = [item for item in basics if item["category"] not in categories]
-    priorities = missing or basics[:2]
-    knowledge = _rag_result(
-        f"{season}季 {values.scene} 衣橱基础单品 购买建议",
-        context,
-    )
+    priorities = missing
     return {
         "season": season,
         "priorities": priorities[:4],
-        "message": "优先购买：" + "、".join(item["item"] for item in priorities[:4]),
-        "sources": knowledge.get("sources", []),
+        "message": ("按基础品类规则发现的候选缺口（请先核对已有衣物）：" + "、".join(item["item"] for item in priorities[:4])
+                    if priorities else "当前基础品类没有明显缺口，无需仅为补齐品类而购买。"),
+        "sources": [],
+        "recommendation_basis": "project_heuristic",
+        "temperature_c": temperature,
+        "missing_conditions": [],
+        "rule_explanations": ["仅按季节与已有品类检查缺口，不代表必须购买或个性化适配。"],
     }
 
 
@@ -191,14 +205,14 @@ def _season_for_temperature(temperature: float) -> str:
     return "春秋"
 
 
-def _purchase_basics(season: str, temperature: float) -> list[dict[str, str]]:
-    if season == "夏" or temperature >= 28:
+def _purchase_basics(season: str, temperature: float | None) -> list[dict[str, str]]:
+    if season == "夏" or (temperature is not None and temperature >= 28):
         return [
             {"item": "透气短袖或亚麻衬衫", "category": "上装", "reason": "应对高温并减少闷热"},
             {"item": "轻薄长裤或五分裤", "category": "下装", "reason": "保持活动度和透气性"},
             {"item": "透气运动鞋或凉鞋", "category": "鞋履", "reason": "适合日常步行"},
         ]
-    if season == "冬" or temperature <= 12:
+    if season == "冬" or (temperature is not None and temperature <= 12):
         return [
             {"item": "保暖内层", "category": "上装", "reason": "提高核心保暖"},
             {"item": "羽绒服或保暖外套", "category": "外套", "reason": "应对低温和风寒"},

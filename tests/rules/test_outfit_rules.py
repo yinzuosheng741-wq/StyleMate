@@ -117,3 +117,22 @@ def test_results_use_distinct_top_bottom_pairs_and_expose_score_breakdown(sample
     ]
     assert len(core_pairs) == len(set(core_pairs))
     assert all(sum(item.score_breakdown.values()) >= item.score for item in results)
+
+
+def test_dress_is_a_complete_alternative_and_still_obeys_weather_and_exclusions():
+    garments = [_garment("dress", "连衣裙"), _garment("shoe", "鞋履"), _garment("coat", "外套")]
+    warm = plan_outfits(OutfitRequest(scene="通勤", temperature_c=28), garments)
+    cold = plan_outfits(OutfitRequest(scene="通勤", temperature_c=8), garments)
+    assert warm and all("dress" in item.garment_ids and "coat" not in item.garment_ids for item in warm)
+    assert cold and all("coat" in item.garment_ids for item in cold)
+    assert plan_outfits(OutfitRequest(scene="通勤", extra_constraints=["不穿裙子"]), garments) == []
+
+
+def test_accessory_pruning_preserves_explicit_color_preference():
+    clothes = [_garment("top", "上装"), _garment("bottom", "下装"),
+               _garment("a-black", "鞋履"),
+               _garment("z-white", "鞋履").model_copy(update={"primary_color": "white"})]
+    plain = plan_outfits(OutfitRequest(scene="通勤"), clothes)
+    preferred = plan_outfits(OutfitRequest(scene="通勤", color_preference="white"), clothes)
+    assert "a-black" in plain[0].garment_ids
+    assert "z-white" in preferred[0].garment_ids

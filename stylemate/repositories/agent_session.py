@@ -78,7 +78,7 @@ class SessionAgentRepository:
 
 def _conversation_summary(payload: dict) -> dict:
     state = ConversationState.model_validate(payload)
-    messages = state.messages
+    messages = state.transcript or state.messages
     first_user = next((message.content for message in messages if message.role == "user"), "")
     last_message_at = max(
         (message.created_at for message in messages),

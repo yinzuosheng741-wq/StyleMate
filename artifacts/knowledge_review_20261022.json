@@ -1,0 +1,798 @@
+{
+  "date": "2026-10-22",
+  "reviewer": "codex-source-comparison_not_human_expert",
+  "original_sha256": "c3ad806781c01b8e8e449e59353eeb3553b2bf1e10ce9dc304bbb6e1dc3b3b4d",
+  "status_counts": {
+    "reviewed": 10,
+    "pending_review": 33,
+    "project_rule": 21
+  },
+  "source_checks": [
+    {
+      "url": "https://www.woolmark.com/care/care-for-wool/",
+      "status": "sections_compared",
+      "locators": "drying, storage, care label, knits/wovens"
+    },
+    {
+      "url": "https://www.gore-tex.com/support/care/outerwear",
+      "status": "sections_compared",
+      "locators": "Wash, DRY, DWR, Special Care"
+    },
+    {
+      "url": "https://www.canva.com/colors/color-wheel/",
+      "status": "scope_checked",
+      "note": "color relationships, not authority for project wardrobe workflows"
+    },
+    {
+      "url": "https://www.cleaninginstitute.org/cleaning-tips/clothes/laundry-basics",
+      "status": "fetch_failed_403",
+      "note": "records remain pending; no semantic validation claimed"
+    },
+    {
+      "url": "https://www.ftc.gov/business-guidance/resources/clothes-captioning-complying-care-labeling-rule",
+      "status": "page_accessible_record_support_pending",
+      "note": "2026-10-22 浏览器工具可获取页面或 PDF；仅确认可访问，未逐条确认记录的完整语义支持。"
+    },
+    {
+      "url": "https://www.ginetex.net/userfiles/files/gin_bro_gb_rz_brochure_web.pdf",
+      "status": "page_accessible_record_support_pending",
+      "note": "2026-10-22 浏览器工具可获取页面或 PDF；仅确认可访问，未逐条确认记录的完整语义支持。"
+    },
+    {
+      "url": "https://www.cleaninginstitute.org/cleaning-tips/clothes/stain-removal-guide",
+      "status": "page_accessible_record_support_pending",
+      "note": "2026-10-22 浏览器工具可获取页面或 PDF；仅确认可访问，未逐条确认记录的完整语义支持。"
+    },
+    {
+      "url": "https://www.rei.com/learn/expert-advice/layering-basics.html",
+      "status": "page_accessible_record_support_pending",
+      "note": "2026-10-22 浏览器工具可获取页面或 PDF；仅确认可访问，未逐条确认记录的完整语义支持。"
+    },
+    {
+      "url": "https://www.patagonia.com/repairs/",
+      "status": "page_accessible_record_support_pending",
+      "note": "2026-10-22 浏览器工具可获取页面或 PDF；仅确认可访问，未逐条确认记录的完整语义支持。"
+    },
+    {
+      "url": "https://www.nike.com/help/a/size-charts",
+      "status": "minimal_extracted_content_record_support_pending",
+      "note": "仅返回少量页面文本，不把标题或链接可访问当成知识核验。"
+    },
+    {
+      "url": "https://faq-sg.uniqlo.com/articles/en_US/FAQ/Product-Measurement-Guidelines-SG",
+      "status": "page_accessible_record_support_pending",
+      "note": "2026-10-22 浏览器工具可获取页面或 PDF；仅确认可访问，未逐条确认记录的完整语义支持。"
+    },
+    {
+      "url": "https://www.weather.gov/safety/heat-during",
+      "status": "page_accessible_record_support_pending",
+      "note": "2026-10-22 浏览器工具可获取页面或 PDF；仅确认可访问，未逐条确认记录的完整语义支持。"
+    },
+    {
+      "url": "https://www.weather.gov/safety/cold-during",
+      "status": "page_accessible_record_support_pending",
+      "note": "2026-10-22 浏览器工具可获取页面或 PDF；仅确认可访问，未逐条确认记录的完整语义支持。"
+    },
+    {
+      "url": "https://www.epa.gov/sunsafety/sun-safety-tips",
+      "status": "page_accessible_record_support_pending",
+      "note": "2026-10-22 浏览器工具可获取页面或 PDF；仅确认可访问，未逐条确认记录的完整语义支持。"
+    },
+    {
+      "url": "https://www.nps.gov/articles/10essentials.htm",
+      "status": "page_accessible_record_support_pending",
+      "note": "2026-10-22 浏览器工具可获取页面或 PDF；仅确认可访问，未逐条确认记录的完整语义支持。"
+    },
+    {
+      "url": "https://www.aad.org/public/everyday-care/sun-protection/shade-clothing-sunscreen",
+      "status": "page_accessible_record_support_pending",
+      "note": "2026-10-22 浏览器工具可获取页面或 PDF；仅确认可访问，未逐条确认记录的完整语义支持。"
+    }
+  ],
+  "items": [
+    {
+      "id": "fabric-wool-label",
+      "title": "羊毛先看洗标",
+      "topic": "fabric",
+      "previous_source_url": "https://www.woolmark.com/care/care-for-wool/",
+      "previous_content_sha256": "03b5de8784593b1c7e6016a4cb54f50e9e7ba33bd4b5f1d6b45d03c2b0f5dbd7",
+      "review_status": "reviewed",
+      "decision": "2026-10-22 使用官方网页指定章节逐项对照后收窄/改写中文摘要；由 Codex 审查，非人工专家认证。",
+      "source_locator": "Can you dry clean Merino wool?",
+      "current_content_sha256": "fbd4d6d64ee3d3fdf9eb39e285567e0b6d19bfa5ef998503b164e7d0d23be0ad"
+    },
+    {
+      "id": "fabric-wool-heat",
+      "title": "羊毛避免高温",
+      "topic": "fabric",
+      "previous_source_url": "https://www.woolmark.com/care/care-for-wool/",
+      "previous_content_sha256": "8fdd7cb8c6b9c1512c55bfdb71d482b5ab5696583121aaac4a21c45cdeb49876",
+      "review_status": "reviewed",
+      "decision": "2026-10-22 使用官方网页指定章节逐项对照后收窄/改写中文摘要；由 Codex 审查，非人工专家认证。",
+      "source_locator": "Dry away from direct sunlight or heat",
+      "current_content_sha256": "6843e5280964354c569247ec8463aec164bc13144e92a9662bf27bde06cf696c"
+    },
+    {
+      "id": "fabric-wool-shape",
+      "title": "羊毛保持版型",
+      "topic": "fabric",
+      "previous_source_url": "https://www.woolmark.com/care/care-for-wool/",
+      "previous_content_sha256": "3f7d4631d27d179457ba00894b1b96d69215c8173b2fbc566f031d484292637a",
+      "review_status": "reviewed",
+      "decision": "2026-10-22 使用官方网页指定章节逐项对照后收窄/改写中文摘要；由 Codex 审查，非人工专家认证。",
+      "source_locator": "Hang wovens, fold knits; How to dry a wool sweater",
+      "current_content_sha256": "6ebe00511b1af3e67625b401cae26d8fd5baded0364f4ea8c6e1cae6aff24c85"
+    },
+    {
+      "id": "fabric-repair-first",
+      "title": "耐穿先查可修",
+      "topic": "fabric",
+      "previous_source_url": "https://www.patagonia.com/repairs/",
+      "previous_content_sha256": "2f3857152c44aee8cb8de3ee20c65fef467b4f2fa888e361445180a05010d626",
+      "review_status": "pending_review",
+      "decision": "现有摘要尚未完成逐项原文核验；默认事实检索隔离，保留原记录。",
+      "source_locator": "",
+      "current_content_sha256": "2f3857152c44aee8cb8de3ee20c65fef467b4f2fa888e361445180a05010d626"
+    },
+    {
+      "id": "care-label-complete",
+      "title": "洗护标签优先",
+      "topic": "care",
+      "previous_source_url": "https://www.ftc.gov/business-guidance/resources/clothes-captioning-complying-care-labeling-rule",
+      "previous_content_sha256": "59752f38b030be0f2a11abfde1f5aadea3cb39246a42f00e1c6ecf09df9ad675",
+      "review_status": "pending_review",
+      "decision": "现有摘要尚未完成逐项原文核验；默认事实检索隔离，保留原记录。",
+      "source_locator": "",
+      "current_content_sha256": "59752f38b030be0f2a11abfde1f5aadea3cb39246a42f00e1c6ecf09df9ad675"
+    },
+    {
+      "id": "care-symbol-sequence",
+      "title": "五类洗护符号",
+      "topic": "care",
+      "previous_source_url": "https://www.ginetex.net/userfiles/files/gin_bro_gb_rz_brochure_web.pdf",
+      "previous_content_sha256": "e164ba7edb296e6519c578305a11f2c10c5aa8b14af7f6233d47d9992db41712",
+      "review_status": "pending_review",
+      "decision": "现有摘要尚未完成逐项原文核验；默认事实检索隔离，保留原记录。",
+      "source_locator": "",
+      "current_content_sha256": "e164ba7edb296e6519c578305a11f2c10c5aa8b14af7f6233d47d9992db41712"
+    },
+    {
+      "id": "care-sort-before-wash",
+      "title": "清洗前分类",
+      "topic": "care",
+      "previous_source_url": "https://www.cleaninginstitute.org/cleaning-tips/clothes/laundry-basics",
+      "previous_content_sha256": "3839790f9ad3d181b176e02b414f19067e22e9650faa512038bd4f5158d2c4b2",
+      "review_status": "pending_review",
+      "decision": "现有摘要尚未完成逐项原文核验；默认事实检索隔离，保留原记录。",
+      "source_locator": "",
+      "current_content_sha256": "3839790f9ad3d181b176e02b414f19067e22e9650faa512038bd4f5158d2c4b2"
+    },
+    {
+      "id": "care-stain-before-dry",
+      "title": "污渍未除别烘",
+      "topic": "care",
+      "previous_source_url": "https://www.cleaninginstitute.org/cleaning-tips/clothes/stain-removal-guide",
+      "previous_content_sha256": "26d6090211ec036253fa86854dd02f89de2ea09d6ddb3e45692df2440a94bbaa",
+      "review_status": "pending_review",
+      "decision": "现有摘要尚未完成逐项原文核验；默认事实检索隔离，保留原记录。",
+      "source_locator": "",
+      "current_content_sha256": "26d6090211ec036253fa86854dd02f89de2ea09d6ddb3e45692df2440a94bbaa"
+    },
+    {
+      "id": "size-brand-chart",
+      "title": "尺码表优先原则",
+      "topic": "size",
+      "previous_source_url": "https://www.nike.com/help/a/size-charts",
+      "previous_content_sha256": "c0cc3f916d5958b4f51a74672206037d34de4431561b41a120c00849915383d7",
+      "review_status": "project_rule",
+      "decision": "转为项目启发式建议；原外部链接不足以支持完整建议，解除权威引用关联。",
+      "source_locator": "",
+      "current_content_sha256": "c0cc3f916d5958b4f51a74672206037d34de4431561b41a120c00849915383d7"
+    },
+    {
+      "id": "size-product-measure",
+      "title": "成衣尺寸核对",
+      "topic": "size",
+      "previous_source_url": "https://faq-sg.uniqlo.com/articles/en_US/FAQ/Product-Measurement-Guidelines-SG",
+      "previous_content_sha256": "0edda3c189738dfb20dafc356b7fa6fe498435b16a60f46782e8fb7b68b4aec6",
+      "review_status": "project_rule",
+      "decision": "转为项目启发式建议；原外部链接不足以支持完整建议，解除权威引用关联。",
+      "source_locator": "",
+      "current_content_sha256": "0edda3c189738dfb20dafc356b7fa6fe498435b16a60f46782e8fb7b68b4aec6"
+    },
+    {
+      "id": "size-layering-ease",
+      "title": "叠穿预留余量",
+      "topic": "size",
+      "previous_source_url": "https://www.rei.com/learn/expert-advice/layering-basics.html",
+      "previous_content_sha256": "013c87e326803cbac8d65bb05f1b1b1385e2eedb851aaa6541d3ecea65d341e7",
+      "review_status": "project_rule",
+      "decision": "转为项目启发式建议；原外部链接不足以支持完整建议，解除权威引用关联。",
+      "source_locator": "",
+      "current_content_sha256": "013c87e326803cbac8d65bb05f1b1b1385e2eedb851aaa6541d3ecea65d341e7"
+    },
+    {
+      "id": "size-fit-recheck",
+      "title": "换款重新核尺",
+      "topic": "size",
+      "previous_source_url": "https://www.nike.com/help/a/size-charts",
+      "previous_content_sha256": "b3b9958f4404e2639402304dad51b9520ce1ae6bd9ca30c6a0a8c720771b03e9",
+      "review_status": "project_rule",
+      "decision": "转为项目启发式建议；原外部链接不足以支持完整建议，解除权威引用关联。",
+      "source_locator": "",
+      "current_content_sha256": "b3b9958f4404e2639402304dad51b9520ce1ae6bd9ca30c6a0a8c720771b03e9"
+    },
+    {
+      "id": "color-wheel-balance",
+      "title": "色轮辅助配色",
+      "topic": "color",
+      "previous_source_url": "https://www.canva.com/colors/color-wheel/",
+      "previous_content_sha256": "2a37e6e8e82c632cac158992d8ed4cea6024ba1713fa765d14eeed866971a4da",
+      "review_status": "project_rule",
+      "decision": "转为项目启发式建议；原外部链接不足以支持完整建议，解除权威引用关联。",
+      "source_locator": "",
+      "current_content_sha256": "2a37e6e8e82c632cac158992d8ed4cea6024ba1713fa765d14eeed866971a4da"
+    },
+    {
+      "id": "color-neutral-anchor",
+      "title": "中性色作锚点",
+      "topic": "color",
+      "previous_source_url": "https://www.canva.com/colors/color-wheel/",
+      "previous_content_sha256": "5649d3a6a82796fd266adb3d3723f003acf65d469348de02536ab14c6c15ed42",
+      "review_status": "project_rule",
+      "decision": "转为项目启发式建议；原外部链接不足以支持完整建议，解除权威引用关联。",
+      "source_locator": "",
+      "current_content_sha256": "5649d3a6a82796fd266adb3d3723f003acf65d469348de02536ab14c6c15ed42"
+    },
+    {
+      "id": "color-test-light",
+      "title": "不同光线复看",
+      "topic": "color",
+      "previous_source_url": "https://www.canva.com/colors/color-wheel/",
+      "previous_content_sha256": "7d1d7f227005ceb024696bf68d7ca02f2c2828a1e4472a229070b542b1d3f6cb",
+      "review_status": "project_rule",
+      "decision": "转为项目启发式建议；原外部链接不足以支持完整建议，解除权威引用关联。",
+      "source_locator": "",
+      "current_content_sha256": "7d1d7f227005ceb024696bf68d7ca02f2c2828a1e4472a229070b542b1d3f6cb"
+    },
+    {
+      "id": "color-small-accent",
+      "title": "小面积点缀色",
+      "topic": "color",
+      "previous_source_url": "https://www.canva.com/colors/color-wheel/",
+      "previous_content_sha256": "e5293127c3554962a69512a654679da4277d60e86c426f49c50e4283149a5ad8",
+      "review_status": "project_rule",
+      "decision": "转为项目启发式建议；原外部链接不足以支持完整建议，解除权威引用关联。",
+      "source_locator": "",
+      "current_content_sha256": "e5293127c3554962a69512a654679da4277d60e86c426f49c50e4283149a5ad8"
+    },
+    {
+      "id": "weather-layer-system",
+      "title": "分层应对温差",
+      "topic": "weather",
+      "previous_source_url": "https://www.rei.com/learn/expert-advice/layering-basics.html",
+      "previous_content_sha256": "d5d1d7f65bda325d647ddb019803b27afb1080c26dae6faaf6b9ae1c02072a74",
+      "review_status": "pending_review",
+      "decision": "现有摘要尚未完成逐项原文核验；默认事实检索隔离，保留原记录。",
+      "source_locator": "",
+      "current_content_sha256": "d5d1d7f65bda325d647ddb019803b27afb1080c26dae6faaf6b9ae1c02072a74"
+    },
+    {
+      "id": "weather-avoid-cotton-cold",
+      "title": "寒冷潮湿重干爽",
+      "topic": "weather",
+      "previous_source_url": "https://www.rei.com/learn/expert-advice/layering-basics.html",
+      "previous_content_sha256": "1198409bfbcfbdd96101d08516bfdd2c17274af468463a372b299bd6a4501768",
+      "review_status": "pending_review",
+      "decision": "现有摘要尚未完成逐项原文核验；默认事实检索隔离，保留原记录。",
+      "source_locator": "",
+      "current_content_sha256": "1198409bfbcfbdd96101d08516bfdd2c17274af468463a372b299bd6a4501768"
+    },
+    {
+      "id": "weather-wind-shell",
+      "title": "有风考虑外层",
+      "topic": "weather",
+      "previous_source_url": "https://www.rei.com/learn/expert-advice/layering-basics.html",
+      "previous_content_sha256": "6c5c2bf3bf82f2b07f5e9e443d7c23c2933ed21ec022f944b66bb1da8b730be3",
+      "review_status": "pending_review",
+      "decision": "现有摘要尚未完成逐项原文核验；默认事实检索隔离，保留原记录。",
+      "source_locator": "",
+      "current_content_sha256": "6c5c2bf3bf82f2b07f5e9e443d7c23c2933ed21ec022f944b66bb1da8b730be3"
+    },
+    {
+      "id": "weather-carry-layer",
+      "title": "通勤备可增减层",
+      "topic": "weather",
+      "previous_source_url": "https://www.rei.com/learn/expert-advice/layering-basics.html",
+      "previous_content_sha256": "f4f297f3c6d3d0942c06fdef017bbd04501abb770435914f1a6bf2c37d08cb92",
+      "review_status": "project_rule",
+      "decision": "转为项目启发式建议；原外部链接不足以支持完整建议，解除权威引用关联。",
+      "source_locator": "",
+      "current_content_sha256": "f4f297f3c6d3d0942c06fdef017bbd04501abb770435914f1a6bf2c37d08cb92"
+    },
+    {
+      "id": "scenario-outdoor-layer",
+      "title": "户外活动可调层",
+      "topic": "scenario",
+      "previous_source_url": "https://www.rei.com/learn/expert-advice/layering-basics.html",
+      "previous_content_sha256": "cc75f67fb2ebe5fb8c82c4cb15954ea85fe6d0f383ce197abfe70c5eb0b07132",
+      "review_status": "pending_review",
+      "decision": "现有摘要尚未完成逐项原文核验；默认事实检索隔离，保留原记录。",
+      "source_locator": "",
+      "current_content_sha256": "cc75f67fb2ebe5fb8c82c4cb15954ea85fe6d0f383ce197abfe70c5eb0b07132"
+    },
+    {
+      "id": "scenario-rain-plan",
+      "title": "雨天关注外层",
+      "topic": "scenario",
+      "previous_source_url": "https://www.rei.com/learn/expert-advice/layering-basics.html",
+      "previous_content_sha256": "763737352b7d82fa82f5b8053113310cb16963e0d1cb72fa97157a2dba223a82",
+      "review_status": "pending_review",
+      "decision": "现有摘要尚未完成逐项原文核验；默认事实检索隔离，保留原记录。",
+      "source_locator": "",
+      "current_content_sha256": "763737352b7d82fa82f5b8053113310cb16963e0d1cb72fa97157a2dba223a82"
+    },
+    {
+      "id": "scenario-repair-before-trip",
+      "title": "出行前检查破损",
+      "topic": "scenario",
+      "previous_source_url": "https://www.patagonia.com/repairs/",
+      "previous_content_sha256": "05ed41131159f445c079f2d4b8494dbfaadecd0eecfcb27d7d2d1d1376be0152",
+      "review_status": "pending_review",
+      "decision": "现有摘要尚未完成逐项原文核验；默认事实检索隔离，保留原记录。",
+      "source_locator": "",
+      "current_content_sha256": "05ed41131159f445c079f2d4b8494dbfaadecd0eecfcb27d7d2d1d1376be0152"
+    },
+    {
+      "id": "scenario-dress-care-label",
+      "title": "正式场合先防污",
+      "topic": "scenario",
+      "previous_source_url": "https://www.cleaninginstitute.org/cleaning-tips/clothes/stain-removal-guide",
+      "previous_content_sha256": "67bfda91aa1e60bb6d17830a8b5d1206e6d1b9d46b8e190c6af7f859a2e18533",
+      "review_status": "pending_review",
+      "decision": "现有摘要尚未完成逐项原文核验；默认事实检索隔离，保留原记录。",
+      "source_locator": "",
+      "current_content_sha256": "67bfda91aa1e60bb6d17830a8b5d1206e6d1b9d46b8e190c6af7f859a2e18533"
+    },
+    {
+      "id": "wardrobe-core-categories",
+      "title": "衣橱先补基础类别",
+      "topic": "wardrobe",
+      "previous_source_url": "https://www.nike.com/help/a/size-charts",
+      "previous_content_sha256": "f943f75b651e5867fe748668a837f20b462f7119f409efc2e5dd861516113eac",
+      "review_status": "project_rule",
+      "decision": "转为项目启发式建议；原外部链接不足以支持完整建议，解除权威引用关联。",
+      "source_locator": "",
+      "current_content_sha256": "f943f75b651e5867fe748668a837f20b462f7119f409efc2e5dd861516113eac"
+    },
+    {
+      "id": "wardrobe-inventory-first",
+      "title": "搭配从现有衣橱起",
+      "topic": "wardrobe",
+      "previous_source_url": "https://www.canva.com/colors/color-wheel/",
+      "previous_content_sha256": "6ae3dfa38f07430357a030a67261572039414387fa4fd2f42100b1c2b3ebb81b",
+      "review_status": "project_rule",
+      "decision": "转为项目启发式建议；原外部链接不足以支持完整建议，解除权威引用关联。",
+      "source_locator": "",
+      "current_content_sha256": "6ae3dfa38f07430357a030a67261572039414387fa4fd2f42100b1c2b3ebb81b"
+    },
+    {
+      "id": "wardrobe-fit-before-keep",
+      "title": "留存前复核合身",
+      "topic": "wardrobe",
+      "previous_source_url": "https://faq-sg.uniqlo.com/articles/en_US/FAQ/Product-Measurement-Guidelines-SG",
+      "previous_content_sha256": "b20f1dca65d725f04eb1e3be31deb65c47c601620dfc26108b926141190e8661",
+      "review_status": "project_rule",
+      "decision": "转为项目启发式建议；原外部链接不足以支持完整建议，解除权威引用关联。",
+      "source_locator": "",
+      "current_content_sha256": "b20f1dca65d725f04eb1e3be31deb65c47c601620dfc26108b926141190e8661"
+    },
+    {
+      "id": "wardrobe-repair-value",
+      "title": "修理纳入衣橱决策",
+      "topic": "wardrobe",
+      "previous_source_url": "https://www.patagonia.com/repairs/",
+      "previous_content_sha256": "d2ea1c43703dc53e1548b4e2b63c9e6ff5a1a3771bc36122404f9c32c7d0cb53",
+      "review_status": "project_rule",
+      "decision": "转为项目启发式建议；原外部链接不足以支持完整建议，解除权威引用关联。",
+      "source_locator": "",
+      "current_content_sha256": "d2ea1c43703dc53e1548b4e2b63c9e6ff5a1a3771bc36122404f9c32c7d0cb53"
+    },
+    {
+      "id": "style-analogous-colors",
+      "title": "邻近色风格启发",
+      "topic": "style",
+      "previous_source_url": "https://www.canva.com/colors/color-wheel/",
+      "previous_content_sha256": "254894bf2445116a869023e04cd973f63e530d9470aebcb77893d4e160434b27",
+      "review_status": "project_rule",
+      "decision": "转为项目启发式建议；原外部链接不足以支持完整建议，解除权威引用关联。",
+      "source_locator": "",
+      "current_content_sha256": "254894bf2445116a869023e04cd973f63e530d9470aebcb77893d4e160434b27"
+    },
+    {
+      "id": "style-contrast-colors",
+      "title": "对比色风格启发",
+      "topic": "style",
+      "previous_source_url": "https://www.canva.com/colors/color-wheel/",
+      "previous_content_sha256": "f6518a9367c8d21d3b3ce41f9fc872110fcfe3890b691f32ee00bcafeb25b84b",
+      "review_status": "project_rule",
+      "decision": "转为项目启发式建议；原外部链接不足以支持完整建议，解除权威引用关联。",
+      "source_locator": "",
+      "current_content_sha256": "f6518a9367c8d21d3b3ce41f9fc872110fcfe3890b691f32ee00bcafeb25b84b"
+    },
+    {
+      "id": "style-one-focus",
+      "title": "一套一个视觉重点",
+      "topic": "style",
+      "previous_source_url": "https://www.canva.com/colors/color-wheel/",
+      "previous_content_sha256": "d9771a254d0a1c062c1664d6f36f8a982a42e9c2a201765a2f5528c9e912a344",
+      "review_status": "project_rule",
+      "decision": "转为项目启发式建议；原外部链接不足以支持完整建议，解除权威引用关联。",
+      "source_locator": "",
+      "current_content_sha256": "d9771a254d0a1c062c1664d6f36f8a982a42e9c2a201765a2f5528c9e912a344"
+    },
+    {
+      "id": "style-compare-photo",
+      "title": "拍照复看整体",
+      "topic": "style",
+      "previous_source_url": "https://www.canva.com/colors/color-wheel/",
+      "previous_content_sha256": "53f391d473628fef292e672c0f87913cc40df207d39df420fbdb7e2f4bad2c82",
+      "review_status": "project_rule",
+      "decision": "转为项目启发式建议；原外部链接不足以支持完整建议，解除权威引用关联。",
+      "source_locator": "",
+      "current_content_sha256": "53f391d473628fef292e672c0f87913cc40df207d39df420fbdb7e2f4bad2c82"
+    },
+    {
+      "id": "storage-dry-before-fold",
+      "title": "完全干燥再收纳",
+      "topic": "storage",
+      "previous_source_url": "https://www.cleaninginstitute.org/cleaning-tips/clothes/laundry-basics",
+      "previous_content_sha256": "ea296194caf1e1ac931d3b4febdce31f707ebf8af9df2eb9e302221bc6ef901f",
+      "review_status": "pending_review",
+      "decision": "现有摘要尚未完成逐项原文核验；默认事实检索隔离，保留原记录。",
+      "source_locator": "",
+      "current_content_sha256": "ea296194caf1e1ac931d3b4febdce31f707ebf8af9df2eb9e302221bc6ef901f"
+    },
+    {
+      "id": "storage-fold-promptly",
+      "title": "洗后及时整理",
+      "topic": "storage",
+      "previous_source_url": "https://www.cleaninginstitute.org/cleaning-tips/clothes/laundry-basics",
+      "previous_content_sha256": "2ae149813130e47a8bc754ea1502004358744605519526b8a3dd21d4bb54d43a",
+      "review_status": "pending_review",
+      "decision": "现有摘要尚未完成逐项原文核验；默认事实检索隔离，保留原记录。",
+      "source_locator": "",
+      "current_content_sha256": "2ae149813130e47a8bc754ea1502004358744605519526b8a3dd21d4bb54d43a"
+    },
+    {
+      "id": "storage-wool-clean",
+      "title": "羊毛收纳前清洁",
+      "topic": "storage",
+      "previous_source_url": "https://www.woolmark.com/care/care-for-wool/",
+      "previous_content_sha256": "a7a275ac0f321fb7e8ed36d906ad330b69ab6c029bdd2843ee5cf0421ba9e6d8",
+      "review_status": "reviewed",
+      "decision": "2026-10-22 使用官方网页指定章节逐项对照后收窄/改写中文摘要；由 Codex 审查，非人工专家认证。",
+      "source_locator": "Long-term storage",
+      "current_content_sha256": "811d8a83b59ae8900890c97d384297f8af706e05cca71536525c2b7698d05bd4"
+    },
+    {
+      "id": "storage-repair-record",
+      "title": "收纳时记录待修",
+      "topic": "storage",
+      "previous_source_url": "https://www.patagonia.com/repairs/",
+      "previous_content_sha256": "63a63f4271efae6d7898fff98d29058e3acdec7ce2eeff301462a22782107595",
+      "review_status": "project_rule",
+      "decision": "转为项目启发式建议；原外部链接不足以支持完整建议，解除权威引用关联。",
+      "source_locator": "",
+      "current_content_sha256": "63a63f4271efae6d7898fff98d29058e3acdec7ce2eeff301462a22782107595"
+    },
+    {
+      "id": "weather-heat-light-clothing",
+      "title": "高温优先轻薄浅色",
+      "topic": "weather",
+      "previous_source_url": "https://www.weather.gov/safety/heat-during",
+      "previous_content_sha256": "c2ab41c03b15ec5b0e403c8853fef4e55f186501dca7cf2c363f76e10b2961ff",
+      "review_status": "pending_review",
+      "decision": "现有摘要尚未完成逐项原文核验；默认事实检索隔离，保留原记录。",
+      "source_locator": "",
+      "current_content_sha256": "c2ab41c03b15ec5b0e403c8853fef4e55f186501dca7cf2c363f76e10b2961ff"
+    },
+    {
+      "id": "scenario-heat-adjust-activity",
+      "title": "高温活动减少暴露",
+      "topic": "scenario",
+      "previous_source_url": "https://www.weather.gov/safety/heat-during",
+      "previous_content_sha256": "72f8f4f6ba45a0600af9432a9158b66cd3c84b84333db5a1c30f5a0d8bd9d342",
+      "review_status": "pending_review",
+      "decision": "现有摘要尚未完成逐项原文核验；默认事实检索隔离，保留原记录。",
+      "source_locator": "",
+      "current_content_sha256": "72f8f4f6ba45a0600af9432a9158b66cd3c84b84333db5a1c30f5a0d8bd9d342"
+    },
+    {
+      "id": "weather-cold-loose-layers",
+      "title": "寒冷采用宽松分层",
+      "topic": "weather",
+      "previous_source_url": "https://www.weather.gov/safety/cold-during",
+      "previous_content_sha256": "d5900b1674ea1e306169d8e9086b9f351a5b8e893adcff0d5ba4a08b79481baa",
+      "review_status": "pending_review",
+      "decision": "现有摘要尚未完成逐项原文核验；默认事实检索隔离，保留原记录。",
+      "source_locator": "",
+      "current_content_sha256": "d5900b1674ea1e306169d8e9086b9f351a5b8e893adcff0d5ba4a08b79481baa"
+    },
+    {
+      "id": "scenario-cold-change-wet",
+      "title": "寒冷受潮及时换干衣",
+      "topic": "scenario",
+      "previous_source_url": "https://www.weather.gov/safety/cold-during",
+      "previous_content_sha256": "e56ab331d2cc436bb0bf4ea75572ff263b57e8503ff6e2d859fb7330c47ad13f",
+      "review_status": "pending_review",
+      "decision": "现有摘要尚未完成逐项原文核验；默认事实检索隔离，保留原记录。",
+      "source_locator": "",
+      "current_content_sha256": "e56ab331d2cc436bb0bf4ea75572ff263b57e8503ff6e2d859fb7330c47ad13f"
+    },
+    {
+      "id": "scenario-cold-protect-extremities",
+      "title": "严寒保护头手等末端",
+      "topic": "scenario",
+      "previous_source_url": "https://www.weather.gov/safety/cold-during",
+      "previous_content_sha256": "0891b6fa600a72697ec953f6fd3cda07e6ef59b753696aa220d1782437ca941c",
+      "review_status": "pending_review",
+      "decision": "现有摘要尚未完成逐项原文核验；默认事实检索隔离，保留原记录。",
+      "source_locator": "",
+      "current_content_sha256": "0891b6fa600a72697ec953f6fd3cda07e6ef59b753696aa220d1782437ca941c"
+    },
+    {
+      "id": "weather-uv-cover-skin",
+      "title": "强紫外线增加覆盖",
+      "topic": "weather",
+      "previous_source_url": "https://www.epa.gov/sunsafety/sun-safety-tips",
+      "previous_content_sha256": "6a06098c63b114473665ab72d9d0e92e3b7e5e4e20c20ea2198576ad99283b5f",
+      "review_status": "pending_review",
+      "decision": "现有摘要尚未完成逐项原文核验；默认事实检索隔离，保留原记录。",
+      "source_locator": "",
+      "current_content_sha256": "6a06098c63b114473665ab72d9d0e92e3b7e5e4e20c20ea2198576ad99283b5f"
+    },
+    {
+      "id": "scenario-uv-index-plan",
+      "title": "户外计划参考 UV 指数",
+      "topic": "scenario",
+      "previous_source_url": "https://www.epa.gov/sunsafety/sun-safety-tips",
+      "previous_content_sha256": "76b884e9272feea27ce546fbdd0f52da1a03a83cd46bb0c99edbc4eb37143470",
+      "review_status": "pending_review",
+      "decision": "现有摘要尚未完成逐项原文核验；默认事实检索隔离，保留原记录。",
+      "source_locator": "",
+      "current_content_sha256": "76b884e9272feea27ce546fbdd0f52da1a03a83cd46bb0c99edbc4eb37143470"
+    },
+    {
+      "id": "care-shell-close-zips",
+      "title": "功能外套洗前闭合拉链",
+      "topic": "care",
+      "previous_source_url": "https://www.gore-tex.com/support/care/outerwear",
+      "previous_content_sha256": "a68f9202baf480e862bdb1179f7ed751712d95fe6a90da3a29bfe8c60607b660",
+      "review_status": "reviewed",
+      "decision": "2026-10-22 使用官方网页指定章节逐项对照后收窄/改写中文摘要；由 Codex 审查，非人工专家认证。",
+      "source_locator": "GORE-TEX Outerwear / Wash / Step 1",
+      "current_content_sha256": "d53c6769ff182237e99ec2f894364173295b51570d86e4f6cd9976998f8f7ee5"
+    },
+    {
+      "id": "care-shell-liquid-detergent",
+      "title": "功能外套慎选洗涤剂",
+      "topic": "care",
+      "previous_source_url": "https://www.gore-tex.com/support/care/outerwear",
+      "previous_content_sha256": "4551c26d5b3c34ea268326e1c22a823110cb8276cf867dc4f35b515a4a4d5282",
+      "review_status": "reviewed",
+      "decision": "2026-10-22 使用官方网页指定章节逐项对照后收窄/改写中文摘要；由 Codex 审查，非人工专家认证。",
+      "source_locator": "GORE-TEX Outerwear / Wash / Step 2",
+      "current_content_sha256": "497c50671bfc185dd65f98d78279824f0bd367d86ca71518e127f25d921b3506"
+    },
+    {
+      "id": "fabric-shell-dwr-beading",
+      "title": "泼水表现先做水珠检查",
+      "topic": "fabric",
+      "previous_source_url": "https://www.gore-tex.com/support/care/outerwear",
+      "previous_content_sha256": "eaeafa7db81c4fa78757104c815f0a875fd9624086df31c96e271bb20697ac2c",
+      "review_status": "reviewed",
+      "decision": "2026-10-22 使用官方网页指定章节逐项对照后收窄/改写中文摘要；由 Codex 审查，非人工专家认证。",
+      "source_locator": "Re-apply the DWR / Step 1; Special Care",
+      "current_content_sha256": "8fd0e8e6d85824360c57c80bcbeb8732300114b4f916a6454a7c3fd5e34a5ae5"
+    },
+    {
+      "id": "care-shell-reactivate-dwr",
+      "title": "按产品说明恢复拒水",
+      "topic": "care",
+      "previous_source_url": "https://www.gore-tex.com/support/care/outerwear",
+      "previous_content_sha256": "606509e5ce3a78073891c0197092f0e0e223115c04e85d9f81aa823748aa9bce",
+      "review_status": "reviewed",
+      "decision": "2026-10-22 使用官方网页指定章节逐项对照后收窄/改写中文摘要；由 Codex 审查，非人工专家认证。",
+      "source_locator": "DRY / Step 2; Special Care",
+      "current_content_sha256": "d6e1f41b532a1920f268ddacba2f97a2f6b3d0316409a0d10efca67824330c2f"
+    },
+    {
+      "id": "wardrobe-maintain-shell-first",
+      "title": "功能外套先维护再替换",
+      "topic": "wardrobe",
+      "previous_source_url": "https://www.gore-tex.com/support/care/outerwear",
+      "previous_content_sha256": "40c86e6837e611b9fd4c795b6bf39eded82101eec72f79c19af890b77fc4292f",
+      "review_status": "reviewed",
+      "decision": "2026-10-22 使用官方网页指定章节逐项对照后收窄/改写中文摘要；由 Codex 审查，非人工专家认证。",
+      "source_locator": "Re-apply the DWR; Special Care",
+      "current_content_sha256": "b59405d942ca65b05e24e0198c5f8017746d488bfc1683fce3d8e6dd830f4bc2"
+    },
+    {
+      "id": "weather-heat-hydration-clothing",
+      "title": "高温穿着配合补水",
+      "topic": "weather",
+      "previous_source_url": "https://www.weather.gov/safety/heat-during",
+      "previous_content_sha256": "51338fe768fce284e3d7d8722aab3e1b94446d0c32b869548d90a82e9f88eeeb",
+      "review_status": "pending_review",
+      "decision": "现有摘要尚未完成逐项原文核验；默认事实检索隔离，保留原记录。",
+      "source_locator": "",
+      "current_content_sha256": "51338fe768fce284e3d7d8722aab3e1b94446d0c32b869548d90a82e9f88eeeb"
+    },
+    {
+      "id": "weather-cold-dry-layer",
+      "title": "寒冷雨雪后更换干衣",
+      "topic": "weather",
+      "previous_source_url": "https://www.weather.gov/safety/cold-during",
+      "previous_content_sha256": "e5415e63541eaa88607aa7972c8f1b908a8f165e276aee0291f7d554cde8a8cc",
+      "review_status": "pending_review",
+      "decision": "现有摘要尚未完成逐项原文核验；默认事实检索隔离，保留原记录。",
+      "source_locator": "",
+      "current_content_sha256": "e5415e63541eaa88607aa7972c8f1b908a8f165e276aee0291f7d554cde8a8cc"
+    },
+    {
+      "id": "weather-uv-clothing-factor",
+      "title": "防晒衣物看覆盖度",
+      "topic": "weather",
+      "previous_source_url": "https://www.aad.org/public/everyday-care/sun-protection/shade-clothing-sunscreen",
+      "previous_content_sha256": "a6c07633c65f0adc591493e71ac07fecc196e16a0c02d32c6177d47bbe7e1928",
+      "review_status": "pending_review",
+      "decision": "现有摘要尚未完成逐项原文核验；默认事实检索隔离，保留原记录。",
+      "source_locator": "",
+      "current_content_sha256": "a6c07633c65f0adc591493e71ac07fecc196e16a0c02d32c6177d47bbe7e1928"
+    },
+    {
+      "id": "weather-uv-hat-glasses",
+      "title": "强日照覆盖头脸",
+      "topic": "weather",
+      "previous_source_url": "https://www.aad.org/public/everyday-care/sun-protection/shade-clothing-sunscreen",
+      "previous_content_sha256": "24c2e703d23cea18011cfa274f2a73425fcddf870852d1e7c9532395ba72d4ab",
+      "review_status": "pending_review",
+      "decision": "现有摘要尚未完成逐项原文核验；默认事实检索隔离，保留原记录。",
+      "source_locator": "",
+      "current_content_sha256": "24c2e703d23cea18011cfa274f2a73425fcddf870852d1e7c9532395ba72d4ab"
+    },
+    {
+      "id": "scenario-trip-ten-essentials",
+      "title": "户外行程带基础装备",
+      "topic": "scenario",
+      "previous_source_url": "https://www.nps.gov/articles/10essentials.htm",
+      "previous_content_sha256": "76bfc24cd46bb894c151bef5b7b84da546f2a4e40acc86f2f2cf4fa24ed5566e",
+      "review_status": "pending_review",
+      "decision": "现有摘要尚未完成逐项原文核验；默认事实检索隔离，保留原记录。",
+      "source_locator": "",
+      "current_content_sha256": "76bfc24cd46bb894c151bef5b7b84da546f2a4e40acc86f2f2cf4fa24ed5566e"
+    },
+    {
+      "id": "scenario-trip-route-weather",
+      "title": "行程按路线和天气调整",
+      "topic": "scenario",
+      "previous_source_url": "https://www.nps.gov/articles/10essentials.htm",
+      "previous_content_sha256": "537edec1989aca9fba68588880536389c3e26b8a9c443b91c76eb40c7dff2817",
+      "review_status": "pending_review",
+      "decision": "现有摘要尚未完成逐项原文核验；默认事实检索隔离，保留原记录。",
+      "source_locator": "",
+      "current_content_sha256": "537edec1989aca9fba68588880536389c3e26b8a9c443b91c76eb40c7dff2817"
+    },
+    {
+      "id": "scenario-trip-emergency-layer",
+      "title": "远行预留应急保暖层",
+      "topic": "scenario",
+      "previous_source_url": "https://www.nps.gov/articles/10essentials.htm",
+      "previous_content_sha256": "384a4324e1281f15789c04e947e43c119dbce20e7a228a9d57bd24eeb0fcf4ac",
+      "review_status": "pending_review",
+      "decision": "现有摘要尚未完成逐项原文核验；默认事实检索隔离，保留原记录。",
+      "source_locator": "",
+      "current_content_sha256": "384a4324e1281f15789c04e947e43c119dbce20e7a228a9d57bd24eeb0fcf4ac"
+    },
+    {
+      "id": "care-wash-symbol-temperature",
+      "title": "洗护符号限制温度",
+      "topic": "care",
+      "previous_source_url": "https://www.ginetex.net/userfiles/files/gin_bro_gb_rz_brochure_web.pdf",
+      "previous_content_sha256": "ac59b6d4194633a17c41cfe1c1487af022c1595235282f6660b516c2b3dd4a84",
+      "review_status": "pending_review",
+      "decision": "现有摘要尚未完成逐项原文核验；默认事实检索隔离，保留原记录。",
+      "source_locator": "",
+      "current_content_sha256": "ac59b6d4194633a17c41cfe1c1487af022c1595235282f6660b516c2b3dd4a84"
+    },
+    {
+      "id": "care-wash-detergent-dose",
+      "title": "洗涤剂按说明用量",
+      "topic": "care",
+      "previous_source_url": "https://www.cleaninginstitute.org/cleaning-tips/clothes/laundry-basics",
+      "previous_content_sha256": "2cb1b7c40f4e643b18fdeba16cad0322518c7b334bf232a4e319c7e9f5f4dfed",
+      "review_status": "pending_review",
+      "decision": "现有摘要尚未完成逐项原文核验；默认事实检索隔离，保留原记录。",
+      "source_locator": "",
+      "current_content_sha256": "2cb1b7c40f4e643b18fdeba16cad0322518c7b334bf232a4e319c7e9f5f4dfed"
+    },
+    {
+      "id": "care-repair-before-replace",
+      "title": "小损坏先评估维修",
+      "topic": "care",
+      "previous_source_url": "https://www.patagonia.com/repairs/",
+      "previous_content_sha256": "1f47f5e2b41d9b1a5af2b9d4577d0b7d203b55ed853017ad292becbab2824828",
+      "review_status": "pending_review",
+      "decision": "现有摘要尚未完成逐项原文核验；默认事实检索隔离，保留原记录。",
+      "source_locator": "",
+      "current_content_sha256": "1f47f5e2b41d9b1a5af2b9d4577d0b7d203b55ed853017ad292becbab2824828"
+    },
+    {
+      "id": "fabric-cotton-shrink-risk",
+      "title": "棉制品留意缩水",
+      "topic": "fabric",
+      "previous_source_url": "https://www.cleaninginstitute.org/cleaning-tips/clothes/laundry-basics",
+      "previous_content_sha256": "0fb780a294e1356e5aecf80560a46819ea47a698056e149913cdc88caa806753",
+      "review_status": "pending_review",
+      "decision": "现有摘要尚未完成逐项原文核验；默认事实检索隔离，保留原记录。",
+      "source_locator": "",
+      "current_content_sha256": "0fb780a294e1356e5aecf80560a46819ea47a698056e149913cdc88caa806753"
+    },
+    {
+      "id": "fabric-wool-moisture",
+      "title": "羊毛受潮先干燥",
+      "topic": "fabric",
+      "previous_source_url": "https://www.woolmark.com/care/care-for-wool/",
+      "previous_content_sha256": "ca94f823dad492816e0ac1598a5feab9fce53801453b3713cf68d15fde72d565",
+      "review_status": "reviewed",
+      "decision": "2026-10-22 使用官方网页指定章节逐项对照后收窄/改写中文摘要；由 Codex 审查，非人工专家认证。",
+      "source_locator": "Dry away from direct sunlight or heat; How to dry a wool sweater",
+      "current_content_sha256": "3783a5983b009f10f05a17f3916be8f008a818aa9f7209efc435461b27557410"
+    },
+    {
+      "id": "wardrobe-purchase-cost-per-wear",
+      "title": "购买前估算使用频率",
+      "topic": "wardrobe",
+      "previous_source_url": "https://www.nps.gov/articles/10essentials.htm",
+      "previous_content_sha256": "81503bcefba9ee0afa6129184b00c4838ca29bfbf62f1706136ad749c25dfce9",
+      "review_status": "project_rule",
+      "decision": "转为项目启发式建议；原外部链接不足以支持完整建议，解除权威引用关联。",
+      "source_locator": "",
+      "current_content_sha256": "81503bcefba9ee0afa6129184b00c4838ca29bfbf62f1706136ad749c25dfce9"
+    },
+    {
+      "id": "wardrobe-purchase-care-cost",
+      "title": "购买前看洗护成本",
+      "topic": "wardrobe",
+      "previous_source_url": "https://www.ftc.gov/business-guidance/resources/clothes-captioning-complying-care-labeling-rule",
+      "previous_content_sha256": "0d76e887287f992893a3b79a7b9ac923d267ce7b4bbaab7eea27151253e30e45",
+      "review_status": "project_rule",
+      "decision": "转为项目启发式建议；原外部链接不足以支持完整建议，解除权威引用关联。",
+      "source_locator": "",
+      "current_content_sha256": "0d76e887287f992893a3b79a7b9ac923d267ce7b4bbaab7eea27151253e30e45"
+    },
+    {
+      "id": "size-measure-same-garment",
+      "title": "测量时保持口径一致",
+      "topic": "size",
+      "previous_source_url": "https://faq-sg.uniqlo.com/articles/en_US/FAQ/Product-Measurement-Guidelines-SG",
+      "previous_content_sha256": "06d780ae8c0d967cdaa7e954b06085e975a3dcfb3e980bd9342c35f314dd494d",
+      "review_status": "pending_review",
+      "decision": "现有摘要尚未完成逐项原文核验；默认事实检索隔离，保留原记录。",
+      "source_locator": "",
+      "current_content_sha256": "06d780ae8c0d967cdaa7e954b06085e975a3dcfb3e980bd9342c35f314dd494d"
+    },
+    {
+      "id": "style-material-changes-formality",
+      "title": "正式度不只由颜色决定",
+      "topic": "style",
+      "previous_source_url": "https://www.canva.com/colors/color-wheel/",
+      "previous_content_sha256": "b1fc1ff71930454b412ecc865a053bd98cc03abf2ad99648eeb45041305920db",
+      "review_status": "project_rule",
+      "decision": "转为项目启发式建议；原外部链接不足以支持完整建议，解除权威引用关联。",
+      "source_locator": "",
+      "current_content_sha256": "b1fc1ff71930454b412ecc865a053bd98cc03abf2ad99648eeb45041305920db"
+    }
+  ]
+}

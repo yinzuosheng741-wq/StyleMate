@@ -148,15 +148,17 @@ def test_empty_wardrobe_outfit_still_returns_general_knowledge_guidance():
 
     assert "通用穿搭建议" in reply.content
     assert "当前衣橱还无法组成完整搭配" not in reply.content
-    assert reply.sources
+    assert "搭配规则启发" in reply.content
+    assert not reply.sources
 
 
-def test_purchase_shortcut_returns_an_actionable_plan():
+def test_purchase_shortcut_collects_missing_conditions():
     app = service()
 
     purchase = app.chat("owner-a", "thread-a", "推荐购买")
 
-    assert "优先购买" in purchase.content
+    assert "补充季节或实际温度" in purchase.content
+    assert not purchase.sources
 
 
 def test_travel_shortcut_collects_destination_before_using_tools():

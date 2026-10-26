@@ -21,7 +21,7 @@ class KnowledgeQuery(BaseModel):
 class KnowledgeQASkill:
     spec = SkillSpec(
         name="knowledge_qa",
-        description="混合检索衣橱知识，校验引用并在空召回时最多改写一次。",
+        description="混合检索已审核知识与用户资料，检查来源格式并在空召回时最多改写一次。",
         input_model=KnowledgeQuery,
         output_model=SkillOutcome,
         allowed_tools=("hybrid_retrieval", "source_validation", "query_rewrite"),
@@ -68,7 +68,7 @@ class KnowledgeQASkill:
             _step(
                 "source_validation",
                 "success" if valid_hits else "fallback",
-                f"validated {len(valid_hits)} cited results",
+                f"checked source URL format for {len(valid_hits)} results; semantic support not verified",
             )
         )
         attempts = 1
@@ -122,6 +122,7 @@ class KnowledgeQASkill:
                 "effective_query": effective_query,
                 "query_rewritten": rewritten,
                 "attempts": attempts,
+                "validation_scope": "source_format_only_not_answer_entailment",
                 "results": results,
                 "sources": [
                     {
@@ -141,7 +142,7 @@ class KnowledgeQASkill:
             user_message=(
                 "已找到带来源的相关知识。"
                 if results
-                else "知识库暂未找到可验证的直接答案。"
+                else "知识库暂未找到带有效来源格式的相关资料。"
             ),
         )
 
@@ -188,6 +189,10 @@ def _result_payload(hit: RetrievalHit) -> dict:
         "chunk_id": hit.chunk_id,
         "page_number": hit.page_number,
         "section_title": hit.section_title,
+        "source_locator": hit.source_locator,
+        "review_status": hit.review_status,
+        "applicability": hit.applicability,
+        "limitations": hit.limitations,
     }
 
 

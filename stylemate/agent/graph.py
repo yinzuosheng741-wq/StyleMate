@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import logging
 from pathlib import Path
 from typing import Any
 
@@ -10,7 +11,10 @@ from langchain_core.messages import AIMessage, ToolMessage
 from langchain_core.tools import BaseTool
 from langgraph.graph import END, START, StateGraph
 
+from stylemate.agent.routing import route_skills
 from stylemate.agent.state import AgentState, model_messages
+
+logger = logging.getLogger(__name__)
 
 MAX_MODEL_CALLS = 4
 MAX_TOOL_CALLS = 6
@@ -26,13 +30,25 @@ def build_agent_graph(model, tools: list[BaseTool]):
     """Compile the two-node graph.  The tool node only sees bound closures."""
     tool_map = {tool.name: tool for tool in tools}
 
+    def route(state: AgentState) -> dict[str, Any]:
+        user_messages = [m for m in state.get("messages", []) if getattr(m, "type", "") == "human"]
+        text = str(user_messages[-1].content) if user_messages else ""
+        decision = route_skills(text, set(tool_map))
+        logger.info("skill_route_finished skills=%s tools=%d", decision.skills, len(decision.allowed_tools))
+        return {"allowed_tools": sorted(decision.allowed_tools), "active_skills": list(decision.skills),
+                "traces": [{"name": "skill_router", "status": "success",
+                            "summary": ", ".join(decision.skills), "duration_ms": 0}]}
+
     def assistant(state: AgentState) -> dict[str, Any]:
         if (
             state.get("model_calls", 0) >= MAX_MODEL_CALLS
             or state.get("tool_calls", 0) >= MAX_TOOL_CALLS
         ):
             return {"messages": [AIMessage(content=_STOP_MESSAGE)]}
-        response = model.bind_tools(tools).invoke(model_messages(state, _system_prompt()))
+        allowed = set(state.get("allowed_tools", []))
+        visible_tools = [tool for tool in tools if tool.name in allowed]
+        logger.info("agent_model_started call=%d tools=%d", state.get("model_calls", 0) + 1, len(visible_tools))
+        response = model.bind_tools(visible_tools).invoke(model_messages(state, _system_prompt()))
         if not isinstance(response, AIMessage):
             response = AIMessage(content=str(getattr(response, "content", response) or ""))
         # Do not end the graph on an unexecuted tool request at the model-call limit.
@@ -64,7 +80,11 @@ def build_agent_graph(model, tools: list[BaseTool]):
                 continue
             name, args = call.get("name", ""), call.get("args", {}) or {}
             tool = tool_map.get(name)
-            if tool is None:
+            if tool is not None and name not in state.get("allowed_tools", []):
+                logger.warning("tool_policy_blocked tool=%s", name)
+                raw = {"result": {"message": "当前任务未开放该工具，请明确操作意图后重试。"},
+                       "trace": {"name": name, "status": "failed", "summary": "skill tool permission denied", "duration_ms": 0}}
+            elif tool is None:
                 raw = {"result": {"message": "不支持该工具。"}, "trace": {"name": name or "unknown", "status": "failed", "summary": "unknown tool", "duration_ms": 0}}
             else:
                 try:
@@ -86,9 +106,11 @@ def build_agent_graph(model, tools: list[BaseTool]):
         return update
 
     builder = StateGraph(AgentState)
+    builder.add_node("route", route)
     builder.add_node("assistant", assistant)
     builder.add_node("tools", tool_node)
-    builder.add_edge(START, "assistant")
+    builder.add_edge(START, "route")
+    builder.add_edge("route", "assistant")
     builder.add_conditional_edges("assistant", route_after_assistant, {"tools": "tools", END: END})
     builder.add_edge("tools", "assistant")
     return builder.compile()

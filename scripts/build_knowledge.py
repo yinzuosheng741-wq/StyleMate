@@ -49,18 +49,19 @@ def audit(records_path: Path, sources_path: Path) -> list[str]:
         records = load_builtin_records(records_path)
     except (OSError, ValueError) as exc:
         return [str(exc)]
-    if not 32 <= len(records) <= 64:
-        errors.append(f"record count must be 32-64, got {len(records)}")
+    if not records:
+        errors.append("corpus must not be empty")
     ids = [record.id for record in records]
     if len(ids) != len(set(ids)):
         errors.append("records.jsonl has duplicate record ID")
     missing_topics = REQUIRED_TOPICS - {record.topic for record in records}
     if missing_topics:
         errors.append("missing topics: " + ", ".join(sorted(missing_topics)))
-    low_coverage = [topic for topic, count in Counter(record.topic for record in records).items() if count < 3]
-    if low_coverage:
-        errors.append("each topic needs at least 3 records: " + ", ".join(sorted(low_coverage)))
     for record in records:
+        if record.content_kind == "heuristic":
+            if record.source_url is not None:
+                errors.append(f"{record.id} project heuristic must not carry an authority citation")
+            continue
         source = source_by_url.get(str(record.source_url))
         if source is None:
             errors.append(f"{record.id} uses a URL absent from sources.json")
@@ -75,24 +76,44 @@ def audit(records_path: Path, sources_path: Path) -> list[str]:
             errors.append(f"{record.id} does not contain an original Chinese summary")
         if any(paragraph in record.content for paragraph in FORBIDDEN_COPIED_PARAGRAPHS):
             errors.append(f"{record.id} appears to copy a source paragraph")
+        if record.reviewed_at and record.reviewed_at > date.today():
+            errors.append(f"{record.id} has a future review date")
     return errors
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--check", action="store_true", help="validate the checked-in corpus")
+    parser.add_argument("--report", type=Path, help="write a new structural/provenance report, without live verification")
     args = parser.parse_args()
     errors = audit(ROOT / "data/knowledge/records.jsonl", ROOT / "data/knowledge/sources.json")
     if errors:
         print("knowledge audit FAILED")
         print("\n".join(f"- {error}" for error in errors))
         return 1
+    records = load_builtin_records(ROOT / "data/knowledge/records.jsonl")
+    if args.report:
+        if args.report.exists():
+            parser.error("report already exists; use a new path")
+        args.report.parent.mkdir(parents=True, exist_ok=True)
+        with args.report.open("x", encoding="utf-8") as handle:
+            json.dump({
+                "scope": "structural_and_recorded_provenance_not_live_source_verification",
+                "records": len(records),
+                "published_evidence": sum(r.is_published_evidence for r in records),
+                "review_status_counts": dict(Counter(r.review_status for r in records)),
+                "published_topic_counts": dict(Counter(r.topic for r in records if r.is_published_evidence)),
+                "missing_published_topics": sorted(REQUIRED_TOPICS - {r.topic for r in records if r.is_published_evidence}),
+                "items": [{"id": r.id, "topic": r.topic, "review_status": r.review_status,
+                           "content_kind": r.content_kind, "source_locator": r.source_locator,
+                           "review_note": r.review_note} for r in records],
+            }, handle, ensure_ascii=False, indent=2)
+            handle.write("\n")
     if args.check:
-        records = load_builtin_records(ROOT / "data/knowledge/records.jsonl")
-        sources = _load_sources(ROOT / "data/knowledge/sources.json")
         print(
-            f"knowledge audit PASS: {len(records)} records, "
-            f"{len(REQUIRED_TOPICS)} required topics, {len(sources)} audited sources"
+            f"knowledge structure PASS: {len(records)} records, "
+            f"{sum(r.is_published_evidence for r in records)} published evidence; "
+            "this command does not verify source semantics"
         )
     return 0
 

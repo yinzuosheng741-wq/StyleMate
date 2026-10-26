@@ -1,10 +1,8 @@
 from datetime import date, datetime
 
-import chromadb
-
 from stylemate.domain.models import UserDocument
 from stylemate.rag.models import KnowledgeRecord
-from stylemate.rag.retriever import HybridRetriever, owner_collection_name, reciprocal_rank_fusion
+from stylemate.rag.retriever import HybridRetriever, create_chroma_client, owner_collection_name, reciprocal_rank_fusion
 from stylemate.repositories.agent_session import SessionAgentRepository
 
 
@@ -25,6 +23,9 @@ class CountingEmbedding:
 def test_bm25_fallback_returns_cited_source_without_embedding_key():
     records = [
         KnowledgeRecord(
+            review_status="reviewed", source_locator="synthetic test fixture",
+            review_note="Synthetic retrieval fixture; not source-verified knowledge.",
+            reviewed_at="2026-10-22", reviewer="test-fixture", applicability="test only",
             id="wool-care",
             title="羊毛基础洗护",
             content="羊毛衣物应先读取洗标，使用适合羊毛的温和程序并避免高温、强力脱水和长时间烘干，必要时交由专业护理。",
@@ -38,7 +39,7 @@ def test_bm25_fallback_returns_cited_source_without_embedding_key():
         records=records,
         repository=SessionAgentRepository({}),
         embedding=None,
-        chroma_client=chromadb.EphemeralClient(),
+        chroma_client=create_chroma_client("demo"),
     )
 
     hits = retriever.search("羊毛大衣怎么洗", "owner-a", "thread-a", top_k=3)
@@ -71,7 +72,7 @@ def test_keyword_fallback_keeps_user_documents_owner_and_conversation_scoped():
             created_at=datetime(2026, 8, 13),
         )
     )
-    retriever = HybridRetriever([], repository, embedding=None, chroma_client=chromadb.EphemeralClient())
+    retriever = HybridRetriever([], repository, embedding=None, chroma_client=create_chroma_client("demo"))
 
     hits = retriever.search("羊毛大衣洗涤", "owner-a", "thread-a", top_k=3)
 
@@ -98,6 +99,9 @@ def test_document_embeddings_are_reused_across_queries():
     embedding = CountingEmbedding()
     records = [
         KnowledgeRecord(
+            review_status="reviewed", source_locator="synthetic test fixture",
+            review_note="Synthetic retrieval fixture; not source-verified knowledge.",
+            reviewed_at="2026-10-22", reviewer="test-fixture", applicability="test only",
             id="indexed-once",
             title="Indexed care guide",
             content="GORE-TEX outerwear should avoid fabric softener during washing.",
@@ -111,7 +115,7 @@ def test_document_embeddings_are_reused_across_queries():
         records,
         SessionAgentRepository({}),
         embedding,
-        chromadb.EphemeralClient(),
+        create_chroma_client("demo"),
     )
 
     retriever.search("fabric softener", "owner-a", "thread-a")
@@ -139,7 +143,7 @@ def test_document_embeddings_are_reused_across_queries():
 def test_user_document_vectors_update_only_when_documents_change():
     repository = SessionAgentRepository({})
     embedding = CountingEmbedding()
-    client = chromadb.EphemeralClient()
+    client = create_chroma_client("demo")
     retriever = HybridRetriever([], repository, embedding, client)
     document = UserDocument(
         owner_id="owner-a",
@@ -188,7 +192,7 @@ def test_user_document_chunks_return_page_metadata_and_deduplicate_one_document(
         )
     )
     retriever = HybridRetriever(
-        [], repository, embedding=None, chroma_client=chromadb.EphemeralClient()
+        [], repository, embedding=None, chroma_client=create_chroma_client("demo")
     )
 
     hits = retriever.search("羊毛低温平铺", "owner-a", "thread-a", top_k=4)

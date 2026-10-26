@@ -185,7 +185,7 @@ class SQLiteAgentRepository:
 
 
 def _conversation_summary(state: ConversationState) -> dict:
-    messages = state.messages
+    messages = state.transcript or state.messages
     first_user = next((message.content for message in messages if message.role == "user"), "")
     last_message_at = max(
         (message.created_at for message in messages),

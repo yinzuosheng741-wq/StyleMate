@@ -1,7 +1,6 @@
 from datetime import date, datetime
 from time import sleep
 
-import chromadb
 import pytest
 from pydantic import ValidationError
 
@@ -12,6 +11,7 @@ from stylemate.rag.retriever import (
     EmbeddingUnavailableError,
     HybridRetriever,
     OpenAICompatibleEmbeddingAdapter,
+    create_chroma_client,
 )
 from stylemate.repositories.agent_session import SessionAgentRepository
 
@@ -37,6 +37,9 @@ class SlowEmbedding(ConstantEmbedding):
 
 def _record():
     return KnowledgeRecord(
+            review_status="reviewed", source_locator="synthetic test fixture",
+            review_note="Synthetic retrieval fixture; not source-verified knowledge.",
+            reviewed_at="2026-10-22", reviewer="test-fixture", applicability="test only",
         id="fallback-care",
         title="Fallback care note",
         content="wool care should follow the garment label before any wash cycle begins",
@@ -62,6 +65,9 @@ def _document(conversation_id, document_id, filename, text):
 def test_knowledge_record_keeps_the_formal_minimum_content_length():
     with pytest.raises(ValidationError):
         KnowledgeRecord(
+            review_status="reviewed", source_locator="synthetic test fixture",
+            review_note="Synthetic retrieval fixture; not source-verified knowledge.",
+            reviewed_at="2026-10-22", reviewer="test-fixture", applicability="test only",
             id="short", title="Short title", content="short",
             source_url="https://www.woolmark.com/care/care-for-wool/",
             source_name="Woolmark", topic="care", retrieved_at=date(2026, 8, 13),
@@ -72,7 +78,7 @@ def test_owner_semantic_collection_keeps_same_document_ids_separate_by_conversat
     repository = SessionAgentRepository({})
     repository.save_document(_document("thread-a", "shared", "A note", "alpha private wardrobe note"))
     repository.save_document(_document("thread-b", "shared", "B note", "beta private wardrobe note"))
-    retriever = HybridRetriever([], repository, ConstantEmbedding(), chromadb.EphemeralClient())
+    retriever = HybridRetriever([], repository, ConstantEmbedding(), create_chroma_client("demo"))
 
     hits_a = retriever.search("note", "same-owner", "thread-a", top_k=3)
     hits_b = retriever.search("note", "same-owner", "thread-b", top_k=3)
@@ -84,7 +90,7 @@ def test_owner_semantic_collection_keeps_same_document_ids_separate_by_conversat
 def test_user_collection_removes_stale_vectors_for_the_current_conversation():
     repository = SessionAgentRepository({})
     repository.save_document(_document("thread-a", "old", "Old note", "stale wardrobe note"))
-    retriever = HybridRetriever([], repository, ConstantEmbedding(), chromadb.EphemeralClient())
+    retriever = HybridRetriever([], repository, ConstantEmbedding(), create_chroma_client("demo"))
     assert retriever.search("note", "same-owner", "thread-a", top_k=3)
     repository.state["stylemate_agent"]["same-owner"]["documents"]["thread-a"] = {}
 
@@ -93,7 +99,7 @@ def test_user_collection_removes_stale_vectors_for_the_current_conversation():
 
 @pytest.mark.parametrize("embedding", [ConnectionFailingEmbedding(), SlowEmbedding()])
 def test_semantic_sdk_errors_and_timeouts_fall_back_without_exposing_details(embedding):
-    retriever = HybridRetriever([_record()], SessionAgentRepository({}), embedding, chromadb.EphemeralClient(), embedding_timeout_seconds=0.001)
+    retriever = HybridRetriever([_record()], SessionAgentRepository({}), embedding, create_chroma_client("demo"), embedding_timeout_seconds=0.001)
 
     hits = retriever.search("wool", "owner-a", "thread-a", top_k=1)
 

@@ -85,7 +85,7 @@ class OutfitPlanningSkill:
         steps.append(self._step("plan_outfits", "success", "Outfits planned"))
         status = "success" if recommendations and weather_available else "fallback"
         if not recommendations:
-            message = "请先添加上装和下装，再生成穿搭建议。"
+            message = "未找到满足当前天气、季节和排除条件的组合；请检查上装与下装或连衣裙，雨雪天还需鞋履，低温时需外套。"
         elif not weather_available:
             message = "天气信息暂不可用，已根据衣柜生成穿搭建议。"
         else:

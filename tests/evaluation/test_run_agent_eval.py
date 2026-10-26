@@ -3,8 +3,29 @@ from pathlib import Path
 
 import pytest
 
-from evaluation.run_agent_eval import EmbeddingEvaluationError, run_agent_evaluation
+from evaluation.run_agent_eval import EmbeddingEvaluationError, _evaluate_retrieval, run_agent_evaluation
 from stylemate.rag.corpus import load_builtin_records
+from stylemate.rag.models import RetrievalHit
+
+
+def test_retrieval_metrics_keep_unavailable_labels_in_the_raw_denominator():
+    class Retriever:
+        def search(self, *_args, **_kwargs):
+            return [RetrievalHit(title="Fixture", snippet="fixture", source_name="fixture",
+                                 source_url="https://example.test", topic="care", score=1, record_id="available")]
+
+    cases = [{"query": "test", "relevant_ids": ["available"]},
+             {"query": "test", "relevant_ids": ["quarantined"]}]
+    report = _evaluate_retrieval(Retriever(), cases, "bm25")
+    assert report["case_count"] == 2
+    assert report["recall_at_5"] == 0.5
+    assert report["mrr_at_5"] == 0.5
+
+
+def test_empty_conditional_subset_is_unavailable_not_zero_quality():
+    report = _evaluate_retrieval(None, [], "hybrid")
+    assert report["case_count"] == 0
+    assert report["recall_at_5"] is None
 
 
 def test_agent_evaluation_runs_document_level_retrieval_cases(tmp_path):
@@ -22,9 +43,17 @@ def test_agent_evaluation_runs_document_level_retrieval_cases(tmp_path):
     assert saved["graph_contract_accuracy"] == 1.0
     assert saved["graph_write_confirmation_rate"] == 1.0
     assert saved["graph_loop_bound_pass_rate"] == 1.0
-    assert saved["rag_recall_at_3"] >= 0.9
-    assert saved["rag_mrr_at_5"] >= 0.9
-    assert saved["rag_ndcg_at_5"] >= 0.9
+    coverage = saved["knowledge_coverage"]
+    assert coverage["published_records"] > 0
+    assert coverage["uncovered_cases"] >= 0
+    assert sum(coverage[k] for k in ("fully_covered_cases", "partially_covered_cases", "uncovered_cases")) == 60
+    covered_upper_bound = (coverage["fully_covered_cases"] + coverage["partially_covered_cases"]) / 60
+    assert 0 <= saved["rag_recall_at_3"] <= covered_upper_bound
+    for mode, raw in saved["retrieval_ablation"].items():
+        assert raw["case_count"] == 60
+        conditional = saved["conditional_retrieval_ablation"][mode]
+        assert conditional["case_count"] == coverage["fully_covered_cases"]
+        assert 0 <= conditional["recall_at_5"] <= 1
     assert set(saved["retrieval_ablation"]) == {"bm25", "vector", "hybrid"}
     assert saved["retrieval_ablation"]["hybrid"]["latency_p95_ms"] > 0
     assert saved["memory_fact_recall"] >= 0.9

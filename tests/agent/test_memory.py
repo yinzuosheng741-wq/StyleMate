@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 
-from langchain_core.messages import SystemMessage
+from langchain_core.messages import HumanMessage, SystemMessage
 
 from stylemate.agent.memory import prune_expired_facts, update_conversation_facts
 from stylemate.agent.state import initial_state, model_messages
@@ -21,11 +21,12 @@ def test_model_context_renders_structured_facts_instead_of_free_text_summary():
     messages = model_messages(state, "system")
 
     system_text = "\n".join(
-        message.content for message in messages if isinstance(message, SystemMessage)
+        message.content for message in messages if isinstance(message, HumanMessage)
     )
     assert '"scenes":["面试"]' in system_text
     assert '"constraints":["不紧身"]' in system_text
     assert "对话摘要" not in system_text
+    assert [m.content for m in messages if isinstance(m, SystemMessage)] == ["system"]
 
 
 def test_initial_state_accepts_legacy_summary_for_rolling_migration():

@@ -4,6 +4,8 @@ from stylemate.agent.tools.styling import (
     get_user_location,
     get_weather,
     rag_search,
+    recommend_open_outfit,
+    recommend_purchases,
     recommend_size,
     travel_packing,
 )
@@ -100,6 +102,46 @@ def test_travel_packing_adapts_to_weather_and_activity():
     assert any("雨具" in item for item in result["packing_list"])
     assert any("外套" in item for item in result["packing_list"])
     assert result["weather_summary"] == "小雨，18°C"
+
+
+def test_heuristic_outfit_does_not_attach_unrelated_retrieval_sources():
+    context = _context()
+    result = recommend_open_outfit({"scene": "通勤", "temperature_c": 30}, context)
+    assert result["sources"] == []
+    assert result["recommendation_basis"] == "project_heuristic"
+    assert context.retriever.calls == []
+    assert "透气短袖" in result["recommendation"]
+
+
+def test_unknown_temperature_does_not_become_a_silent_mild_weather_assumption():
+    result = recommend_open_outfit({"scene": "通勤"}, _context())
+    assert result["conditions"]["temperature_c"] is None
+    assert result["missing_conditions"] == ["temperature_c"]
+    assert "温度未知" in result["recommendation"]
+    assert "长袖衬衫或薄针织" not in result["recommendation"]
+
+
+def test_purchase_requires_season_or_temperature_and_has_no_authority_citation():
+    context = _context()
+    missing = recommend_purchases({}, context)
+    seasonal = recommend_purchases({"season": "夏"}, context)
+    assert missing["priorities"] == []
+    assert missing["missing_conditions"] == ["season_or_temperature"]
+    assert seasonal["temperature_c"] is None
+    assert seasonal["priorities"]
+    assert seasonal["sources"] == []
+    assert context.retriever.calls == []
+
+
+def test_complete_inventory_does_not_trigger_arbitrary_purchase_suggestions():
+    from stylemate.demo.sample_data import sample_garments
+
+    context = _context()
+    for garment in sample_garments():
+        context.wardrobe_repository.save_garment(context.owner_id, garment)
+    result = recommend_purchases({"season": "夏"}, context)
+    assert result["priorities"] == []
+    assert "无需" in result["message"]
 
 
 def test_weather_typed_timeout_is_retried_by_executor_without_trace_leak():

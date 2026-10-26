@@ -3,10 +3,14 @@
 from __future__ import annotations
 
 import hashlib
+import logging
 from datetime import date
 from itertools import product
 
 from stylemate.domain.models import Garment, OutfitRecommendation, OutfitRequest
+from stylemate.rules.constraints import excludes_color
+
+logger = logging.getLogger(__name__)
 
 _SCENE_STYLES = {
     "面试": {"通勤", "正式", "简约", "优雅"},
@@ -61,12 +65,17 @@ def plan_outfits(
     limit = min(limit, 3)
 
     allowed_ids = set(request.candidate_garment_ids)
+    target_season = _target_season(request)
     inventory = sorted(
         (
             garment
             for garment in garments
             if (not allowed_ids or garment.id in allowed_ids)
             and not _excluded(garment, request.extra_constraints)
+            and (not target_season or _supports_season(garment, target_season))
+            and not (request.temperature_c is not None and request.temperature_c >= 28
+                     and any(token in f"{garment.name} {garment.material or ''}".lower()
+                             for token in ("针织", "毛衣", "羊毛", "羊绒", "呢料", "wool", "cashmere")))
         ),
         key=lambda garment: garment.id,
     )
@@ -74,16 +83,26 @@ def plan_outfits(
     bottoms = [garment for garment in inventory if _matches_category(garment, "下装")]
     shoes = [garment for garment in inventory if _matches_category(garment, "鞋履")]
     outerwear = [garment for garment in inventory if _matches_category(garment, "外套")]
-    if not tops or not bottoms:
+    dresses = [garment for garment in inventory if _matches_category(garment, "连衣裙")]
+    if (not tops or not bottoms) and not dresses:
         return []
 
+    # Equivalent accessory candidates have identical hard/soft rule outcomes;
+    # the smallest ID always wins the existing deterministic tie-breaker.
+    shoes = _equivalent_options(shoes, request)
+    outerwear = _equivalent_options(outerwear, request)
     shoe_options: list[Garment | None] = shoes or [None]
     outerwear_options: list[Garment | None] = [None, *outerwear]
-    best_by_core_pair: dict[tuple[str, str], OutfitRecommendation] = {}
-    for top, bottom, shoe, outer in product(
-        tops, bottoms, shoe_options, outerwear_options
-    ):
-        selected = [item for item in (top, bottom, shoe, outer) if item is not None]
+    if _needs_outerwear(request):
+        outerwear_options = outerwear
+    elif request.temperature_c is not None and request.temperature_c >= 28:
+        outerwear_options = [None]
+    # A dress is an alternative complete base, never an extra top/bottom layer.
+    bases = [list(pair) for pair in product(tops, bottoms)] + [[dress] for dress in dresses]
+    best_by_core_pair: dict[tuple[str, ...], OutfitRecommendation] = {}
+    logger.info("outfit_planning_started inventory=%d bases=%d", len(inventory), len(bases))
+    for base, shoe, outer in product(bases, shoe_options, outerwear_options):
+        selected = [*base, *(item for item in (shoe, outer) if item is not None)]
         if len({item.id for item in selected}) != len(selected):
             continue
         checks = _hard_constraint_checks(request, selected, allowed_ids)
@@ -92,6 +111,11 @@ def plan_outfits(
         breakdown = _score_breakdown(request, selected, shoe, outer)
         score = min(100, sum(breakdown.values()))
         garment_ids = [item.id for item in selected]
+        core_pair = tuple(item.id for item in base)
+        current = best_by_core_pair.get(core_pair)
+        # Construct and explain only a better candidate for this base outfit.
+        if current is not None and (-score, tuple(sorted(garment_ids))) >= _recommendation_sort_key(current):
+            continue
         recommendation = OutfitRecommendation(
             id=_recommendation_id(request.scene, garment_ids),
             garment_ids=garment_ids,
@@ -100,14 +124,10 @@ def plan_outfits(
             constraint_checks=checks,
             score_breakdown=breakdown,
         )
-        core_pair = (top.id, bottom.id)
-        current = best_by_core_pair.get(core_pair)
-        if current is None or _recommendation_sort_key(
-            recommendation
-        ) < _recommendation_sort_key(current):
-            best_by_core_pair[core_pair] = recommendation
+        best_by_core_pair[core_pair] = recommendation
 
     ranked = sorted(best_by_core_pair.values(), key=_recommendation_sort_key)
+    logger.info("outfit_planning_finished valid_bases=%d selected=%d", len(ranked), min(limit, len(ranked)))
     return ranked[:limit]
 
 
@@ -120,8 +140,8 @@ def _hard_constraint_checks(
     target_season = _target_season(request)
     return {
         "inventory": not allowed_ids or ids <= allowed_ids,
-        "top_bottom": _has_category(selected, "上装")
-        and _has_category(selected, "下装"),
+        "top_bottom": (_has_category(selected, "上装") and _has_category(selected, "下装"))
+        or _has_category(selected, "连衣裙"),
         "season": not target_season
         or all(_supports_season(item, target_season) for item in selected),
         "weather": _weather_compatible(request, selected),
@@ -129,6 +149,17 @@ def _hard_constraint_checks(
             _excluded(item, request.extra_constraints) for item in selected
         ),
     }
+
+
+def _equivalent_options(garments: list[Garment], request: OutfitRequest) -> list[Garment]:
+    representatives: dict[tuple, Garment] = {}
+    for garment in sorted(garments, key=lambda item: item.id):
+        # Ambiguous multi-role categories retain their identity for uniqueness checks.
+        identity = "" if garment.category in {"鞋履", "外套"} else garment.id
+        key = (garment.category, _color_family(garment.primary_color), tuple(sorted(garment.styles)),
+               bool(request.color_preference and request.color_preference in garment.primary_color), identity)
+        representatives.setdefault(key, garment)
+    return list(representatives.values())
 
 
 def _score_breakdown(
@@ -242,6 +273,8 @@ def _needs_outerwear(request: OutfitRequest) -> bool:
 
 
 def _excluded(garment: Garment, constraints: list[str]) -> bool:
+    if excludes_color(garment.primary_color, garment.category, constraints):
+        return True
     text = (
         f"{garment.name} {garment.category} {garment.primary_color} "
         f"{' '.join(garment.styles)}"

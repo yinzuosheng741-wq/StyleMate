@@ -137,6 +137,8 @@ class ConversationState(BaseModel):
     owner_id: str
     conversation_id: str
     messages: list[ConversationMessage] = Field(default_factory=list)
+    # Full UI history is never passed to the model. Old payloads migrate on save.
+    transcript: list[ConversationMessage] = Field(default_factory=list)
     facts: ConversationFacts = Field(default_factory=ConversationFacts)
     # Read old persisted payloads, then migrate this text into facts on the next turn.
     summary: str = ""

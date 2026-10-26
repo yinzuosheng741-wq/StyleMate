@@ -3,16 +3,23 @@
 from __future__ import annotations
 
 import hashlib
+import logging
 import math
+import os
 import re
+import sys
 from collections import Counter
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Literal, Protocol
 
 from stylemate.domain.models import UserDocument
 from stylemate.rag.models import KnowledgeRecord, RetrievalHit, UserDocumentChunk
+from stylemate.rag.query_planning import lexical_queries
 from stylemate.rag.user_docs import chunk_user_document
+
+logger = logging.getLogger(__name__)
 
 RRF_K = 60
 RECALL_MULTIPLIER = 3
@@ -162,7 +169,15 @@ def user_vector_id(conversation_id: str, document_id: str, chunk_id: str = "") -
 
 
 def create_chroma_client(mode: str = "demo", path: str = "data/chroma"):
-    """Select the in-memory demo store or the local persistent store."""
+    """Select portable exact search on Windows, or opt into native Chroma."""
+    if mode not in {"demo", "local"}:
+        raise ValueError("mode must be demo or local")
+    backend = os.getenv("STYLEMATE_VECTOR_BACKEND", "sqlite" if sys.platform == "win32" else "chroma")
+    if backend == "sqlite":
+        from stylemate.rag.portable_vectors import PortableVectorClient
+        return PortableVectorClient(None if mode == "demo" else Path(path) / "portable-vectors.sqlite3")
+    if backend != "chroma":
+        raise ValueError("unknown_vector_backend")
     import chromadb
 
     if mode == "demo":
@@ -173,7 +188,9 @@ def create_chroma_client(mode: str = "demo", path: str = "data/chroma"):
 
 class HybridRetriever:
     def __init__(self, records: list[KnowledgeRecord], repository, embedding: EmbeddingAdapter | None, chroma_client, embedding_timeout_seconds: float = 8.0):
-        self.records = records
+        # The canonical corpus retains drafts and project rules for audit. Only
+        # source-reviewed facts participate in default factual retrieval.
+        self.records = [record for record in records if record.is_published_evidence]
         self.repository = repository
         self.embedding = embedding
         self.chroma_client = chroma_client
@@ -185,6 +202,7 @@ class HybridRetriever:
         self._builtin_sync_result = False
         self._user_sync_signatures: dict[tuple[str, str], tuple[str, bool]] = {}
         self._stats: Counter[str] = Counter()
+        self.last_audit: dict[str, int | bool] = {}
         if self.embedding is not None:
             self.sync_builtin_index()
 
@@ -203,6 +221,9 @@ class HybridRetriever:
         self._stats["search_requests"] += 1
         self._stats[f"search_mode_{mode}"] += 1
         documents = self.repository.list_documents(owner_id, conversation_id)
+        # Recheck repository results before indexing candidates, including BM25.
+        documents = [doc for doc in documents
+                     if doc.owner_id == owner_id and doc.conversation_id == conversation_id]
         chunks = [
             chunk
             for document in documents
@@ -212,17 +233,28 @@ class HybridRetriever:
         candidate_map = {candidate.key: candidate for candidate in candidates}
         recall_limit = max(top_k, top_k * RECALL_MULTIPLIER)
         rankings: list[list[str]] = []
+        lexical_count = 0
+        vector_count = 0
+        vector_failed = False
         if mode in {"bm25", "hybrid"}:
-            rankings.append(self._bm25_ranking(query, candidates, recall_limit))
+            lexical_rankings = [self._bm25_ranking(variant, candidates, recall_limit)
+                                for variant in lexical_queries(query)]
+            lexical_scores = reciprocal_rank_fusion(lexical_rankings)
+            lexical = sorted(lexical_scores, key=lambda key: (-lexical_scores[key], key))[:recall_limit]
+            rankings.append(lexical)
+            lexical_count = len(lexical)
 
         if mode in {"vector", "hybrid"} and self.embedding is not None:
             try:
-                rankings.append(
-                    self._semantic_ranking(query, owner_id, conversation_id, recall_limit)
-                )
+                semantic = self._semantic_ranking(query, owner_id, conversation_id, recall_limit)
+                rankings.append(semantic)
+                vector_count = len(semantic)
             except Exception:
                 # BM25 remains available when embedding or Chroma is unavailable.
-                pass
+                vector_failed = True
+
+        self.last_audit = {"lexical_candidates": lexical_count, "vector_candidates": vector_count,
+                           "vector_failed": vector_failed, "scope_applied": True, "selected": 0}
 
         rankings = [ranking for ranking in rankings if ranking]
         if not rankings:
@@ -256,10 +288,14 @@ class HybridRetriever:
                     chunk_id=candidate.chunk_id,
                     page_number=candidate.page_number,
                     section_title=candidate.section_title,
+                    **self._review_metadata(candidate.record_id),
                 )
             )
             if len(hits) == top_k:
                 break
+        self.last_audit["selected"] = len(hits)
+        logger.info("knowledge_retrieval_finished lexical=%d vector=%d selected=%d vector_failed=%s",
+                    lexical_count, vector_count, len(hits), vector_failed)
         return hits
 
     def _embedding_call(self, method, value):
@@ -282,6 +318,17 @@ class HybridRetriever:
                 )
             )
         return vectors
+
+    def _review_metadata(self, record_id: str | None) -> dict:
+        record = next((item for item in self.records if item.id == record_id), None)
+        if record is None:
+            return {"review_status": "user_provided"}
+        return {
+            "source_locator": record.source_locator,
+            "review_status": record.review_status,
+            "applicability": record.applicability,
+            "limitations": record.limitations,
+        }
 
     @staticmethod
     def _record_metadata(record: KnowledgeRecord) -> dict[str, str]:

@@ -34,6 +34,8 @@ def recommend_inventory_outfit(arguments: dict[str, Any], context: ToolContext) 
         for garment_id in values.candidate_garment_ids
         if garment_id in owned_ids
     ]
+    if values.candidate_garment_ids and not candidate_ids:
+        return {"recommendations": [], "message": "指定的候选衣物当前不可用，请重新选择衣橱中的单品；本次未扩大候选范围。"}
     request = OutfitRequest(
         scene=values.scene,
         target_date=values.target_date,

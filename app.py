@@ -1,6 +1,7 @@
 """StyleMate: a demo-first, inventory-grounded wardrobe workbench."""
 
 import json
+import os
 import uuid
 from datetime import date
 from html import escape
@@ -194,7 +195,8 @@ def _cached_outfit(
     constraints: list[str] | None = None,
 ):
     signature = (
-        tuple(item.id for item in garments),
+        tuple((item.id, item.name, item.category, item.primary_color, item.material,
+               tuple(item.seasons), tuple(item.styles)) for item in garments),
         scene,
         weather.summary,
         weather.temperature_c,
@@ -226,7 +228,7 @@ def _render_recommendations(context: AppContext, outcome, garments: list[Garment
     if not recommendations:
         render_empty_state(
             "暂时无法组成完整搭配",
-            "衣橱至少需要一件上装和一件下装；天气较冷时还需要外套。",
+            "请检查上装与下装或连衣裙，以及当前天气、季节和排除条件；天气较冷时还需要外套。",
         )
         return
     for payload in recommendations:
@@ -485,7 +487,9 @@ def _wardrobe_tab(context: AppContext, garments: list[Garment]) -> None:
 
 
 def _assistant_rail(context: AppContext, garments: list[Garment]) -> None:
-    with st.container(key="stylemate_assistant_rail"):
+    desktop = os.getenv("STYLEMATE_DESKTOP") == "1"
+    desktop_prompt = st.chat_input("告诉我你的场景、目的地或衣物问题", key="desktop_chat_input") if desktop else None
+    with st.container(key="stylemate_desktop_chat" if desktop else "stylemate_assistant_rail"):
         st.markdown(
             "<div class='stylemate-assistant-head'>"
             "<div class='status'>STYLEMATE AGENT · ONLINE</div>"
@@ -494,8 +498,8 @@ def _assistant_rail(context: AppContext, garments: list[Garment]) -> None:
             "</div>",
             unsafe_allow_html=True,
         )
-        top_actions = st.columns([1, 1.4, 1.35], gap="small")
-        if top_actions[0].button(
+        top_actions = st.columns([1, 1.4, 1.35], gap="small") if not desktop else [None, None, st]
+        if not desktop and top_actions[0].button(
             "新建",
             key="clear_agent_conversation",
             icon=":material/add_comment:",
@@ -506,7 +510,7 @@ def _assistant_rail(context: AppContext, garments: list[Garment]) -> None:
             st.session_state["stylemate_show_history"] = False
             st.session_state.pop("stylemate_profile_proposal", None)
             st.rerun()
-        if top_actions[1].button(
+        if not desktop and top_actions[1].button(
             "历史对话",
             key="open_agent_history",
             icon=":material/history:",
@@ -532,9 +536,9 @@ def _assistant_rail(context: AppContext, garments: list[Garment]) -> None:
         selected_prompt = ""
         conversation = context.agent_repository.load_conversation(context.owner_id, context.conversation_id)
         chat_history = st.container(
-            height=430,
+            height=None if desktop else 430,
             border=False,
-            key="stylemate_chat_history",
+            key="stylemate_desktop_history" if desktop else "stylemate_chat_history",
         )
         with chat_history:
             if st.session_state.get("stylemate_show_history"):
@@ -562,7 +566,9 @@ def _assistant_rail(context: AppContext, garments: list[Garment]) -> None:
                         st.session_state["stylemate_show_history"] = False
                         st.session_state.pop("stylemate_profile_proposal", None)
                         st.rerun()
-            if not conversation.messages:
+            if not (conversation.transcript or conversation.messages):
+                if desktop:
+                    st.markdown("## 今天想怎么穿？")
                 st.markdown(
                     "<div class='stylemate-kicker'>试试这些功能</div>",
                     unsafe_allow_html=True,
@@ -577,19 +583,23 @@ def _assistant_rail(context: AppContext, garments: list[Garment]) -> None:
                         selected_prompt = prompt_value
                 st.caption("告诉我场景、目的地，或你想解决的衣物问题。")
             else:
-                for message in conversation.messages[-8:]:
+                for message in conversation.transcript or conversation.messages:
                     _render_agent_message(message)
             _render_profile_proposal(context)
             _render_pending_action(context)
 
-        with st.form("assistant_prompt_form", clear_on_submit=True):
-            prompt = st.text_area(
-                "消息",
-                placeholder="例如：周五要面试，帮我搭一套不紧身的衣服",
-                height=76,
-                label_visibility="collapsed",
-            )
-            submitted = st.form_submit_button("发送", type="primary", use_container_width=True)
+        if desktop:
+            prompt = desktop_prompt
+            submitted = bool(prompt)
+        else:
+            with st.form("assistant_prompt_form", clear_on_submit=True):
+                prompt = st.text_area(
+                    "消息",
+                    placeholder="例如：周五要面试，帮我搭一套不紧身的衣服",
+                    height=76,
+                    label_visibility="collapsed",
+                )
+                submitted = st.form_submit_button("发送", type="primary", use_container_width=True)
         if submitted:
             selected_prompt = prompt.strip()
         if not selected_prompt:
@@ -763,7 +773,7 @@ def _about_tab(context: AppContext) -> None:
         if context.settings.app_mode == "demo"
         else "本地模式将衣物元数据保存在本机 SQLite，图片保存在本地目录。"
     )
-    artifact = Path("artifacts/agent_evaluation.json")
+    artifact = Path(__file__).resolve().parent / "artifacts" / "agent_evaluation.json"
     if not artifact.is_file():
         st.caption("评测将在发布前生成。")
         return
@@ -814,6 +824,14 @@ def main() -> None:
     settings = RuntimeSettings.from_env()
     context = build_context(st.session_state, settings)
     garments = context.repository.list_garments(context.owner_id)
+    if os.getenv("STYLEMATE_DESKTOP") == "1":
+        from stylemate.ui.workspace import inject_desktop_style, render_desktop_sidebar
+        page = render_desktop_sidebar(context)
+        if page == "AI 对话":
+            inject_desktop_style()
+            st.title("StyleMate")
+            _assistant_rail(context, garments)
+            return
     st.markdown(
         "<div class='stylemate-brand-kicker'>PERSONAL WARDROBE AGENT</div>",
         unsafe_allow_html=True,

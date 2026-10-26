@@ -165,9 +165,26 @@ def run_agent_evaluation(
     }
     graph_metrics = _evaluate_graph(service, graph_cases)
     hybrid_metrics = retrieval_ablation["hybrid"]
+    published_ids = {record.id for record in retriever.records}
+    fully_covered = [case for case in rag_cases if set(case["relevant_ids"]) <= published_ids]
+    partial_count = sum(bool(set(case["relevant_ids"]) & published_ids)
+                        and not set(case["relevant_ids"]) <= published_ids for case in rag_cases)
     metrics: dict[str, Any] = {
         "case_count": len(cases) + len(rag_cases) + len(graph_cases),
         "retrieval_case_count": len(rag_cases),
+        "knowledge_coverage": {
+            "published_records": len(published_ids),
+            "fully_covered_cases": len(fully_covered),
+            "partially_covered_cases": partial_count,
+            "uncovered_cases": len(rag_cases) - len(fully_covered) - partial_count,
+            "complete_coverage_rate": _rate(len(fully_covered), len(rag_cases)),
+            "note": "Coverage of historical labels, not a new task-based holdout. Raw metrics retain all cases.",
+        },
+        "conditional_retrieval_ablation": {
+            mode: _evaluate_retrieval(retriever, fully_covered, mode)
+            for mode in ("bm25", "vector", "hybrid")
+        },
+        "knowledge_fingerprint": hashlib.sha256(KNOWLEDGE_PATH.read_bytes()).hexdigest(),
         "graph_case_count": len(graph_cases),
         "tool_selection_accuracy": _rate(passed["routing"], totals["routing"]),
         **graph_metrics,
@@ -219,7 +236,8 @@ def _evaluate_graph(
                 conversation_id=conversation_id,
             )
         )
-        traces = result.get("traces", [])
+        # Routing decisions are audited separately from actual tool execution.
+        traces = [trace for trace in result.get("traces", []) if trace.get("name") != "skill_router"]
         trace_names = [trace.get("name") for trace in traces]
         path_passed += int(trace_names == case["expected_tools"])
 
@@ -279,7 +297,7 @@ def _evaluate_retrieval(
     retriever: HybridRetriever,
     cases: list[dict[str, Any]],
     mode: str,
-) -> dict[str, float | int]:
+) -> dict[str, float | int | None]:
     recall_3 = 0.0
     recall_5 = 0.0
     reciprocal_ranks = 0.0
@@ -326,10 +344,10 @@ def _evaluate_retrieval(
     total = len(cases)
     return {
         "case_count": total,
-        "recall_at_3": round(recall_3 / total, 4),
-        "recall_at_5": round(recall_5 / total, 4),
-        "mrr_at_5": round(reciprocal_ranks / total, 4),
-        "ndcg_at_5": round(ndcg / total, 4),
+        "recall_at_3": round(recall_3 / total, 4) if total else None,
+        "recall_at_5": round(recall_5 / total, 4) if total else None,
+        "mrr_at_5": round(reciprocal_ranks / total, 4) if total else None,
+        "ndcg_at_5": round(ndcg / total, 4) if total else None,
         "hard_negative_avoidance_at_3": _rate(
             hard_negative_passed, hard_negative_total
         ),

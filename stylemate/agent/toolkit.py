@@ -11,6 +11,7 @@ from langchain_core.tools import BaseTool, StructuredTool
 from pydantic import BaseModel
 
 from stylemate.agent.middleware import ToolContext, ToolExecutor
+from stylemate.agent.policy import denied_tool_payload
 from stylemate.agent.tool_schemas import (
     READ_TOOL_SCHEMAS,
     WRITE_TOOL_SCHEMAS,
@@ -122,6 +123,9 @@ def _read_tool(
     context: ToolContext,
 ) -> BaseTool:
     def call(**arguments: Any) -> str:
+        denied = denied_tool_payload(name, context.owner_id, context.conversation_id)
+        if denied:
+            return denied
         safe_arguments = plain_arguments(arguments)
         result = executor.execute(
             ToolSpec(
@@ -174,6 +178,9 @@ def _write_tools(writes: WriteActionToolkit) -> list[BaseTool]:
         arguments_model: type[BaseModel],
     ) -> BaseTool:
         def call(**arguments: Any) -> str:
+            denied = denied_tool_payload(name, writes.owner_id, writes.conversation_id)
+            if denied:
+                return denied
             started = monotonic()
             try:
                 action = operation(plain_arguments(arguments))

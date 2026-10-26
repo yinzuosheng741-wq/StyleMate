@@ -1,15 +1,17 @@
 from datetime import date
 
-import chromadb
 import pytest
 
 from stylemate.rag.models import KnowledgeRecord
-from stylemate.rag.retriever import DashScopeEmbeddingAdapter, HybridRetriever
+from stylemate.rag.retriever import DashScopeEmbeddingAdapter, HybridRetriever, create_chroma_client
 from stylemate.repositories.agent_session import SessionAgentRepository
 
 
 def _fallback_record():
     return KnowledgeRecord(
+            review_status="reviewed", source_locator="synthetic test fixture",
+            review_note="Synthetic retrieval fixture; not source-verified knowledge.",
+            reviewed_at="2026-10-22", reviewer="test-fixture", applicability="test only",
         id="sdk-fallback",
         title="SDK fallback note",
         content="wool care should follow the garment label before choosing any cleaning cycle",
@@ -38,7 +40,7 @@ def test_dashscope_failures_fall_back_to_keyword_hits(monkeypatch, failure):
         [_fallback_record()],
         SessionAgentRepository({}),
         DashScopeEmbeddingAdapter(request_timeout_seconds=0.01),
-        chromadb.EphemeralClient(),
+        create_chroma_client("demo"),
     )
 
     hits = retriever.search("wool", "owner-a", "thread-a", top_k=1)

@@ -76,6 +76,17 @@ class AgentService:
         self.profile_service = ProfileService(wardrobe_repository)
 
     def chat(self, owner_id: str, conversation_id: str, text: str) -> ConversationMessage:
+        from stylemate.agent.policy import request_policy
+        from stylemate.agent.routing import route_skills
+        from stylemate.agent.tool_schemas import READ_TOOL_SCHEMAS, WRITE_TOOL_SCHEMAS
+
+        if not isinstance(text, str) or not text.strip() or len(text) > 4000:
+            raise ValueError("消息不能为空且不能超过 4000 个字符")
+        route = route_skills(text, set(READ_TOOL_SCHEMAS) | set(WRITE_TOOL_SCHEMAS))
+        with request_policy(owner_id, conversation_id, route.allowed_tools):
+            return self._chat(owner_id, conversation_id, text)
+
+    def _chat(self, owner_id: str, conversation_id: str, text: str) -> ConversationMessage:
         if not isinstance(text, str) or not text.strip() or len(text) > 4000:
             raise ValueError("消息不能为空且不能超过 4000 个字符")
         state = self.repository.load_conversation(owner_id, conversation_id)
@@ -193,6 +204,22 @@ class AgentService:
 
     def list_conversations(self, owner_id: str) -> list[dict[str, Any]]:
         return self.repository.list_conversations(owner_id)
+
+    def forget_context(self, owner_id: str, conversation_id: str) -> None:
+        """Keep the visible archive; reset model context and pending proposals."""
+        state = self.repository.load_conversation(owner_id, conversation_id)
+        self.repository.save_conversation(ConversationState(
+            owner_id=owner_id, conversation_id=conversation_id,
+            transcript=state.transcript or state.messages,
+        ))
+        self.repository.clear_pending(owner_id, conversation_id)
+
+    def forget_profile_field(self, owner_id: str, field: str) -> None:
+        if field not in PROFILE_KEYS:
+            raise ValueError("unknown_profile_field")
+        profile = self.profile_service.get(owner_id)
+        profile.pop(field, None)
+        self.profile_service.replace(owner_id, profile)
 
     def propose_profile_updates(self, owner_id: str, text: str) -> dict[str, str]:
         """Extract only explicit, reviewable preferences; never persist them silently."""
@@ -368,11 +395,18 @@ class AgentService:
         except Exception:
             return "工具暂时不可用，请稍后重试。", [], []
         result = payload.get("result", {})
-        if name == "recommend_size" and isinstance(result, dict):
+        failed = isinstance(payload.get("trace"), dict) and payload["trace"].get("status") == "failed"
+        if failed:
+            content = (result.get("message") if isinstance(result, dict) else None) or "工具未完成操作，请检查条件后重试。"
+        elif name == "recommend_size" and isinstance(result, dict):
             content = f"参考尺码：{result.get('recommended_size', '请提供身高体重')}。{result.get('reference_note', '')}"
         elif name in {"care_guide", "rag_search"} and isinstance(result, dict):
             snippets = result.get("results", [])
             content = snippets[0].get("snippet", "知识库暂未找到直接答案。") if snippets else "知识库暂未找到直接答案。"
+            if snippets:
+                for label, field in (("适用范围", "applicability"), ("限制", "limitations")):
+                    if snippets[0].get(field):
+                        content += f"\n{label}：{snippets[0][field]}"
         elif name == "recommend_open_outfit" and isinstance(result, dict):
             content = result.get("recommendation", "暂未生成通用穿搭建议。")
             alternatives = result.get("alternatives", [])
@@ -405,7 +439,7 @@ class AgentService:
                     )
                 content = "\n".join(lines)
             else:
-                content = "当前衣橱还无法组成完整搭配，请先补充上装、下装和鞋履。"
+                content = result.get("message") or "当前衣橱没有满足本次条件的完整搭配。可调整排除条件，或补充适合的上装与下装（或连衣裙）。"
         elif name == "search_wardrobe" and isinstance(result, dict):
             garments = result.get("garments", [])
             content = "\n".join(
@@ -416,7 +450,8 @@ class AgentService:
             suggestions = result.get("suggestions", [])
             content = "；".join(suggestions) if suggestions else "当前基础品类比较完整。"
         elif name in {"add_garment", "update_garment", "delete_garment"}:
-            content = "已生成衣橱变更预览，请在下方确认后执行。"
+            content = ("已生成衣橱变更预览，请在下方确认后执行。" if payload.get("pending_action")
+                       else "尚未生成变更预览，请说明具体操作和准确衣物编号。")
         else:
             content = str(result.get("message") if isinstance(result, dict) and result.get("message") else result)
         traces = [_trace(payload["trace"])] if isinstance(payload.get("trace"), dict) else []
@@ -435,6 +470,7 @@ class AgentService:
                 owner_id=state.owner_id,
                 conversation_id=state.conversation_id,
                 messages=messages,
+                transcript=[*(state.transcript or state.messages), user_message, reply],
                 facts=facts,
                 summary="",
             )
@@ -555,11 +591,14 @@ def _outfit_arguments(text: str) -> dict[str, Any]:
         ),
         "日常",
     )
+    from stylemate.rules.constraints import extract_color_exclusions
+
     exclusions = [
         constraint
         for constraint in ("不穿裙子", "不要裙子", "不穿高跟鞋", "不要高跟鞋")
         if constraint in text
     ]
+    exclusions.extend(extract_color_exclusions(text))
     arguments: dict[str, Any] = {
         "scene": scene,
         "extra_constraints": exclusions,
