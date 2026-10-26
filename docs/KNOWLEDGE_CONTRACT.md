@@ -22,6 +22,8 @@
 
 用户上传资料继续走 owner/conversation 隔离通道，其结果标为 user_provided。该标记不等于内容权威或真实。
 
+2026-10-26 增量：内置候选再执行明确材质/主题适用性过滤，最终向量命中也必须在此候选映射中。该过滤只覆盖有限语法；用户文档不使用内置主题分类。空召回改写保留原有任务，不添加新的洗护意图；通用冲锋衣不被自动等同于特定品牌技术。
+
 ## 检索与引用
 
 RetrievalHit 以及 KnowledgeQASkill 的 results 传递 source_locator、review_status、applicability 和 limitations。来源 URL 格式校验单列为 `source_format_only_not_answer_entailment`，不能当成“最终结论得到原文支持”的证明。

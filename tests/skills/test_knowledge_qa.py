@@ -54,7 +54,8 @@ def test_knowledge_skill_rewrites_once_after_empty_retrieval():
     assert outcome.status == "success"
     assert outcome.data["attempts"] == 2
     assert outcome.data["query_rewritten"] is True
-    assert "GORE-TEX 功能外套" in retriever.calls[1][0]
+    assert "功能外套" in retriever.calls[1][0]
+    assert "GORE-TEX" not in retriever.calls[1][0]
     assert "耐久拒水" in retriever.calls[1][0]
     assert len(outcome.trace.steps) == KnowledgeQASkill.spec.max_steps
 

@@ -16,7 +16,7 @@ from typing import Literal, Protocol
 
 from stylemate.domain.models import UserDocument
 from stylemate.rag.models import KnowledgeRecord, RetrievalHit, UserDocumentChunk
-from stylemate.rag.query_planning import lexical_queries
+from stylemate.rag.query_planning import knowledge_compatible, lexical_queries
 from stylemate.rag.user_docs import chunk_user_document
 
 logger = logging.getLogger(__name__)
@@ -230,6 +230,10 @@ class HybridRetriever:
             for chunk in chunk_user_document(document)
         ]
         candidates = self._candidates(conversation_id, chunks)
+        before_filter = len(candidates)
+        candidates = [candidate for candidate in candidates if candidate.document_id or knowledge_compatible(
+            query, title=candidate.title, content=candidate.content, topic=candidate.topic,
+        )]
         candidate_map = {candidate.key: candidate for candidate in candidates}
         recall_limit = max(top_k, top_k * RECALL_MULTIPLIER)
         rankings: list[list[str]] = []
@@ -254,6 +258,7 @@ class HybridRetriever:
                 vector_failed = True
 
         self.last_audit = {"lexical_candidates": lexical_count, "vector_candidates": vector_count,
+                           "applicability_filtered": before_filter - len(candidates),
                            "vector_failed": vector_failed, "scope_applied": True, "selected": 0}
 
         rankings = [ranking for ranking in rankings if ranking]

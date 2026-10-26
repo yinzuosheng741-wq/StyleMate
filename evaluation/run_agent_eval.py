@@ -250,8 +250,16 @@ def _evaluate_graph(
                 else all(status == "failed" for status in statuses)
             )
         )
-        if case.get("expect_sources"):
-            contract_ok = contract_ok and bool(result.get("sources"))
+        if "expect_sources" in case:
+            contract_ok = contract_ok and bool(result.get("sources")) == case["expect_sources"]
+        if case.get("expect_empty_knowledge"):
+            knowledge_results = [json.loads(message.content).get("result", {})
+                                 for message in result.get("messages", [])
+                                 if getattr(message, "type", "") == "tool"
+                                 and getattr(message, "name", "") in {"rag_search", "care_guide"}]
+            contract_ok = contract_ok and bool(knowledge_results) and all(
+                item.get("results") == [] and item.get("sources") == [] for item in knowledge_results
+            )
         contract_passed += int(contract_ok)
 
         if operation := case.get("write_operation"):

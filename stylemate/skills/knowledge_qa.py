@@ -153,7 +153,7 @@ def _normalize_query(query: str) -> str:
 
 def _rewrite_query(query: str) -> str:
     aliases = {
-        "冲锋衣": "GORE-TEX 功能外套",
+        "冲锋衣": "功能外套",
         "毛衣": "羊毛衣物",
         "防泼水": "耐久拒水",
         "尺码号": "品牌尺码表",
@@ -163,7 +163,9 @@ def _rewrite_query(query: str) -> str:
         rewritten = rewritten.replace(source, target)
     rewritten = re.sub(r"[吗呢么？?]+$", "", rewritten).strip()
     if rewritten == query:
-        rewritten = f"{rewritten} 衣物穿搭洗护知识"
+        # Do not introduce a new task (e.g. care) that can override the user's
+        # original size/color intent or make unrelated records appear relevant.
+        rewritten = f"{rewritten} 相关资料"
     return rewritten[:4000]
 
 
