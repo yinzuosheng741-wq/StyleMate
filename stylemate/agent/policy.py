@@ -25,6 +25,12 @@ class RequestPolicy:
 _policy: ContextVar[RequestPolicy | None] = ContextVar("stylemate_request_policy", default=None)
 
 
+def remaining_request_seconds() -> float | None:
+    """Return the trusted request's remaining wall-clock budget, if bound."""
+    policy = _policy.get()
+    return max(0.0, policy.deadline - monotonic()) if policy is not None else None
+
+
 @contextmanager
 def request_policy(owner_id, conversation_id, allowed_tools, *, max_calls=6, timeout=90):
     policy = RequestPolicy(owner_id, conversation_id, frozenset(allowed_tools),

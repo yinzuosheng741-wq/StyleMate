@@ -1,5 +1,7 @@
 # StyleMate 个人衣橱助手
 
+框架更新（2026-10-27）：修复工具超时重试和业务流程重复天气调用，统一请求时间边界；高星项目对标、架构取舍与验证范围见[框架演进设计](docs/FRAMEWORK_EVOLUTION_20261027.md)。
+
 2026-10-27 更新：衣橱界面采用暖纸色、陶土色和衣架标识，精简按钮与输入区的重复描边。见[视觉识别设计](docs/VISUAL_IDENTITY_20261027.md)。任务草稿、完整导出与全宽工作台见[桌面交互设计](docs/DESKTOP_REFINEMENT_20261027.md)，真实衣物卡片与评测版本绑定见[工作区与验证设计](docs/WORKSPACE_AND_VALIDATION_20261027.md)。
 
 ![StyleMate 桌面工作区](docs/assets/workspace-identity-20261027.png)

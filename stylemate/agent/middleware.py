@@ -6,6 +6,7 @@ import json
 import re
 from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures import TimeoutError as FutureTimeout
+from contextvars import copy_context
 from dataclasses import dataclass
 from time import monotonic
 from typing import Any, Callable
@@ -13,6 +14,7 @@ from typing import Any, Callable
 import requests
 from pydantic import BaseModel, ValidationError
 
+from stylemate.agent.policy import remaining_request_seconds
 from stylemate.domain.models import AgentTraceStep, ToolExecution, ToolSpec
 from stylemate.repositories.base import WardrobeRepository
 
@@ -42,6 +44,8 @@ class ToolExecutor:
         handler: ToolHandler,
     ) -> ToolExecution:
         started = monotonic()
+        if spec.permission != "read":
+            return self._failure(spec.name, started, "衣橱修改必须通过确认流程。", "read_executor_permission_denied")
         try:
             safe_arguments = self._validate_arguments(spec, arguments)
         except (ValidationError, TypeError, ValueError):
@@ -49,10 +53,17 @@ class ToolExecutor:
 
         attempts = 2 if spec.retry_once else 1
         for attempt in range(attempts):
+            remaining = remaining_request_seconds()
+            if remaining is not None and remaining <= 0:
+                return self._failure(spec.name, started, "本轮执行时间已用完，请重试。", "request_deadline_exceeded")
+            wait_seconds = min(spec.timeout_seconds, remaining) if remaining is not None else spec.timeout_seconds
             try:
                 data = self._call_with_timeout(
-                    spec.timeout_seconds, handler, safe_arguments, context
+                    wait_seconds, handler, safe_arguments, context
                 )
+                remaining = remaining_request_seconds()
+                if remaining is not None and remaining <= 0:
+                    return self._failure(spec.name, started, "本轮执行时间已用完，请重试。", "request_deadline_exceeded")
                 if spec.validates_inventory_ids and not self._owns_returned_garments(data, context):
                     return self._failure(
                         spec.name,
@@ -71,7 +82,14 @@ class ToolExecutor:
                         duration_ms=_duration_ms(started),
                     ),
                 )
-            except (FutureTimeout, requests.Timeout, requests.ConnectionError, ConnectionError):
+            except FutureTimeout:
+                # A waiting timeout cannot kill a running Python thread. Never
+                # overlap a retry with that worker or accept its eventual result.
+                remaining = remaining_request_seconds()
+                if remaining is not None and remaining <= 0:
+                    return self._failure(spec.name, started, "本轮执行时间已用完，请重试。", "request_deadline_exceeded")
+                return self._failure(spec.name, started, "服务响应超时，请稍后重试。", "tool_wait_timeout")
+            except (requests.Timeout, requests.ConnectionError, ConnectionError):
                 if attempt + 1 < attempts:
                     continue
                 return self._failure(spec.name, started, "服务响应超时，请稍后重试。", "network timeout")
@@ -92,13 +110,14 @@ class ToolExecutor:
 
     @staticmethod
     def _call_with_timeout(
-        timeout_seconds: int,
+        timeout_seconds: float,
         handler: ToolHandler,
         arguments: dict[str, Any],
         context: ToolContext,
     ) -> Any:
         executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="tool-read")
-        future = executor.submit(handler, arguments, context)
+        # ContextVar policy must survive the executor thread boundary.
+        future = executor.submit(copy_context().run, handler, arguments, context)
         try:
             return future.result(timeout=timeout_seconds)
         finally:

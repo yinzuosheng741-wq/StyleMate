@@ -164,21 +164,18 @@ class AgentService:
             )
         toolkit = self._toolkit(owner_id, conversation_id)
         if normalized in {"根据今天的天气推荐穿搭", "天气穿搭"}:
-            weather = self._call_named(toolkit, "get_weather", {"city": ""})
+            weather_payload = self._invoke_named(toolkit, "get_weather", {"city": ""})
+            weather = self._present_named("get_weather", weather_payload)
+            live_weather = _successful_result(weather_payload)
             outfit_arguments = _outfit_arguments(text)
-            if self.weather_client is not None:
-                try:
-                    live_weather = self.weather_client.weather("")
-                except Exception:
-                    live_weather = None
-                if live_weather is not None and getattr(live_weather, "available", False):
-                    outfit_arguments.update(
-                        {
-                            "city": getattr(live_weather, "city", "") or None,
-                            "temperature_c": getattr(live_weather, "temperature_c", None),
-                            "weather_condition": getattr(live_weather, "summary", "") or None,
-                        }
-                    )
+            if live_weather.get("available"):
+                outfit_arguments.update(
+                    {
+                        "city": live_weather.get("city") or None,
+                        "temperature_c": live_weather.get("temperature_c"),
+                        "weather_condition": live_weather.get("summary") or None,
+                    }
+                )
             outfit = self._outfit_route(
                 toolkit, owner_id, text, arguments=outfit_arguments
             )
@@ -344,25 +341,19 @@ class AgentService:
         activities: list[str],
     ):
         """Check destination weather before producing a bounded packing list."""
-        weather = self._call_named(toolkit, "get_weather", {"city": destination})
-        try:
-            weather_result = (
-                self.weather_client.weather(destination)
-                if self.weather_client
-                else None
-            )
-        except Exception:
-            weather_result = None
+        weather_payload = self._invoke_named(toolkit, "get_weather", {"city": destination})
+        weather = self._present_named("get_weather", weather_payload)
+        weather_result = _successful_result(weather_payload)
         packing_arguments: dict[str, Any] = {
             "destination": destination,
             "days": days,
             "activities": activities,
         }
-        if weather_result is not None and getattr(weather_result, "available", False):
+        if weather_result.get("available"):
             packing_arguments.update(
                 {
-                    "temperature_c": getattr(weather_result, "temperature_c", None),
-                    "weather_condition": getattr(weather_result, "summary", "") or None,
+                    "temperature_c": weather_result.get("temperature_c"),
+                    "weather_condition": weather_result.get("summary") or None,
                 }
             )
         packing = self._call_named(toolkit, "travel_packing", packing_arguments)
@@ -392,11 +383,19 @@ class AgentService:
         )
 
     def _call_named(self, toolkit, name: str, args: dict[str, Any]):
+        return self._present_named(name, self._invoke_named(toolkit, name, args))
+
+    @staticmethod
+    def _invoke_named(toolkit, name: str, args: dict[str, Any]) -> dict[str, Any]:
         tool = next(tool for tool in toolkit.tools if tool.name == name)
         try:
-            payload = __import__("json").loads(tool.invoke(args))
+            return __import__("json").loads(tool.invoke(args))
         except Exception:
-            return "工具暂时不可用，请稍后重试。", [], []
+            return {"result": {"message": "工具暂时不可用，请稍后重试。"},
+                    "trace": {"name": name, "status": "failed", "summary": "tool invocation failed", "duration_ms": 0}}
+
+    @staticmethod
+    def _present_named(name: str, payload: dict[str, Any]):
         result = payload.get("result", {})
         failed = isinstance(payload.get("trace"), dict) and payload["trace"].get("status") == "failed"
         if failed:
@@ -478,6 +477,14 @@ class AgentService:
                 summary="",
             )
         )
+
+
+def _successful_result(payload: dict[str, Any]) -> dict[str, Any]:
+    """Only a completed tool result may supply downstream business inputs."""
+    if payload.get("trace", {}).get("status") != "success":
+        return {}
+    result = payload.get("result")
+    return result if isinstance(result, dict) else {}
 
 
 def _trace(value: dict[str, Any]) -> AgentTraceStep:

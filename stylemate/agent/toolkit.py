@@ -143,7 +143,7 @@ def _read_tool(
         if name == "recommend_inventory_outfit" and result.status != "failed" and isinstance(result.data, dict):
             record_outfits(context.owner_id, context.conversation_id, result.data, context.wardrobe_repository)
         payload = {
-            "result": result.data,
+            "result": {"message": result.user_message} if result.status == "failed" else result.data,
             "trace": result.trace.model_dump(mode="json"),
             "sources": (result.data or {}).get("sources", [])
             if isinstance(result.data, dict)
