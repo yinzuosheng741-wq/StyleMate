@@ -16,6 +16,7 @@ from stylemate.config.runtime import RuntimeSettings
 from stylemate.diagnostics import runtime_diagnostics
 from stylemate.domain.models import ConversationMessage, Garment, OutfitRecommendation, OutfitRequest
 from stylemate.evaluation.reporting import load_evaluation_summary
+from stylemate.ui.chat_actions import conversation_export, render_task_draft, start_task_draft
 from stylemate.ui.components import (
     inject_style,
     render_empty_state,
@@ -488,7 +489,8 @@ def _wardrobe_tab(context: AppContext, garments: list[Garment]) -> None:
 
 def _assistant_rail(context: AppContext, garments: list[Garment]) -> None:
     desktop = os.getenv("STYLEMATE_DESKTOP") == "1"
-    desktop_prompt = st.chat_input("告诉我你的场景、目的地或衣物问题", key="desktop_chat_input") if desktop else None
+    desktop_prompt = st.chat_input("告诉我你的场景、目的地或衣物问题", key="desktop_chat_input", max_chars=6000,
+                                   disabled=bool(st.session_state.get("stylemate_task_draft"))) if desktop else None
     with st.container(key="stylemate_desktop_chat" if desktop else "stylemate_assistant_rail"):
         st.markdown(
             "<div class='stylemate-assistant-head'>"
@@ -498,7 +500,15 @@ def _assistant_rail(context: AppContext, garments: list[Garment]) -> None:
             "</div>",
             unsafe_allow_html=True,
         )
-        top_actions = st.columns([1, 1.4, 1.35], gap="small") if not desktop else [None, None, st.columns([5, 1])[1]]
+        if desktop:
+            with st.container(key="workspace_toolbar"):
+                title, actions = st.columns([5, 1.3])
+                title.markdown("<div class='workspace-topline'>StyleMate <span>衣橱对话</span></div>", unsafe_allow_html=True)
+                mode = "本地规则" if context.agent_service.model is None else "模型已配置"
+                title.markdown(f"<div class='workspace-context'>{len(garments)} 件衣物 <b>·</b> {mode}</div>", unsafe_allow_html=True)
+            top_actions = [None, None, actions]
+        else:
+            top_actions = st.columns([1, 1.4, 1.35], gap="small")
         if not desktop and top_actions[0].button(
             "新建",
             key="clear_agent_conversation",
@@ -520,11 +530,18 @@ def _assistant_rail(context: AppContext, garments: list[Garment]) -> None:
             st.session_state["stylemate_show_history"] = not st.session_state.get("stylemate_show_history", False)
             st.rerun()
         with top_actions[2].popover(
-            "资料",
-            icon=":material/library_books:",
-            help="管理当前会话可检索的资料",
+            "选项" if desktop else "资料",
+            icon=":material/more_horiz:" if desktop else ":material/library_books:",
+            help="导出对话或管理会话资料" if desktop else "管理当前会话可检索的资料",
             use_container_width=True,
         ):
+            if desktop:
+                saved = context.agent_repository.load_conversation(context.owner_id, context.conversation_id)
+                st.download_button("导出完整对话", conversation_export(saved, garments),
+                                   file_name="stylemate-conversation.md", mime="text/markdown",
+                                   key="stylemate_export_conversation", disabled=not bool(saved.transcript or saved.messages))
+                st.caption("只导出当前对话的可阅读记录；上传资料单独管理。")
+                st.divider()
             _assistant_documents(context)
 
         presets = (
@@ -568,23 +585,40 @@ def _assistant_rail(context: AppContext, garments: list[Garment]) -> None:
                         st.rerun()
             if not (conversation.transcript or conversation.messages):
                 if desktop:
-                    st.markdown("## 今天想怎么穿？")
-                st.markdown(
-                    "<div class='stylemate-kicker'>试试这些功能</div>",
-                    unsafe_allow_html=True,
-                )
-                preset_columns = st.columns(2, gap="small")
-                for index, (key, label, prompt_value) in enumerate(presets):
-                    if preset_columns[index % 2].button(
-                        label,
-                        key=f"assistant_preset_{key}",
-                        use_container_width=True,
-                    ):
-                        selected_prompt = prompt_value
-                st.caption("告诉我场景、目的地，或你想解决的衣物问题。")
+                    st.markdown("<div class='workspace-welcome'><div class='workspace-orbit'>✳</div>"
+                                "<h2>今天想怎么穿？</h2><p>从你的衣橱出发，让每一次出门都轻松一点。</p></div>",
+                                unsafe_allow_html=True)
+                else:
+                    st.markdown("<div class='stylemate-kicker'>试试这些功能</div>", unsafe_allow_html=True)
+                descriptions = ["结合天气与安排，找到合适组合", "先看材质与标签，再给护理建议",
+                                "从已有单品出发，查找真正缺少的", "按目的地与行程，整理行李思路"]
+                draft_templates = [
+                    "请根据我的衣橱推荐穿搭。\n今天的场景：\n所在城市或温度：\n不想穿的单品或颜色：",
+                    "请帮我判断这件衣物怎么洗护。\n衣物材质：\n洗标要求：\n目前的问题：",
+                    "我想补充衣橱，请先检查已有单品，再说明是否有必要购买。\n主要场景：\n预算与偏好：",
+                    "请帮我制定出行穿搭与行李建议。\n目的地：\n行程天数：\n主要活动：",
+                ]
+                if not desktop or not st.session_state.get("stylemate_task_draft"):
+                    preset_columns = st.columns(2, gap="small")
+                    for index, (key, label, prompt_value) in enumerate(presets):
+                        with preset_columns[index % 2]:
+                            with st.container(key=f"workspace_task_{key}" if desktop else None):
+                                clicked = st.button(label, key=f"assistant_preset_{key}", use_container_width=True,
+                                                    on_click=start_task_draft if desktop else None,
+                                                    args=(st.session_state, draft_templates[index]) if desktop else None)
+                                if desktop:
+                                    st.caption(descriptions[index])
+                                elif clicked:
+                                    selected_prompt = prompt_value
+                    if desktop:
+                        st.markdown("<div class='workspace-hint'>选择任务可先编辑问题，也可以直接在下方输入</div>", unsafe_allow_html=True)
+                    else:
+                        st.caption("告诉我场景、目的地，或你想解决的衣物问题。")
             else:
                 for message in conversation.transcript or conversation.messages:
                     _render_agent_message(message, context)
+            if desktop:
+                selected_prompt = render_task_draft(st) or ""
             _render_profile_proposal(context)
             _render_pending_action(context)
 
@@ -606,18 +640,23 @@ def _assistant_rail(context: AppContext, garments: list[Garment]) -> None:
             return
         try:
             with chat_history:
-                with st.chat_message("user"):
-                    st.markdown(selected_prompt)
-                with st.chat_message("assistant"):
+                if desktop and st.session_state.get("stylemate_task_draft"):
                     with st.spinner("正在为你整理一套方案..."):
-                        context.agent_service.chat(
-                            context.owner_id,
-                            context.conversation_id,
-                            selected_prompt,
-                        )
+                        context.agent_service.chat(context.owner_id, context.conversation_id, selected_prompt)
+                else:
+                    with st.chat_message("user"):
+                        st.markdown(selected_prompt)
+                    with st.chat_message("assistant"):
+                        with st.spinner("正在为你整理一套方案..."):
+                            context.agent_service.chat(
+                                context.owner_id,
+                                context.conversation_id,
+                                selected_prompt,
+                            )
             proposal = context.agent_service.propose_profile_updates(context.owner_id, selected_prompt)
             if proposal:
                 st.session_state["stylemate_profile_proposal"] = proposal
+            st.session_state.pop("stylemate_task_draft", None)
         except ValueError as exc:
             with chat_history:
                 st.error(str(exc))
@@ -838,12 +877,22 @@ def main() -> None:
     garments = context.repository.list_garments(context.owner_id)
     if os.getenv("STYLEMATE_DESKTOP") == "1":
         from stylemate.ui.workspace import inject_desktop_style, render_desktop_sidebar
+        inject_desktop_style()
         page = render_desktop_sidebar(context)
         if page == "AI 对话":
-            inject_desktop_style()
-            st.title("StyleMate")
             _assistant_rail(context, garments)
             return
+        with st.container(key="stylemate_workbench"):
+            st.title("我的衣橱")
+            st.caption("管理单品，整理今天的搭配与出行计划。")
+            today, wardrobe, about = st.tabs(["今日搭配", "我的衣橱", "关于项目"])
+            with today:
+                _today_tab(context, garments)
+            with wardrobe:
+                _wardrobe_tab(context, garments)
+            with about:
+                _about_tab(context)
+        return
     st.markdown(
         "<div class='stylemate-brand-kicker'>PERSONAL WARDROBE AGENT</div>",
         unsafe_allow_html=True,

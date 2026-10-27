@@ -1,8 +1,8 @@
 # StyleMate 个人衣橱助手
 
-2026-10-27 更新：对话中展示真实衣橱候选卡片，工作台与聊天共用温度未知处理；桌面欢迎区、消息和资料入口进一步整理。评测页绑定当前语料与题集指纹，版本失效时隐藏旧指标。见[工作区与验证设计](docs/WORKSPACE_AND_VALIDATION_20261027.md)。
+2026-10-27 更新：精修桌面侧栏、任务卡片、消息与输入区，任务入口先生成可编辑草稿，新增完整对话导出，衣橱工作台使用独立全宽布局。见[桌面交互设计](docs/DESKTOP_REFINEMENT_20261027.md)。真实衣物卡片与评测报告版本绑定见[工作区与验证设计](docs/WORKSPACE_AND_VALIDATION_20261027.md)。
 
-![桌面对话中的衣橱候选卡片](docs/assets/workspace-20261027.png)
+![StyleMate 桌面工作区](docs/assets/workspace-refined-20261027.png)
 
 截图使用关闭外部服务的演示环境；无图片单品显示品类占位。桌面启动见[桌面便携版](docs/DESKTOP.md)，知识审核与限制见[审查台账](docs/KNOWLEDGE_REVIEW_20261022.md)。
 
