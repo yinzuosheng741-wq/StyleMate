@@ -58,3 +58,10 @@ def test_open_outfit_guidance_is_available_without_owned_garments():
     assert "透气短袖" in guidance.top
     assert "轻薄下装" in guidance.bottom
     assert guidance.avoid
+
+
+def test_workbench_unknown_weather_uses_the_same_category_boundary_as_chat():
+    guidance = open_outfit_guidance(WeatherResult(available=False, reason="missing_key"))
+    assert "薄针织" not in guidance.top
+    assert "温度未知" in guidance.avoid
+    assert "未知" in weather_guidance(None).headline

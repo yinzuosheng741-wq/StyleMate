@@ -1,6 +1,5 @@
 """StyleMate: a demo-first, inventory-grounded wardrobe workbench."""
 
-import json
 import os
 import uuid
 from datetime import date
@@ -16,6 +15,7 @@ from stylemate.agent.tools.location_weather import WeatherResult
 from stylemate.config.runtime import RuntimeSettings
 from stylemate.diagnostics import runtime_diagnostics
 from stylemate.domain.models import ConversationMessage, Garment, OutfitRecommendation, OutfitRequest
+from stylemate.evaluation.reporting import load_evaluation_summary
 from stylemate.ui.components import (
     inject_style,
     render_empty_state,
@@ -492,13 +492,13 @@ def _assistant_rail(context: AppContext, garments: list[Garment]) -> None:
     with st.container(key="stylemate_desktop_chat" if desktop else "stylemate_assistant_rail"):
         st.markdown(
             "<div class='stylemate-assistant-head'>"
-            "<div class='status'>STYLEMATE AGENT · ONLINE</div>"
+            f"<div class='status'>STYLEMATE · {'本地规则可用' if context.agent_service.model is None else '对话模型已配置'}</div>"
             "<h3>AI 衣橱助手</h3>"
             f"<p>已接入 {len(garments)} 件衣物 · 可结合你的衣橱推荐</p>"
             "</div>",
             unsafe_allow_html=True,
         )
-        top_actions = st.columns([1, 1.4, 1.35], gap="small") if not desktop else [None, None, st]
+        top_actions = st.columns([1, 1.4, 1.35], gap="small") if not desktop else [None, None, st.columns([5, 1])[1]]
         if not desktop and top_actions[0].button(
             "新建",
             key="clear_agent_conversation",
@@ -584,7 +584,7 @@ def _assistant_rail(context: AppContext, garments: list[Garment]) -> None:
                 st.caption("告诉我场景、目的地，或你想解决的衣物问题。")
             else:
                 for message in conversation.transcript or conversation.messages:
-                    _render_agent_message(message)
+                    _render_agent_message(message, context)
             _render_profile_proposal(context)
             _render_pending_action(context)
 
@@ -662,9 +662,23 @@ def _assistant_documents(context: AppContext) -> None:
             st.error(f"文档无法加入：{exc}")
 
 
-def _render_agent_message(message: ConversationMessage) -> None:
+def _render_agent_message(message: ConversationMessage, context: AppContext) -> None:
     with st.chat_message(message.role):
-        st.markdown(message.content)
+        if message.outfits:
+            st.markdown("为你找到以下衣橱搭配：")
+            with st.expander("查看完整文字建议"):
+                st.markdown(message.content)
+        else:
+            st.markdown(message.content)
+        if message.outfits:
+            garments = {item.id: item for item in context.repository.list_garments(context.owner_id)}
+            st.caption("衣橱搭配 · 历史推荐按当前衣物信息显示，规则评分不代表成功概率")
+            for index, outfit in enumerate(message.outfits):
+                if not all(key in garments for key in outfit.garment_ids):
+                    st.info("这套历史搭配中有衣物已不可用，可以重新请求推荐。")
+                    continue
+                images = {key: _image_value(context, garments[key]) for key in outfit.garment_ids}
+                render_outfit_card(outfit, garments, images, key_prefix=f"{message.id}_{index}_")
         if message.sources:
             with st.expander("引用来源"):
                 for source in message.sources:
@@ -773,21 +787,15 @@ def _about_tab(context: AppContext) -> None:
         if context.settings.app_mode == "demo"
         else "本地模式将衣物元数据保存在本机 SQLite，图片保存在本地目录。"
     )
-    artifact = Path(__file__).resolve().parent / "artifacts" / "agent_evaluation.json"
-    if not artifact.is_file():
-        st.caption("评测将在发布前生成。")
-        return
-    try:
-        metrics = json.loads(artifact.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
-        st.caption("评测将在发布前生成。")
-        return
+    summary = load_evaluation_summary(Path(__file__).resolve().parent)
+    st.caption(summary.message)
+    metrics = summary.metrics
     retrieval_case_count = int(metrics.get("retrieval_case_count", 0))
     st.markdown(
         "<div class='stylemate-eval-summary'>"
-        "<strong>BM25 + Embedding + Chroma + RRF</strong> 当前混合检索链路"
+        "<strong>混合检索离线回归</strong> · 语料与题集指纹校验"
         f"<span>固定离线回归集包含 {retrieval_case_count} 条文档级用例，"
-        "评估召回、排序质量与首个相关结果位置；离线结果使用可复现 Embedding 配置。</span></div>",
+        "评估召回、排序质量与首个相关结果位置；不能作为真实模型回答准确率。</span></div>",
         unsafe_allow_html=True,
     )
     metric_columns = st.columns(3)
@@ -799,6 +807,10 @@ def _about_tab(context: AppContext) -> None:
     for column, (key, label) in zip(metric_columns, metric_labels):
         value = metrics.get(key)
         column.metric(label, f"{float(value) * 100:.2f}%" if value is not None else "--")
+    if summary.status == "current":
+        coverage = metrics.get("knowledge_coverage", {})
+        st.caption(f"报告：{summary.report_name} · Embedding：{metrics.get('embedding_evaluation', {}).get('label', 'unknown')}（offline_hash 为确定性测试替身）")
+        st.info(f"历史题集完整证据覆盖：{coverage.get('fully_covered_cases', 0)}/{retrieval_case_count}；已发布事实 {coverage.get('published_records', 0)} 条。覆盖不足仍是主要改进项。")
     st.markdown(
         f"<div class='stylemate-privacy'>{mode_text}<br>上传图片仅用于识别与衣橱保存；"
         "页面不会展示图片字节或 API 密钥。</div>",

@@ -1,12 +1,10 @@
 # StyleMate 个人衣橱助手
 
-2026-10-26 发布批次：内置知识按来源审核状态控制发布；通用规则建议与事实引用分开；未知温度保持未知。现有 64 条记录中 10 条为已审核来源摘要、21 条为项目启发、33 条待核验。审核方式与覆盖限制见[知识审查台账](docs/KNOWLEDGE_REVIEW_20261022.md)，字段及运行边界见[知识与结果契约](docs/KNOWLEDGE_CONTRACT.md)。
+2026-10-27 更新：对话中展示真实衣橱候选卡片，工作台与聊天共用温度未知处理；桌面欢迎区、消息和资料入口进一步整理。评测页绑定当前语料与题集指纹，版本失效时隐藏旧指标。见[工作区与验证设计](docs/WORKSPACE_AND_VALIDATION_20261027.md)。
 
-同日第二批：增加内置知识材质/主题适用性过滤，修复空召回改写引入无关洗护任务的问题；279 项回归通过。详细范围与限制见[分批更新记录](docs/RELEASE_BATCHES_20261026.md)。
+![桌面对话中的衣橱候选卡片](docs/assets/workspace-20261027.png)
 
-第二轮更新：完整对话档案、可查看与遗忘的记忆、贯穿规则与模型入口的工具权限、独立桌面对话布局。实现与后续优先级见 [架构复盘](docs/ARCHITECTURE_REVIEW_20261022.md)。
-
-2026-10-22 更新：新增桌面对话模式、Skill 工具路由、执行权限检查、连衣裙搭配及 Windows 便携向量后端。桌面启动与数据说明见 [桌面便携版](docs/DESKTOP.md)。在已配置的源码环境中双击 `Start.cmd`；完整便携分发包另外包含独立 Python。
+截图使用关闭外部服务的演示环境；无图片单品显示品类占位。桌面启动见[桌面便携版](docs/DESKTOP.md)，知识审核与限制见[审查台账](docs/KNOWLEDGE_REVIEW_20261022.md)。
 
 StyleMate 是一个本地优先的个人衣橱应用。它使用 Streamlit 提供衣橱管理和穿搭界面，使用有边界的 LangGraph Agent 编排天气、库存、知识检索和写操作；库存真实性、穿搭约束与数据写入由确定性代码控制。
 
@@ -131,7 +129,7 @@ python -m pytest -q
 python -m ruff check .
 python scripts/audit_demo_sources.py
 python -m evaluation.run_eval --output artifacts/evaluation.json
-python -m evaluation.run_agent_eval --output artifacts/agent_evaluation.json
+python -m evaluation.run_agent_eval --output artifacts/agent_evaluation_workspace_20261027.json
 ```
 
 每次代码或依赖变化后，应以最新 CI 和本地命令输出为准，不把历史的固定通过数写成当前结论。
@@ -148,8 +146,12 @@ python -m evaluation.run_agent_eval --output artifacts/agent_evaluation.json
 | Agent / RAG 离线用例 | 101 条 |
 | 固定用例工具选择准确率 | 100% |
 | 固定用例写操作保护率 | 100% |
-| RAG Recall@5 | 0.9500 |
-| RAG MRR@5 | 0.9806 |
-| RAG nDCG@5 | 0.9498 |
+| 历史题集完整证据覆盖 | 10/60（16.67%） |
+| 当前已发布事实 | 10 条；另有 21 条项目启发、33 条待核验 |
+| RAG Recall@5 | 0.1806 |
+| RAG MRR@5 | 0.1611 |
+| RAG nDCG@5 | 0.1602 |
 
 RAG 指标来自仓库内 60 条固定用例和可复现的本地 Hash Embedding，只用于验证检索、排序和融合链路，不代表某个在线 Embedding 模型的实际效果。延迟会受运行环境影响，因此不在项目介绍中承诺固定数值。在线模型需要单独配置并重新评测。
+
+当前展示报告由 `artifacts/evaluation_manifest.json` 指定，并核对语料和三个题集的指纹。使用新的报告文件名时同步更新 manifest；旧版 0.95 来自审核前语料，保留作历史记录，不作为当前结果。

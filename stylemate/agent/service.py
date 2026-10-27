@@ -130,7 +130,10 @@ class AgentService:
                         duration_ms=0,
                     ),
                 )
-        reply = ConversationMessage(role="assistant", content=content, traces=traces, sources=sources)
+        from stylemate.agent.policy import current_outfits
+
+        reply = ConversationMessage(role="assistant", content=content, traces=traces, sources=sources,
+                                    outfits=current_outfits(owner_id, conversation_id))
         self._save_turn(state, text.strip(), reply)
         return reply
 

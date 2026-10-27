@@ -16,6 +16,7 @@ from stylemate.agent.tool_schemas import (
     TravelArguments,
     WeatherArguments,
 )
+from stylemate.rules.guidance import outfit_categories
 from stylemate.skills.knowledge_qa import KnowledgeQASkill, KnowledgeQuery
 
 
@@ -86,18 +87,8 @@ def recommend_open_outfit(
     values = OpenOutfitArguments.model_validate(arguments)
     temperature = values.temperature_c
     scene = values.scene or "日常"
-    if temperature is None:
-        top, bottom, shoes = "适合场景且便于增减的上装", "便于活动的下装", "适合活动的鞋履"
-        avoid = "在温度未知时直接确定衣物厚薄"
-    elif temperature >= 28:
-        top, bottom, shoes = "透气短袖或亚麻衬衫", "轻薄长裤或五分裤", "透气运动鞋或凉鞋"
-        avoid = "厚外套、厚针织和不透气面料"
-    elif temperature <= 12:
-        top, bottom, shoes = "保暖内层+针织衫", "厚长裤", "短靴或防滑运动鞋"
-        avoid = "单层薄款上装和露踝鞋履"
-    else:
-        top, bottom, shoes = "长袖衬衫或薄针织", "直筒长裤", "休闲鞋或乐福鞋"
-        avoid = "过多厚重层次"
+    categories = outfit_categories(temperature)
+    top, bottom, shoes, avoid = categories.top, categories.bottom, categories.shoes, categories.avoid
     if "通勤" in scene:
         color = "白、藏蓝、灰、卡其等低饱和色"
     elif "约会" in scene:

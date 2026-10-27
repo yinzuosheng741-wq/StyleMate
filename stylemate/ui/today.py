@@ -5,6 +5,7 @@ from math import ceil
 
 from stylemate.agent.tools.location_weather import WeatherResult
 from stylemate.domain.models import Garment
+from stylemate.rules.guidance import outfit_categories
 
 
 @dataclass(frozen=True)
@@ -33,8 +34,8 @@ def weather_guidance(weather: WeatherResult | None) -> WeatherGuidance:
     """Turn current weather into short, deterministic layering advice."""
     if weather is None or not weather.available:
         return WeatherGuidance(
-            headline="先按常规室内外温差搭配",
-            detail="天气暂不可用，优先选择可叠穿单品，出门前再确认降雨和温度。",
+            headline="天气未知，先确认实际温度",
+            detail="暂时只提供衣物类别建议，不推定厚薄；出门前再确认降雨、温度和个人体感。",
         )
 
     temperature = weather.temperature_c
@@ -73,28 +74,13 @@ def weather_guidance(weather: WeatherResult | None) -> WeatherGuidance:
 def open_outfit_guidance(weather: WeatherResult | None) -> OpenOutfitGuidance:
     """Provide a useful category-level outfit without relying on inventory."""
     temperature = weather.temperature_c if weather and weather.available else None
-    if temperature is not None and temperature >= 28:
-        return OpenOutfitGuidance(
-            top="透气短袖或亚麻衬衫",
-            bottom="轻薄下装（长裤或五分裤）",
-            shoes="透气运动鞋或凉鞋",
-            color="白、浅蓝、灰绿等清爽配色",
-            avoid="厚外套、厚针织和不透气面料",
-        )
-    if temperature is not None and temperature <= 12:
-        return OpenOutfitGuidance(
-            top="保暖内层搭配针织衫",
-            bottom="厚长裤",
-            shoes="短靴或防滑运动鞋",
-            color="藏蓝、灰、棕等稳重配色",
-            avoid="单层薄款上装和露踝鞋履",
-        )
+    categories = outfit_categories(temperature)
     return OpenOutfitGuidance(
-        top="长袖衬衫或薄针织",
-        bottom="直筒长裤或半裙",
-        shoes="休闲鞋或乐福鞋",
+        top=categories.top,
+        bottom=categories.bottom,
+        shoes=categories.shoes,
         color="白、藏蓝、灰、卡其等低饱和色",
-        avoid="过多厚重层次",
+        avoid=categories.avoid,
     )
 
 

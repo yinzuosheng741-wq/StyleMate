@@ -3,8 +3,12 @@
 import json
 from contextlib import contextmanager
 from contextvars import ContextVar
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from time import monotonic
+
+from pydantic import ValidationError
+
+from stylemate.domain.models import OutfitRecommendation
 
 
 @dataclass
@@ -15,6 +19,7 @@ class RequestPolicy:
     max_calls: int = 6
     calls: int = 0
     deadline: float = 0.0
+    outfits: list[OutfitRecommendation] = field(default_factory=list)
 
 
 _policy: ContextVar[RequestPolicy | None] = ContextVar("stylemate_request_policy", default=None)
@@ -51,3 +56,33 @@ def denied_tool_payload(name: str, owner_id: str, conversation_id: str) -> str |
     return json.dumps({"result": {"message": "本轮工具权限或预算受限，请调整问题后重试。"},
                        "trace": {"name": name, "status": "failed", "summary": code,
                                  "duration_ms": 0}}, ensure_ascii=False)
+
+
+def record_outfits(owner_id, conversation_id, result, repository):
+    """Capture typed read-only results at the trusted tool boundary, never from model prose."""
+    policy = _policy.get()
+    if policy is None or (owner_id, conversation_id) != (policy.owner_id, policy.conversation_id):
+        return
+    if len(policy.outfits) >= 3:
+        return
+    if "recommend_inventory_outfit" not in policy.allowed_tools or not isinstance(result.get("recommendations"), list):
+        return
+    seen = {item.id for item in policy.outfits}
+    for payload in result.get("recommendations", [])[:3]:
+        try:
+            outfit = OutfitRecommendation.model_validate(payload)
+        except (ValidationError, TypeError):
+            continue
+        if outfit.id in seen or not all(repository.get_garment(owner_id, key) for key in outfit.garment_ids):
+            continue
+        policy.outfits.append(outfit)
+        seen.add(outfit.id)
+        if len(policy.outfits) >= 3:
+            break
+
+
+def current_outfits(owner_id, conversation_id):
+    policy = _policy.get()
+    if policy is None or (owner_id, conversation_id) != (policy.owner_id, policy.conversation_id):
+        return []
+    return list(policy.outfits)

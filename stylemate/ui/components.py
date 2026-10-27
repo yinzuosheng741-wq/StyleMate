@@ -199,13 +199,14 @@ def render_outfit_card(
     recommendation: OutfitRecommendation,
     garments: dict[str, Garment],
     image_values: dict[str, object] | None = None,
+    *, key_prefix: str = "",
 ) -> None:
     selected = [
         garments[item_id]
         for item_id in recommendation.garment_ids
         if item_id in garments
     ]
-    with st.container(key=f"stylemate_outfit_{recommendation.id}"):
+    with st.container(key=f"stylemate_outfit_{key_prefix}{recommendation.id}"):
         title, score = st.columns([5, 1])
         title.markdown(
             "<div class='stylemate-kicker'>WARDROBE MATCH</div>"
@@ -223,6 +224,11 @@ def render_outfit_card(
                     image_value = (image_values or {}).get(garment.id)
                     if image_value:
                         st.image(image_value, use_container_width=True)
+                    else:
+                        st.markdown(
+                            f"<div style='background:#f4f4f5;border-radius:10px;padding:1.75rem .5rem;text-align:center;color:#71717a'>{escape(garment.category)}</div>",
+                            unsafe_allow_html=True,
+                        )
                     st.markdown(
                         f"<div class='stylemate-piece-name'>{escape(garment.name)}</div>",
                         unsafe_allow_html=True,

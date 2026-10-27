@@ -24,6 +24,7 @@ from stylemate.agent.tools.wardrobe import recommend_inventory_outfit
 from stylemate.config.runtime import RuntimeSettings
 from stylemate.demo.sample_data import sample_garments
 from stylemate.domain.models import ConversationFacts, ConversationMessage, Garment
+from stylemate.evaluation.reporting import text_fingerprint
 from stylemate.rag.corpus import load_builtin_records
 from stylemate.rag.retriever import (
     DashScopeEmbeddingAdapter,
@@ -184,7 +185,13 @@ def run_agent_evaluation(
             mode: _evaluate_retrieval(retriever, fully_covered, mode)
             for mode in ("bm25", "vector", "hybrid")
         },
-        "knowledge_fingerprint": hashlib.sha256(KNOWLEDGE_PATH.read_bytes()).hexdigest(),
+        "fingerprint_schema": "utf8-normalized-newlines-v1",
+        "knowledge_fingerprint": text_fingerprint(KNOWLEDGE_PATH),
+        "dataset_fingerprints": {
+            name: text_fingerprint(path)
+            for name, path in (("retrieval", RAG_CASES_PATH), ("graph", GRAPH_CASES_PATH),
+                               ("routing_memory_safety", CASES_PATH))
+        },
         "graph_case_count": len(graph_cases),
         "tool_selection_accuracy": _rate(passed["routing"], totals["routing"]),
         **graph_metrics,

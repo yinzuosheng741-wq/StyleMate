@@ -11,7 +11,7 @@ from langchain_core.tools import BaseTool, StructuredTool
 from pydantic import BaseModel
 
 from stylemate.agent.middleware import ToolContext, ToolExecutor
-from stylemate.agent.policy import denied_tool_payload
+from stylemate.agent.policy import denied_tool_payload, record_outfits
 from stylemate.agent.tool_schemas import (
     READ_TOOL_SCHEMAS,
     WRITE_TOOL_SCHEMAS,
@@ -140,6 +140,8 @@ def _read_tool(
             context,
             handler,
         )
+        if name == "recommend_inventory_outfit" and result.status != "failed" and isinstance(result.data, dict):
+            record_outfits(context.owner_id, context.conversation_id, result.data, context.wardrobe_repository)
         payload = {
             "result": result.data,
             "trace": result.trace.model_dump(mode="json"),

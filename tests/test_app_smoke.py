@@ -36,8 +36,10 @@ def test_streamlit_app_starts_in_demo_mode(monkeypatch):
     assert app.button(key="assistant_preset_travel")
     assert all(button.key != "assistant_preset_tops" for button in app.button)
     metrics = {metric.label: metric.value for metric in app.metric}
-    assert [metrics[label] for label in ("Recall@5", "MRR@5", "nDCG@5")] == ["95.00%", "98.06%", "94.98%"]
+    assert [metrics[label] for label in ("Recall@5", "MRR@5", "nDCG@5")] == ["18.06%", "16.11%", "16.02%"]
     assert "固定离线回归集包含 60 条文档级用例" in rendered
+    assert any("历史题集完整证据覆盖：10/60" in item.value for item in app.info)
+    assert any("offline_hash" in item.value for item in app.caption)
 
 
 def test_sample_wardrobe_renders_all_cards_without_exception(monkeypatch):
@@ -138,3 +140,18 @@ def test_desktop_history_and_memory_reset_keep_archive(monkeypatch):
     assert state["messages"] == [] and len(state["transcript"]) == 2
     assert len(app.chat_message) == 2
     assert not app.exception
+
+
+def test_desktop_shows_owned_outfit_cards_across_repeated_turns(monkeypatch):
+    monkeypatch.setenv("APP_MODE", "demo")
+    monkeypatch.setenv("STYLEMATE_DESKTOP", "1")
+    _disable_model_providers(monkeypatch)
+    app = AppTest.from_file(str(Path(__file__).parents[1] / "app.py")).run(timeout=20)
+    app.radio(key="desktop_page").set_value("衣橱工作台").run(timeout=20)
+    app.button(key="load_samples_today").click().run(timeout=20)
+    app.radio(key="desktop_page").set_value("AI 对话").run(timeout=20)
+    for _ in range(2):
+        app.chat_input(key="desktop_chat_input").set_value("推荐通勤搭配").run(timeout=20)
+        assert not app.exception
+    assert sum("衣橱搭配" in item.value for item in app.caption) == 2
+    assert any("白色衬衫" in item.value for item in app.markdown)

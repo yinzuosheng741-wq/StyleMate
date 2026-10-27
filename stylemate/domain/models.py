@@ -90,6 +90,7 @@ class ConversationMessage(BaseModel):
     content: str = Field(min_length=1, max_length=12000)
     traces: list[AgentTraceStep] = Field(default_factory=list)
     sources: list[KnowledgeSource] = Field(default_factory=list)
+    outfits: list[OutfitRecommendation] = Field(default_factory=list, max_length=3)
     created_at: datetime = Field(default_factory=datetime.now)
 
 
