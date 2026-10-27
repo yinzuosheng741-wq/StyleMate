@@ -7,6 +7,7 @@ import streamlit as st
 
 from stylemate.agent.memory import prune_expired_facts
 from stylemate.ui.chat_actions import clear_task_draft
+from stylemate.ui.identity import HANGER_MARK
 
 
 def render_desktop_sidebar(context):
@@ -14,8 +15,8 @@ def render_desktop_sidebar(context):
     if target:
         st.session_state["desktop_page"] = target
     with st.sidebar:
-        st.markdown("<div class='workspace-brand'><div class='workspace-brand-mark'>S</div>"
-                    "<div class='workspace-brand-name'>StyleMate<span class='workspace-brand-note'>你的日常衣橱助手</span></div></div>",
+        st.markdown(f"<div class='workspace-brand'><div class='workspace-brand-mark'>{HANGER_MARK}</div>"
+                    "<div class='workspace-brand-name'>StyleMate<span class='workspace-brand-note'>日常衣橱 · 自在穿着</span></div></div>",
                     unsafe_allow_html=True)
         page = st.radio("工作区", ["AI 对话", "衣橱工作台"], key="desktop_page", label_visibility="collapsed")
         if st.button("＋ 新对话", key="desktop_new_chat", use_container_width=True):

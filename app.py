@@ -24,6 +24,7 @@ from stylemate.ui.components import (
     render_outfit_card,
     render_trace,
 )
+from stylemate.ui.identity import HANGER_MARK
 from stylemate.ui.state import (
     AppContext,
     build_context,
@@ -585,8 +586,9 @@ def _assistant_rail(context: AppContext, garments: list[Garment]) -> None:
                         st.rerun()
             if not (conversation.transcript or conversation.messages):
                 if desktop:
-                    st.markdown("<div class='workspace-welcome'><div class='workspace-orbit'>✳</div>"
-                                "<h2>今天想怎么穿？</h2><p>从你的衣橱出发，让每一次出门都轻松一点。</p></div>",
+                    st.markdown(f"<div class='workspace-welcome'><div class='workspace-orbit'>{HANGER_MARK}</div>"
+                                "<div class='workspace-eyebrow'>THE EVERYDAY WARDROBE</div>"
+                                "<h2>今天，穿出自己的风格。</h2><p>从已有的衣物里，发现新的日常灵感。</p></div>",
                                 unsafe_allow_html=True)
                 else:
                     st.markdown("<div class='stylemate-kicker'>试试这些功能</div>", unsafe_allow_html=True)
@@ -603,6 +605,9 @@ def _assistant_rail(context: AppContext, garments: list[Garment]) -> None:
                     for index, (key, label, prompt_value) in enumerate(presets):
                         with preset_columns[index % 2]:
                             with st.container(key=f"workspace_task_{key}" if desktop else None):
+                                if desktop:
+                                    task_names = ["DAILY OUTFIT", "GARMENT CARE", "WARDROBE EDIT", "TRAVEL LIGHT"]
+                                    st.markdown(f"<div class='stylemate-task-note'>{task_names[index]}</div>", unsafe_allow_html=True)
                                 clicked = st.button(label, key=f"assistant_preset_{key}", use_container_width=True,
                                                     on_click=start_task_draft if desktop else None,
                                                     args=(st.session_state, draft_templates[index]) if desktop else None)

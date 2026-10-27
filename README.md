@@ -1,8 +1,8 @@
 # StyleMate 个人衣橱助手
 
-2026-10-27 更新：精修桌面侧栏、任务卡片、消息与输入区，任务入口先生成可编辑草稿，新增完整对话导出，衣橱工作台使用独立全宽布局。见[桌面交互设计](docs/DESKTOP_REFINEMENT_20261027.md)。真实衣物卡片与评测报告版本绑定见[工作区与验证设计](docs/WORKSPACE_AND_VALIDATION_20261027.md)。
+2026-10-27 更新：衣橱界面采用暖纸色、陶土色和衣架标识，精简按钮与输入区的重复描边。见[视觉识别设计](docs/VISUAL_IDENTITY_20261027.md)。任务草稿、完整导出与全宽工作台见[桌面交互设计](docs/DESKTOP_REFINEMENT_20261027.md)，真实衣物卡片与评测版本绑定见[工作区与验证设计](docs/WORKSPACE_AND_VALIDATION_20261027.md)。
 
-![StyleMate 桌面工作区](docs/assets/workspace-refined-20261027.png)
+![StyleMate 桌面工作区](docs/assets/workspace-identity-20261027.png)
 
 截图使用关闭外部服务的演示环境；无图片单品显示品类占位。桌面启动见[桌面便携版](docs/DESKTOP.md)，知识审核与限制见[审查台账](docs/KNOWLEDGE_REVIEW_20261022.md)。
 
