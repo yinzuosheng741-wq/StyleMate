@@ -11,6 +11,7 @@ from langchain_core.messages import AIMessage, ToolMessage
 from langchain_core.tools import BaseTool
 from langgraph.graph import END, START, StateGraph
 
+from stylemate.agent.policy import check_request_deadline
 from stylemate.agent.routing import route_skills
 from stylemate.agent.state import AgentState, model_messages
 
@@ -40,6 +41,7 @@ def build_agent_graph(model, tools: list[BaseTool]):
                             "summary": ", ".join(decision.skills), "duration_ms": 0}]}
 
     def assistant(state: AgentState) -> dict[str, Any]:
+        check_request_deadline()
         if (
             state.get("model_calls", 0) >= MAX_MODEL_CALLS
             or state.get("tool_calls", 0) >= MAX_TOOL_CALLS
@@ -49,6 +51,7 @@ def build_agent_graph(model, tools: list[BaseTool]):
         visible_tools = [tool for tool in tools if tool.name in allowed]
         logger.info("agent_model_started call=%d tools=%d", state.get("model_calls", 0) + 1, len(visible_tools))
         response = model.bind_tools(visible_tools).invoke(model_messages(state, _system_prompt()))
+        check_request_deadline()
         if not isinstance(response, AIMessage):
             response = AIMessage(content=str(getattr(response, "content", response) or ""))
         # Do not end the graph on an unexecuted tool request at the model-call limit.

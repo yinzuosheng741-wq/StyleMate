@@ -25,6 +25,22 @@ class RequestPolicy:
 _policy: ContextVar[RequestPolicy | None] = ContextVar("stylemate_request_policy", default=None)
 
 
+class RequestExecutionDenied(RuntimeError):
+    """Stable request-boundary failure without provider or user content."""
+
+
+def check_request_deadline() -> None:
+    remaining = remaining_request_seconds()
+    if remaining is not None and remaining <= 0:
+        raise RequestExecutionDenied("request_deadline_exceeded")
+
+
+def discard_request_outfits() -> None:
+    policy = _policy.get()
+    if policy is not None:
+        policy.outfits.clear()
+
+
 def remaining_request_seconds() -> float | None:
     """Return the trusted request's remaining wall-clock budget, if bound."""
     policy = _policy.get()

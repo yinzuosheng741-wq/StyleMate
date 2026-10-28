@@ -12,6 +12,11 @@ from openai import APIError
 
 from stylemate.agent.graph import build_agent_graph
 from stylemate.agent.memory import migrate_legacy_summary, update_conversation_facts
+from stylemate.agent.policy import (
+    RequestExecutionDenied,
+    discard_request_outfits,
+    remaining_request_seconds,
+)
 from stylemate.agent.state import initial_state
 from stylemate.agent.toolkit import build_toolkit
 from stylemate.agent.tools.write_actions import cancel_action, confirm_action
@@ -64,6 +69,16 @@ KNOWLEDGE_INTENT_TERMS = CARE_INTENT_TERMS + (
 )
 
 
+def _deadline_result():
+    discard_request_outfits()
+    return (
+        "本轮处理超过时间预算，已停止接受结果。请缩小问题后重试。",
+        [AgentTraceStep(name="request_policy", status="failed",
+                        summary="request_deadline_exceeded", duration_ms=0)],
+        [],
+    )
+
+
 class AgentService:
     def __init__(self, *, settings, agent_repository, wardrobe_repository, wardrobe_service, retriever=None, model=None, weather_client=None):
         self.settings = settings
@@ -111,25 +126,34 @@ class AgentService:
                 traces = [_trace(item) for item in result.get("traces", [])]
                 sources = [_source(item) for item in result.get("sources", []) if _source(item) is not None]
             except (
+                RequestExecutionDenied,
                 APIError,
                 HTTPError,
                 TimeoutError,
                 ConnectionError,
-            ):
-                content, traces, sources = self._route_without_model(
-                    owner_id, conversation_id, text, state=state
-                )
-                if content == NO_KEY_MESSAGE:
-                    content = MODEL_FALLBACK_MESSAGE
-                traces.insert(
-                    0,
-                    AgentTraceStep(
-                        name="model_fallback",
-                        status="fallback",
-                        summary="模型服务不可用，已切换确定性路由。",
-                        duration_ms=0,
-                    ),
-                )
+            ) as exc:
+                remaining = remaining_request_seconds()
+                if isinstance(exc, RequestExecutionDenied) or (remaining is not None and remaining <= 0):
+                    content, traces, sources = _deadline_result()
+                else:
+                    content, traces, sources = self._route_without_model(
+                        owner_id, conversation_id, text, state=state
+                    )
+                    if content == NO_KEY_MESSAGE:
+                        content = MODEL_FALLBACK_MESSAGE
+                    traces.insert(
+                        0,
+                        AgentTraceStep(
+                            name="model_fallback",
+                            status="fallback",
+                            summary="模型服务不可用，已切换确定性路由。",
+                            duration_ms=0,
+                        ),
+                    )
+        # Shortcuts and deterministic fallbacks share the same acceptance boundary.
+        remaining = remaining_request_seconds()
+        if remaining is not None and remaining <= 0:
+            content, traces, sources = _deadline_result()
         from stylemate.agent.policy import current_outfits
 
         reply = ConversationMessage(role="assistant", content=content, traces=traces, sources=sources,
