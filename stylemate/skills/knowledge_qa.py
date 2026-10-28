@@ -9,6 +9,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from stylemate.domain.models import AgentTrace, AgentTraceStep, SkillOutcome, SkillSpec
 from stylemate.rag.models import RetrievalHit
+from stylemate.rag.query_planning import knowledge_compatible
 
 
 class KnowledgeQuery(BaseModel):
@@ -56,7 +57,7 @@ class KnowledgeQASkill:
         hits = self.retriever.search(
             query, owner_id, conversation_id, top_k=request.top_k
         )
-        valid_hits = _valid_cited_hits(hits)
+        valid_hits = _valid_cited_hits(hits, request.query)
         steps.append(
             _step(
                 "hybrid_retrieval",
@@ -68,7 +69,7 @@ class KnowledgeQASkill:
             _step(
                 "source_validation",
                 "success" if valid_hits else "fallback",
-                f"checked source URL format for {len(valid_hits)} results; semantic support not verified",
+                f"checked source URL format and finite task scope for {len(valid_hits)} results; semantic support not verified",
             )
         )
         attempts = 1
@@ -84,7 +85,7 @@ class KnowledgeQASkill:
                 conversation_id,
                 top_k=request.top_k,
             )
-            valid_hits = _valid_cited_hits(retry_hits)
+            valid_hits = _valid_cited_hits(retry_hits, request.query)
             steps.append(
                 _step(
                     "query_rewrite",
@@ -122,7 +123,8 @@ class KnowledgeQASkill:
                 "effective_query": effective_query,
                 "query_rewritten": rewritten,
                 "attempts": attempts,
-                "validation_scope": "source_format_only_not_answer_entailment",
+                "validation_scope": "source_format_and_finite_scope_not_answer_entailment",
+                "answer_status": "evidence_found" if results else "not_found",
                 "results": results,
                 "sources": [
                     {
@@ -154,7 +156,6 @@ def _normalize_query(query: str) -> str:
 def _rewrite_query(query: str) -> str:
     aliases = {
         "冲锋衣": "功能外套",
-        "毛衣": "羊毛衣物",
         "防泼水": "耐久拒水",
         "尺码号": "品牌尺码表",
     }
@@ -169,12 +170,15 @@ def _rewrite_query(query: str) -> str:
     return rewritten[:4000]
 
 
-def _valid_cited_hits(hits: list[RetrievalHit]) -> list[RetrievalHit]:
+def _valid_cited_hits(hits: list[RetrievalHit], original_query: str) -> list[RetrievalHit]:
     return [
         hit
         for hit in hits
         if hit.snippet.strip()
         and hit.source_url.startswith(("https://", "http://", "user-document://"))
+        and (hit.document_id or hit.source_url.startswith("user-document://") or knowledge_compatible(
+            original_query, title=hit.title, content=hit.snippet, topic=hit.topic,
+        ))
     ]
 
 

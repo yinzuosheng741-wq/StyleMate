@@ -6,7 +6,7 @@ from stylemate.skills.wardrobe_onboarding import WardrobeOnboardingSkill
 
 def hit(*, source_url: str = "https://example.test/care") -> RetrievalHit:
     return RetrievalHit(
-        title="功能外套护理",
+        title="GORE-TEX 外套护理",
         snippet="避免使用柔顺剂。",
         source_name="Care Guide",
         source_url=source_url,
@@ -51,7 +51,8 @@ def test_knowledge_skill_rewrites_once_after_empty_retrieval():
         KnowledgeQuery(query="冲锋衣防泼水变差怎么办"),
     )
 
-    assert outcome.status == "success"
+    assert outcome.status == "fallback"
+    assert outcome.data["sources"] == []
     assert outcome.data["attempts"] == 2
     assert outcome.data["query_rewritten"] is True
     assert "功能外套" in retriever.calls[1][0]

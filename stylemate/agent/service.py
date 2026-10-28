@@ -404,7 +404,8 @@ class AgentService:
             content = f"参考尺码：{result.get('recommended_size', '请提供身高体重')}。{result.get('reference_note', '')}"
         elif name in {"care_guide", "rag_search"} and isinstance(result, dict):
             snippets = result.get("results", [])
-            content = snippets[0].get("snippet", "知识库暂未找到直接答案。") if snippets else "知识库暂未找到直接答案。"
+            content = (snippets[0].get("snippet", "知识库暂未找到直接答案。") if snippets
+                       else result.get("message") or "知识库暂未找到直接答案。")
             if snippets:
                 for label, field in (("适用范围", "applicability"), ("限制", "limitations")):
                     if snippets[0].get(field):

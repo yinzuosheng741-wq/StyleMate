@@ -26,7 +26,9 @@
 
 ## 检索与引用
 
-RetrievalHit 以及 KnowledgeQASkill 的 results 传递 source_locator、review_status、applicability 和 limitations。来源 URL 格式校验单列为 `source_format_only_not_answer_entailment`，不能当成“最终结论得到原文支持”的证明。
+RetrievalHit 以及 KnowledgeQASkill 的 results 传递 source_locator、review_status、applicability 和 limitations。2026-10-28 增量将 validation_scope 更新为 `source_format_and_finite_scope_not_answer_entailment`：URL 格式加有限材质/主题范围检查，仍不能当成“最终结论得到原文支持”的证明。此前版本为 source_format_only_not_answer_entailment。
+
+洗护工具对未明确材质/洗标的类别问题返回 needs_clarification、missing_conditions 和空引用；通用洗标、分类等问题可检索一般规则。毛衣不再改写成羊毛，通用冲锋衣不借用 GORE-TEX 专属资料；最终 Skill 使用原问题复核，用户上传资料继续由 owner/conversation 通道管理。有限规则不等于任意语言表述的材质识别或语义认证。
 
 无模型回答也显示首条结果的适用范围与限制。当前仍需后续完善主题相关性、跨条目冲突和逐项回答支持评测；有限规则和提示不能保证任意回答语义正确。
 

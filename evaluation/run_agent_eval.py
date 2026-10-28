@@ -26,6 +26,7 @@ from stylemate.demo.sample_data import sample_garments
 from stylemate.domain.models import ConversationFacts, ConversationMessage, Garment
 from stylemate.evaluation.reporting import text_fingerprint
 from stylemate.rag.corpus import load_builtin_records
+from stylemate.rag.query_planning import knowledge_compatible
 from stylemate.rag.retriever import (
     DashScopeEmbeddingAdapter,
     HybridRetriever,
@@ -168,6 +169,11 @@ def run_agent_evaluation(
     hybrid_metrics = retrieval_ablation["hybrid"]
     published_ids = {record.id for record in retriever.records}
     fully_covered = [case for case in rag_cases if set(case["relevant_ids"]) <= published_ids]
+    published = {record.id: record for record in retriever.records}
+    incompatible_cases = [case["id"] for case in fully_covered if not all(
+        knowledge_compatible(case["query"], title=published[key].title, content=published[key].content,
+                             topic=published[key].topic) for key in case["relevant_ids"]
+    )]
     partial_count = sum(bool(set(case["relevant_ids"]) & published_ids)
                         and not set(case["relevant_ids"]) <= published_ids for case in rag_cases)
     metrics: dict[str, Any] = {
@@ -179,7 +185,9 @@ def run_agent_evaluation(
             "partially_covered_cases": partial_count,
             "uncovered_cases": len(rag_cases) - len(fully_covered) - partial_count,
             "complete_coverage_rate": _rate(len(fully_covered), len(rag_cases)),
-            "note": "Coverage of historical labels, not a new task-based holdout. Raw metrics retain all cases.",
+            "scope_compatible_fully_covered_cases": len(fully_covered) - len(incompatible_cases),
+            "scope_incompatible_case_ids": incompatible_cases,
+            "note": "ID availability of historical labels, not semantic support. Scope-incompatible labels are reported separately; raw metrics retain all cases.",
         },
         "conditional_retrieval_ablation": {
             mode: _evaluate_retrieval(retriever, fully_covered, mode)
