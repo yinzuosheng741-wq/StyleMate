@@ -1,5 +1,7 @@
 # StyleMate 个人衣橱助手
 
+知识更新（2026-10-28）：7 条待审核洗护知识经 ACI、GINETEX 官方章节对照后进入检索，当前 17 条已审核事实、26 条待核验。新报告已绑定当前语料；来源台账、历史题集指标及限制见[知识增量记录](docs/KNOWLEDGE_EXPANSION_20261028.md)。
+
 框架更新（2026-10-27）：修复工具超时重试和业务流程重复天气调用，统一请求时间边界；高星项目对标、架构取舍与验证范围见[框架演进设计](docs/FRAMEWORK_EVOLUTION_20261027.md)。
 
 2026-10-27 更新：衣橱界面采用暖纸色、陶土色和衣架标识，精简按钮与输入区的重复描边。见[视觉识别设计](docs/VISUAL_IDENTITY_20261027.md)。任务草稿、完整导出与全宽工作台见[桌面交互设计](docs/DESKTOP_REFINEMENT_20261027.md)，真实衣物卡片与评测版本绑定见[工作区与验证设计](docs/WORKSPACE_AND_VALIDATION_20261027.md)。
@@ -131,7 +133,7 @@ python -m pytest -q
 python -m ruff check .
 python scripts/audit_demo_sources.py
 python -m evaluation.run_eval --output artifacts/evaluation.json
-python -m evaluation.run_agent_eval --output artifacts/agent_evaluation_workspace_20261027.json
+python -m evaluation.run_agent_eval --output artifacts/agent_evaluation_local.json
 ```
 
 每次代码或依赖变化后，应以最新 CI 和本地命令输出为准，不把历史的固定通过数写成当前结论。
@@ -148,11 +150,11 @@ python -m evaluation.run_agent_eval --output artifacts/agent_evaluation_workspac
 | Agent / RAG 离线用例 | 101 条 |
 | 固定用例工具选择准确率 | 100% |
 | 固定用例写操作保护率 | 100% |
-| 历史题集完整证据覆盖 | 10/60（16.67%） |
-| 当前已发布事实 | 10 条；另有 21 条项目启发、33 条待核验 |
-| RAG Recall@5 | 0.1806 |
-| RAG MRR@5 | 0.1611 |
-| RAG nDCG@5 | 0.1602 |
+| 历史题集完整证据覆盖 | 15/60（25.00%） |
+| 当前已发布事实 | 17 条；另有 21 条项目启发、26 条待核验 |
+| RAG Recall@5 | 0.2722 |
+| RAG MRR@5 | 0.2514 |
+| RAG nDCG@5 | 0.2464 |
 
 RAG 指标来自仓库内 60 条固定用例和可复现的本地 Hash Embedding，只用于验证检索、排序和融合链路，不代表某个在线 Embedding 模型的实际效果。延迟会受运行环境影响，因此不在项目介绍中承诺固定数值。在线模型需要单独配置并重新评测。
 

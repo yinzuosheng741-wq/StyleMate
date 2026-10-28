@@ -47,6 +47,9 @@ def test_wait_timeout_does_not_overlap_a_retry_or_accept_late_data():
 
     def handler(arguments, context):
         calls.append(1)
+        # Expire the request after the worker starts, without depending on
+        # Windows' sub-second wait precision at the deadline boundary.
+        policy.deadline = 0
         entered.set()
         try:
             release.wait(5)
@@ -55,7 +58,7 @@ def test_wait_timeout_does_not_overlap_a_retry_or_accept_late_data():
             finished.set()
 
     try:
-        with request_policy("owner-a", "thread-a", {"get_weather"}, timeout=0.1):
+        with request_policy("owner-a", "thread-a", {"get_weather"}, timeout=0.1) as policy:
             result = ToolExecutor().execute(
                 ToolSpec(name="get_weather", permission="read", retry_once=True), {}, tool_context(), handler,
             )

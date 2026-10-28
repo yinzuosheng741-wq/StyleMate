@@ -27,6 +27,8 @@ artifacts/*
 !artifacts/agent_evaluation_applicability_20261026.json
 !artifacts/evaluation_manifest.json
 !artifacts/agent_evaluation_workspace_20261027.json
+!artifacts/agent_evaluation_source_review_20261028.json
+!artifacts/knowledge_review_20261028.json
 dist/
 data/desktop/
 .pytest-tmp/

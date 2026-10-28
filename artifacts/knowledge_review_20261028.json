@@ -1,0 +1,171 @@
+{
+  "date": "2026-10-28",
+  "reviewer": "codex-source-comparison",
+  "reviewed_ids": [
+    "care-sort-before-wash",
+    "care-stain-before-dry",
+    "storage-dry-before-fold",
+    "storage-fold-promptly",
+    "care-wash-detergent-dose",
+    "care-symbol-sequence",
+    "care-wash-symbol-temperature"
+  ],
+  "review_method": "official_section_comparison_not_expert_certification",
+  "items": [
+    {
+      "id": "care-symbol-sequence",
+      "previous": {
+        "id": "care-symbol-sequence",
+        "title": "五类洗护符号",
+        "content": "洗护符号通常对应洗涤、漂白、干燥、熨烫和专业纺织护理五类处理。符号中的横线、圆点或数字会进一步限制机械作用和温度，因此不要只按图形名称猜测。",
+        "source_url": "https://www.ginetex.net/userfiles/files/gin_bro_gb_rz_brochure_web.pdf",
+        "source_name": "GINETEX",
+        "topic": "care",
+        "retrieved_at": "2026-08-13",
+        "content_kind": "source_summary",
+        "review_status": "pending_review",
+        "source_locator": "",
+        "review_note": "现有摘要尚未完成逐项原文核验；默认事实检索隔离，保留原记录。",
+        "reviewer": "codex-source-comparison",
+        "reviewed_at": "2026-10-22",
+        "applicability": "待核验",
+        "limitations": "不作为已核验事实使用。"
+      },
+      "source_url": "https://www.ginetex.net/GB/labelling/care-symbols.asp",
+      "source_locator": "Care symbols / Washing; Bleaching; Drying; Ironing; Professional Care"
+    },
+    {
+      "id": "care-sort-before-wash",
+      "previous": {
+        "id": "care-sort-before-wash",
+        "title": "清洗前分类",
+        "content": "洗衣前按颜色、面料和洗标要求分组，能降低串色、起球和过度清洗风险。新深色或鲜艳衣物首次清洗时尤其应与浅色衣物分开处理。",
+        "source_url": "https://www.cleaninginstitute.org/cleaning-tips/clothes/laundry-basics",
+        "source_name": "American Cleaning Institute",
+        "topic": "care",
+        "retrieved_at": "2026-08-13",
+        "content_kind": "source_summary",
+        "review_status": "pending_review",
+        "source_locator": "",
+        "review_note": "现有摘要尚未完成逐项原文核验；默认事实检索隔离，保留原记录。",
+        "reviewer": "codex-source-comparison",
+        "reviewed_at": "2026-10-22",
+        "applicability": "待核验",
+        "limitations": "不作为已核验事实使用。"
+      },
+      "source_url": "https://www.cleaninginstitute.org/cleaning-tips/clothes/laundry-basics",
+      "source_locator": "Step 1: Sort Your Laundry / Sort by color; Pro Tips for Best Laundry Results"
+    },
+    {
+      "id": "care-stain-before-dry",
+      "previous": {
+        "id": "care-stain-before-dry",
+        "title": "污渍未除别烘",
+        "content": "污渍应尽早识别并按洗标允许的方式预处理；在放入烘干设备前复查污渍是否已经减淡或消失。热量可能让残留更难处理，因此有疑问时先自然晾干。",
+        "source_url": "https://www.cleaninginstitute.org/cleaning-tips/clothes/stain-removal-guide",
+        "source_name": "American Cleaning Institute",
+        "topic": "care",
+        "retrieved_at": "2026-08-13",
+        "content_kind": "source_summary",
+        "review_status": "pending_review",
+        "source_locator": "",
+        "review_note": "现有摘要尚未完成逐项原文核验；默认事实检索隔离，保留原记录。",
+        "reviewer": "codex-source-comparison",
+        "reviewed_at": "2026-10-22",
+        "applicability": "待核验",
+        "limitations": "不作为已核验事实使用。"
+      },
+      "source_url": "https://www.cleaninginstitute.org/cleaning-tips/clothes/laundry-basics",
+      "source_locator": "Step 2: Treat and Remove Stains / Stain Removal Process"
+    },
+    {
+      "id": "storage-dry-before-fold",
+      "previous": {
+        "id": "storage-dry-before-fold",
+        "title": "完全干燥再收纳",
+        "content": "衣物在折叠或放回衣柜前应确认已经完全干燥，以减少异味和皱褶风险。洗后及时整理并按面料和洗标选择干燥方式，比只依赖收纳用品更重要。",
+        "source_url": "https://www.cleaninginstitute.org/cleaning-tips/clothes/laundry-basics",
+        "source_name": "American Cleaning Institute",
+        "topic": "storage",
+        "retrieved_at": "2026-08-13",
+        "content_kind": "source_summary",
+        "review_status": "pending_review",
+        "source_locator": "",
+        "review_note": "现有摘要尚未完成逐项原文核验；默认事实检索隔离，保留原记录。",
+        "reviewer": "codex-source-comparison",
+        "reviewed_at": "2026-10-22",
+        "applicability": "待核验",
+        "limitations": "不作为已核验事实使用。"
+      },
+      "source_url": "https://www.cleaninginstitute.org/cleaning-tips/clothes/laundry-basics",
+      "source_locator": "Step 6: Fold and Put Clothes Away"
+    },
+    {
+      "id": "storage-fold-promptly",
+      "previous": {
+        "id": "storage-fold-promptly",
+        "title": "洗后及时整理",
+        "content": "清洁完成后及时折叠或按合适方式悬挂，能减少久放在篮中造成的皱褶。收纳前再确认污渍是否处理完毕，并让衣物和口袋处于干燥状态。",
+        "source_url": "https://www.cleaninginstitute.org/cleaning-tips/clothes/laundry-basics",
+        "source_name": "American Cleaning Institute",
+        "topic": "storage",
+        "retrieved_at": "2026-08-13",
+        "content_kind": "source_summary",
+        "review_status": "pending_review",
+        "source_locator": "",
+        "review_note": "现有摘要尚未完成逐项原文核验；默认事实检索隔离，保留原记录。",
+        "reviewer": "codex-source-comparison",
+        "reviewed_at": "2026-10-22",
+        "applicability": "待核验",
+        "limitations": "不作为已核验事实使用。"
+      },
+      "source_url": "https://www.cleaninginstitute.org/cleaning-tips/clothes/laundry-basics",
+      "source_locator": "Step 6: Fold and Put Clothes Away"
+    },
+    {
+      "id": "care-wash-symbol-temperature",
+      "previous": {
+        "id": "care-wash-symbol-temperature",
+        "title": "洗护符号限制温度",
+        "content": "洗标中的水槽、烘干和熨斗符号分别限制处理方式与温度，圆点、横线和叉号都可能改变可执行步骤。识别符号后仍要结合整件衣物的其他限制，不能只看一个图案。",
+        "source_url": "https://www.ginetex.net/userfiles/files/gin_bro_gb_rz_brochure_web.pdf",
+        "source_name": "GINETEX",
+        "topic": "care",
+        "retrieved_at": "2026-08-13",
+        "content_kind": "source_summary",
+        "review_status": "pending_review",
+        "source_locator": "",
+        "review_note": "现有摘要尚未完成逐项原文核验；默认事实检索隔离，保留原记录。",
+        "reviewer": "codex-source-comparison",
+        "reviewed_at": "2026-10-22",
+        "applicability": "待核验",
+        "limitations": "不作为已核验事实使用。"
+      },
+      "source_url": "https://www.ginetex.net/GB/labelling/care-symbols.asp",
+      "source_locator": "Washing / introductory instructions"
+    },
+    {
+      "id": "care-wash-detergent-dose",
+      "previous": {
+        "id": "care-wash-detergent-dose",
+        "title": "洗涤剂按说明用量",
+        "content": "洗涤剂不是越多越干净。应按产品说明、水量和衣物脏污程度控制用量，过量残留可能增加漂洗负担；特殊面料还要核对成衣或制造商的限制。",
+        "source_url": "https://www.cleaninginstitute.org/cleaning-tips/clothes/laundry-basics",
+        "source_name": "American Cleaning Institute",
+        "topic": "care",
+        "retrieved_at": "2026-08-13",
+        "content_kind": "source_summary",
+        "review_status": "pending_review",
+        "source_locator": "",
+        "review_note": "现有摘要尚未完成逐项原文核验；默认事实检索隔离，保留原记录。",
+        "reviewer": "codex-source-comparison",
+        "reviewed_at": "2026-10-22",
+        "applicability": "待核验",
+        "limitations": "不作为已核验事实使用。"
+      },
+      "source_url": "https://www.cleaninginstitute.org/cleaning-tips/clothes/laundry-basics",
+      "source_locator": "Pro Tips for Best Laundry Results"
+    }
+  ],
+  "note": "Source text is not redistributed; the old canonical rows are retained for traceability."
+}

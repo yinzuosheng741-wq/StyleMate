@@ -53,7 +53,8 @@ def test_portable_snapshot_includes_active_report_and_dataset_versions():
     root = Path(__file__).resolve().parents[2]
     names = {path.relative_to(root).as_posix() for path in selected_files(root)}
     assert "artifacts/evaluation_manifest.json" in names
-    assert "artifacts/agent_evaluation_workspace_20261027.json" in names
+    manifest = json.loads((root / "artifacts/evaluation_manifest.json").read_text("utf-8"))
+    assert "artifacts/" + manifest["report"] in names
     assert "evaluation/rag_cases.json" in names
 
 

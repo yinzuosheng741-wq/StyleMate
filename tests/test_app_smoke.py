@@ -3,6 +3,7 @@ from pathlib import Path
 from streamlit.testing.v1 import AppTest
 
 from stylemate.demo.sample_data import sample_garments
+from stylemate.evaluation.reporting import load_evaluation_summary
 
 
 def _disable_model_providers(monkeypatch):
@@ -36,9 +37,14 @@ def test_streamlit_app_starts_in_demo_mode(monkeypatch):
     assert app.button(key="assistant_preset_travel")
     assert all(button.key != "assistant_preset_tops" for button in app.button)
     metrics = {metric.label: metric.value for metric in app.metric}
-    assert [metrics[label] for label in ("Recall@5", "MRR@5", "nDCG@5")] == ["18.06%", "16.11%", "16.02%"]
+    summary = load_evaluation_summary(Path(__file__).parents[1])
+    assert summary.status == "current"
+    expected = [f"{summary.metrics[key]:.2%}" for key in ("rag_recall_at_5", "rag_mrr_at_5", "rag_ndcg_at_5")]
+    assert [metrics[label] for label in ("Recall@5", "MRR@5", "nDCG@5")] == expected
     assert "固定离线回归集包含 60 条文档级用例" in rendered
-    assert any("历史题集完整证据覆盖：10/60" in item.value for item in app.info)
+    covered = summary.metrics["knowledge_coverage"]["fully_covered_cases"]
+    total = summary.metrics["retrieval_case_count"]
+    assert any(f"历史题集完整证据覆盖：{covered}/{total}" in item.value for item in app.info)
     assert any("offline_hash" in item.value for item in app.caption)
 
 
