@@ -17,6 +17,7 @@ from stylemate.agent.policy import (
     discard_request_outfits,
     remaining_request_seconds,
 )
+from stylemate.agent.routing import MEASUREMENT_KNOWLEDGE_TERMS
 from stylemate.agent.state import initial_state
 from stylemate.agent.toolkit import build_toolkit
 from stylemate.agent.tools.write_actions import cancel_action, confirm_action
@@ -46,7 +47,7 @@ CARE_INTENT_TERMS = (
     "洗标",
     "洗涤剂",
 )
-KNOWLEDGE_INTENT_TERMS = CARE_INTENT_TERMS + (
+KNOWLEDGE_INTENT_TERMS = CARE_INTENT_TERMS + MEASUREMENT_KNOWLEDGE_TERMS + (
     "知识库",
     "羊毛",
     "材质",
@@ -577,7 +578,7 @@ def _is_travel_follow_up(state: ConversationState | None, text: str) -> bool:
 def _is_deterministic_intent(text: str) -> bool:
     return any(
         term in text
-        for term in (
+        for term in MEASUREMENT_KNOWLEDGE_TERMS + (
             "搭配",
             "穿什么",
             "推荐购买",

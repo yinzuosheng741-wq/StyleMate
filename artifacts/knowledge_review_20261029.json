@@ -1,0 +1,123 @@
+{
+  "date": "2026-10-29",
+  "review_method": "official_section_comparison_not_expert_certification",
+  "items": [
+    {
+      "id": "care-label-complete",
+      "previous": {
+        "id": "care-label-complete",
+        "title": "洗护标签优先",
+        "content": "洗护建议应覆盖整件衣物，而不只看主面料；里布、拉链、饰件和可拆部分都可能影响清洗方式。遇到冲突信息时，采用更保守的洗标限制。",
+        "source_url": "https://www.ftc.gov/business-guidance/resources/clothes-captioning-complying-care-labeling-rule",
+        "source_name": "美国联邦贸易委员会 FTC",
+        "topic": "care",
+        "retrieved_at": "2026-08-13",
+        "content_kind": "source_summary",
+        "review_status": "pending_review",
+        "source_locator": "",
+        "review_note": "现有摘要尚未完成逐项原文核验；默认事实检索隔离，保留原记录。",
+        "reviewer": "codex-source-comparison",
+        "reviewed_at": "2026-10-22",
+        "applicability": "待核验",
+        "limitations": "不作为已核验事实使用。"
+      },
+      "published": {
+        "id": "care-label-complete",
+        "title": "整件衣物都要考虑洗护",
+        "content": "FTC 的护理说明问答指出，整件衣物的衬里、装饰和其他部件都要纳入护理考虑；需要不同处理方式的可拆卸内衬须单独说明。不能只凭表层面料，忽略整件成衣的洗护标签和部件警告。",
+        "source_url": "https://www.ftc.gov/business-guidance/resources/clothes-captioning-complying-care-labeling-rule",
+        "source_name": "美国联邦贸易委员会 FTC",
+        "topic": "care",
+        "retrieved_at": "2026-10-29",
+        "content_kind": "source_summary",
+        "review_status": "reviewed",
+        "source_locator": "FAQs / Label Content / Does a care instruction have to consider components like linings, trim, buttons or zippers?",
+        "review_note": "逐项核对指定官方网页文字章节后撰写中文摘要；非人工专家认证。未核对图片坐标以外的扩展测量方法。",
+        "reviewer": "codex-source-comparison",
+        "reviewed_at": "2026-10-29",
+        "applicability": "服装护理对象与部件说明；摘录 FTC 问答中的护理原则。",
+        "limitations": "不提供法律合规判断；不据此给未知成衣指定洗涤、漂白或烘干程序。"
+      }
+    },
+    {
+      "id": "size-measure-same-garment",
+      "previous": {
+        "id": "size-measure-same-garment",
+        "title": "测量时保持口径一致",
+        "content": "比较人体尺寸和成衣尺寸时，应记录测量位置、姿势、是否穿内层以及衣物是否平铺。不同商品的测量口径可能不一致，最好按照当前商品页的图示重新测量。",
+        "source_url": "https://faq-sg.uniqlo.com/articles/en_US/FAQ/Product-Measurement-Guidelines-SG",
+        "source_name": "UNIQLO Customer Service",
+        "topic": "size",
+        "retrieved_at": "2026-08-13",
+        "content_kind": "source_summary",
+        "review_status": "pending_review",
+        "source_locator": "",
+        "review_note": "现有摘要尚未完成逐项原文核验；默认事实检索隔离，保留原记录。",
+        "reviewer": "codex-source-comparison",
+        "reviewed_at": "2026-10-22",
+        "applicability": "待核验",
+        "limitations": "不作为已核验事实使用。"
+      },
+      "published": {
+        "id": "size-measure-same-garment",
+        "title": "成衣尺寸平铺测量方法",
+        "content": "UNIQLO 香港及澳门的成衣尺寸说明要求，将衣物放在平整、干净的表面并抚平褶皱后测量。测量位置和褶皱会影响实测值；即使尺码标记相同，不同设计的穿着效果也可能不同，应核对具体商品尺码表。",
+        "source_url": "https://faq-hk.uniqlo.com/pkb_Home_UQ_HK?c=category_uq_tw:UQHK_C2&fs=Search&id=kA0Ie000000TOgx&l=en_US&pn=1",
+        "source_name": "UNIQLO Hong Kong & Macau Customer Service",
+        "topic": "size",
+        "retrieved_at": "2026-10-29",
+        "content_kind": "source_summary",
+        "review_status": "reviewed",
+        "source_locator": "How to Measure Product Size (With Illustrations) / introductory notes",
+        "review_note": "逐项核对指定官方网页文字章节后撰写中文摘要；非人工专家认证。未核对图片坐标以外的扩展测量方法。",
+        "reviewer": "codex-source-comparison",
+        "reviewed_at": "2026-10-29",
+        "applicability": "UNIQLO 香港及澳门页面中的成衣测量说明。",
+        "limitations": "不能由此保证其他品牌采用相同测量位置或公差；不将结果换算为某个必然合身的尺码。"
+      }
+    },
+    {
+      "id": "size-body-versus-product",
+      "previous": null,
+      "published": {
+        "id": "size-body-versus-product",
+        "content_kind": "source_summary",
+        "title": "人体尺寸与商品尺寸区别",
+        "topic": "size",
+        "source_url": "https://faq-hk.uniqlo.com/pkb_Home_UQ_HK?c=category_uq_tw:UQHK_C2&fs=Search&id=kA0Ie000000TOgx&l=en_US&pn=1",
+        "source_name": "UNIQLO Hong Kong & Macau Customer Service",
+        "source_locator": "Difference Between Product Measurements and Body Measurements",
+        "content": "UNIQLO 香港及澳门区分商品尺寸与人体尺寸：前者指衣物本身的实际尺寸，后者指不穿衣物时的人体测量尺寸。查看尺码表时先确认标注属于哪一种，不能把商品尺寸直接当作自己的身体尺寸。",
+        "applicability": "UNIQLO 香港及澳门尺码表的两类测量标记。",
+        "limitations": "不提供跨品牌统一尺码、固定松量或仅凭身高体重的精确合身承诺。",
+        "retrieved_at": "2026-10-29",
+        "review_status": "reviewed",
+        "reviewed_at": "2026-10-29",
+        "reviewer": "codex-source-comparison",
+        "review_note": "逐项核对指定官方网页文字章节后撰写中文摘要；非人工专家认证。未核对图片坐标以外的扩展测量方法。"
+      }
+    },
+    {
+      "id": "size-flat-body-width",
+      "previous": null,
+      "published": {
+        "id": "size-flat-body-width",
+        "content_kind": "source_summary",
+        "title": "平铺胸宽不是人体胸围",
+        "topic": "size",
+        "source_url": "https://faq-hk.uniqlo.com/pkb_Home_UQ_HK?c=category_uq_tw:UQHK_C2&fs=Search&id=kA0Ie000000TOgx&l=en_US&pn=1",
+        "source_name": "UNIQLO Hong Kong & Macau Customer Service",
+        "source_locator": "How to Measure Product Size / Tops / B. Body Width (1/2 Chest Width)",
+        "content": "UNIQLO 香港及澳门上装测量图把胸宽列为半胸宽：衣物完全平铺后，测量腋下左右侧缝之间的宽度。这是成衣的平铺宽度，不能把该数值直接当成人体胸围，也不能据此断言另一件衣物一定合身。",
+        "applicability": "UNIQLO 香港及澳门该页面上装的平铺胸宽测量位置。",
+        "limitations": "不适用于所有品牌、文胸或未采用相同测量方法的尺码表。",
+        "retrieved_at": "2026-10-29",
+        "review_status": "reviewed",
+        "reviewed_at": "2026-10-29",
+        "reviewer": "codex-source-comparison",
+        "review_note": "逐项核对指定官方网页文字章节后撰写中文摘要；非人工专家认证。未核对图片坐标以外的扩展测量方法。"
+      }
+    }
+  ],
+  "note": "2 pending records rewritten; 2 new distinct measurement facts. Singapore page inaccessible; HK page verified instead. No page bodies or diagrams redistributed."
+}
