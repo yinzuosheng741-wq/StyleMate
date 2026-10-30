@@ -1,0 +1,712 @@
+{
+  "scope": "structural_and_recorded_provenance_not_live_source_verification",
+  "records": 86,
+  "published_evidence": 41,
+  "review_status_counts": {
+    "reviewed": 41,
+    "pending_review": 24,
+    "project_rule": 21
+  },
+  "published_topic_counts": {
+    "fabric": 5,
+    "care": 11,
+    "storage": 4,
+    "wardrobe": 2,
+    "size": 3,
+    "weather": 5,
+    "scenario": 7,
+    "style": 1,
+    "color": 3
+  },
+  "missing_published_topics": [],
+  "items": [
+    {
+      "id": "fabric-wool-label",
+      "topic": "fabric",
+      "review_status": "reviewed",
+      "content_kind": "source_summary",
+      "source_locator": "Can you dry clean Merino wool?",
+      "review_note": "2026-10-22 使用官方网页指定章节逐项对照后收窄/改写中文摘要；由 Codex 审查，非人工专家认证。"
+    },
+    {
+      "id": "fabric-wool-heat",
+      "topic": "fabric",
+      "review_status": "reviewed",
+      "content_kind": "source_summary",
+      "source_locator": "Dry away from direct sunlight or heat",
+      "review_note": "2026-10-22 使用官方网页指定章节逐项对照后收窄/改写中文摘要；由 Codex 审查，非人工专家认证。"
+    },
+    {
+      "id": "fabric-wool-shape",
+      "topic": "fabric",
+      "review_status": "reviewed",
+      "content_kind": "source_summary",
+      "source_locator": "Hang wovens, fold knits; How to dry a wool sweater",
+      "review_note": "2026-10-22 使用官方网页指定章节逐项对照后收窄/改写中文摘要；由 Codex 审查，非人工专家认证。"
+    },
+    {
+      "id": "fabric-repair-first",
+      "topic": "fabric",
+      "review_status": "pending_review",
+      "content_kind": "source_summary",
+      "source_locator": "",
+      "review_note": "现有摘要尚未完成逐项原文核验；默认事实检索隔离，保留原记录。"
+    },
+    {
+      "id": "care-label-complete",
+      "topic": "care",
+      "review_status": "reviewed",
+      "content_kind": "source_summary",
+      "source_locator": "FAQs / Label Content / Does a care instruction have to consider components like linings, trim, buttons or zippers?",
+      "review_note": "逐项核对指定官方网页文字章节后撰写中文摘要；非人工专家认证。未核对图片坐标以外的扩展测量方法。"
+    },
+    {
+      "id": "care-symbol-sequence",
+      "topic": "care",
+      "review_status": "reviewed",
+      "content_kind": "source_summary",
+      "source_locator": "Care symbols / Washing; Bleaching; Drying; Ironing; Professional Care",
+      "review_note": "对照所列官方章节后重写中文摘要；删除未在该章节核对的扩展结论。非人工专家认证。"
+    },
+    {
+      "id": "care-sort-before-wash",
+      "topic": "care",
+      "review_status": "reviewed",
+      "content_kind": "source_summary",
+      "source_locator": "Step 1: Sort Your Laundry / Sort by color; Pro Tips for Best Laundry Results",
+      "review_note": "对照所列官方章节后重写中文摘要；删除未在该章节核对的扩展结论。非人工专家认证。"
+    },
+    {
+      "id": "care-stain-before-dry",
+      "topic": "care",
+      "review_status": "reviewed",
+      "content_kind": "source_summary",
+      "source_locator": "Step 2: Treat and Remove Stains / Stain Removal Process",
+      "review_note": "对照所列官方章节后重写中文摘要；删除未在该章节核对的扩展结论。非人工专家认证。"
+    },
+    {
+      "id": "size-brand-chart",
+      "topic": "size",
+      "review_status": "project_rule",
+      "content_kind": "heuristic",
+      "source_locator": "",
+      "review_note": "转为项目启发式建议；原外部链接不足以支持完整建议，解除权威引用关联。"
+    },
+    {
+      "id": "size-product-measure",
+      "topic": "size",
+      "review_status": "project_rule",
+      "content_kind": "heuristic",
+      "source_locator": "",
+      "review_note": "转为项目启发式建议；原外部链接不足以支持完整建议，解除权威引用关联。"
+    },
+    {
+      "id": "size-layering-ease",
+      "topic": "size",
+      "review_status": "project_rule",
+      "content_kind": "heuristic",
+      "source_locator": "",
+      "review_note": "转为项目启发式建议；原外部链接不足以支持完整建议，解除权威引用关联。"
+    },
+    {
+      "id": "size-fit-recheck",
+      "topic": "size",
+      "review_status": "project_rule",
+      "content_kind": "heuristic",
+      "source_locator": "",
+      "review_note": "转为项目启发式建议；原外部链接不足以支持完整建议，解除权威引用关联。"
+    },
+    {
+      "id": "color-wheel-balance",
+      "topic": "color",
+      "review_status": "project_rule",
+      "content_kind": "heuristic",
+      "source_locator": "",
+      "review_note": "转为项目启发式建议；原外部链接不足以支持完整建议，解除权威引用关联。"
+    },
+    {
+      "id": "color-neutral-anchor",
+      "topic": "color",
+      "review_status": "project_rule",
+      "content_kind": "heuristic",
+      "source_locator": "",
+      "review_note": "转为项目启发式建议；原外部链接不足以支持完整建议，解除权威引用关联。"
+    },
+    {
+      "id": "color-test-light",
+      "topic": "color",
+      "review_status": "project_rule",
+      "content_kind": "heuristic",
+      "source_locator": "",
+      "review_note": "转为项目启发式建议；原外部链接不足以支持完整建议，解除权威引用关联。"
+    },
+    {
+      "id": "color-small-accent",
+      "topic": "color",
+      "review_status": "project_rule",
+      "content_kind": "heuristic",
+      "source_locator": "",
+      "review_note": "转为项目启发式建议；原外部链接不足以支持完整建议，解除权威引用关联。"
+    },
+    {
+      "id": "weather-layer-system",
+      "topic": "weather",
+      "review_status": "pending_review",
+      "content_kind": "source_summary",
+      "source_locator": "",
+      "review_note": "现有摘要尚未完成逐项原文核验；默认事实检索隔离，保留原记录。"
+    },
+    {
+      "id": "weather-avoid-cotton-cold",
+      "topic": "weather",
+      "review_status": "pending_review",
+      "content_kind": "source_summary",
+      "source_locator": "",
+      "review_note": "现有摘要尚未完成逐项原文核验；默认事实检索隔离，保留原记录。"
+    },
+    {
+      "id": "weather-wind-shell",
+      "topic": "weather",
+      "review_status": "pending_review",
+      "content_kind": "source_summary",
+      "source_locator": "",
+      "review_note": "现有摘要尚未完成逐项原文核验；默认事实检索隔离，保留原记录。"
+    },
+    {
+      "id": "weather-carry-layer",
+      "topic": "weather",
+      "review_status": "project_rule",
+      "content_kind": "heuristic",
+      "source_locator": "",
+      "review_note": "转为项目启发式建议；原外部链接不足以支持完整建议，解除权威引用关联。"
+    },
+    {
+      "id": "scenario-outdoor-layer",
+      "topic": "scenario",
+      "review_status": "pending_review",
+      "content_kind": "source_summary",
+      "source_locator": "",
+      "review_note": "现有摘要尚未完成逐项原文核验；默认事实检索隔离，保留原记录。"
+    },
+    {
+      "id": "scenario-rain-plan",
+      "topic": "scenario",
+      "review_status": "pending_review",
+      "content_kind": "source_summary",
+      "source_locator": "",
+      "review_note": "现有摘要尚未完成逐项原文核验；默认事实检索隔离，保留原记录。"
+    },
+    {
+      "id": "scenario-repair-before-trip",
+      "topic": "scenario",
+      "review_status": "pending_review",
+      "content_kind": "source_summary",
+      "source_locator": "",
+      "review_note": "现有摘要尚未完成逐项原文核验；默认事实检索隔离，保留原记录。"
+    },
+    {
+      "id": "scenario-dress-care-label",
+      "topic": "scenario",
+      "review_status": "pending_review",
+      "content_kind": "source_summary",
+      "source_locator": "",
+      "review_note": "现有摘要尚未完成逐项原文核验；默认事实检索隔离，保留原记录。"
+    },
+    {
+      "id": "wardrobe-core-categories",
+      "topic": "wardrobe",
+      "review_status": "project_rule",
+      "content_kind": "heuristic",
+      "source_locator": "",
+      "review_note": "转为项目启发式建议；原外部链接不足以支持完整建议，解除权威引用关联。"
+    },
+    {
+      "id": "wardrobe-inventory-first",
+      "topic": "wardrobe",
+      "review_status": "project_rule",
+      "content_kind": "heuristic",
+      "source_locator": "",
+      "review_note": "转为项目启发式建议；原外部链接不足以支持完整建议，解除权威引用关联。"
+    },
+    {
+      "id": "wardrobe-fit-before-keep",
+      "topic": "wardrobe",
+      "review_status": "project_rule",
+      "content_kind": "heuristic",
+      "source_locator": "",
+      "review_note": "转为项目启发式建议；原外部链接不足以支持完整建议，解除权威引用关联。"
+    },
+    {
+      "id": "wardrobe-repair-value",
+      "topic": "wardrobe",
+      "review_status": "project_rule",
+      "content_kind": "heuristic",
+      "source_locator": "",
+      "review_note": "转为项目启发式建议；原外部链接不足以支持完整建议，解除权威引用关联。"
+    },
+    {
+      "id": "style-analogous-colors",
+      "topic": "style",
+      "review_status": "project_rule",
+      "content_kind": "heuristic",
+      "source_locator": "",
+      "review_note": "转为项目启发式建议；原外部链接不足以支持完整建议，解除权威引用关联。"
+    },
+    {
+      "id": "style-contrast-colors",
+      "topic": "style",
+      "review_status": "project_rule",
+      "content_kind": "heuristic",
+      "source_locator": "",
+      "review_note": "转为项目启发式建议；原外部链接不足以支持完整建议，解除权威引用关联。"
+    },
+    {
+      "id": "style-one-focus",
+      "topic": "style",
+      "review_status": "project_rule",
+      "content_kind": "heuristic",
+      "source_locator": "",
+      "review_note": "转为项目启发式建议；原外部链接不足以支持完整建议，解除权威引用关联。"
+    },
+    {
+      "id": "style-compare-photo",
+      "topic": "style",
+      "review_status": "project_rule",
+      "content_kind": "heuristic",
+      "source_locator": "",
+      "review_note": "转为项目启发式建议；原外部链接不足以支持完整建议，解除权威引用关联。"
+    },
+    {
+      "id": "storage-dry-before-fold",
+      "topic": "storage",
+      "review_status": "reviewed",
+      "content_kind": "source_summary",
+      "source_locator": "Step 6: Fold and Put Clothes Away",
+      "review_note": "对照所列官方章节后重写中文摘要；删除未在该章节核对的扩展结论。非人工专家认证。"
+    },
+    {
+      "id": "storage-fold-promptly",
+      "topic": "storage",
+      "review_status": "reviewed",
+      "content_kind": "source_summary",
+      "source_locator": "Step 6: Fold and Put Clothes Away",
+      "review_note": "对照所列官方章节后重写中文摘要；删除未在该章节核对的扩展结论。非人工专家认证。"
+    },
+    {
+      "id": "storage-wool-clean",
+      "topic": "storage",
+      "review_status": "reviewed",
+      "content_kind": "source_summary",
+      "source_locator": "Long-term storage",
+      "review_note": "2026-10-22 使用官方网页指定章节逐项对照后收窄/改写中文摘要；由 Codex 审查，非人工专家认证。"
+    },
+    {
+      "id": "storage-repair-record",
+      "topic": "storage",
+      "review_status": "project_rule",
+      "content_kind": "heuristic",
+      "source_locator": "",
+      "review_note": "转为项目启发式建议；原外部链接不足以支持完整建议，解除权威引用关联。"
+    },
+    {
+      "id": "weather-heat-light-clothing",
+      "topic": "weather",
+      "review_status": "pending_review",
+      "content_kind": "source_summary",
+      "source_locator": "",
+      "review_note": "现有摘要尚未完成逐项原文核验；默认事实检索隔离，保留原记录。"
+    },
+    {
+      "id": "scenario-heat-adjust-activity",
+      "topic": "scenario",
+      "review_status": "pending_review",
+      "content_kind": "source_summary",
+      "source_locator": "",
+      "review_note": "现有摘要尚未完成逐项原文核验；默认事实检索隔离，保留原记录。"
+    },
+    {
+      "id": "weather-cold-loose-layers",
+      "topic": "weather",
+      "review_status": "pending_review",
+      "content_kind": "source_summary",
+      "source_locator": "",
+      "review_note": "现有摘要尚未完成逐项原文核验；默认事实检索隔离，保留原记录。"
+    },
+    {
+      "id": "scenario-cold-change-wet",
+      "topic": "scenario",
+      "review_status": "pending_review",
+      "content_kind": "source_summary",
+      "source_locator": "",
+      "review_note": "现有摘要尚未完成逐项原文核验；默认事实检索隔离，保留原记录。"
+    },
+    {
+      "id": "scenario-cold-protect-extremities",
+      "topic": "scenario",
+      "review_status": "pending_review",
+      "content_kind": "source_summary",
+      "source_locator": "",
+      "review_note": "现有摘要尚未完成逐项原文核验；默认事实检索隔离，保留原记录。"
+    },
+    {
+      "id": "weather-uv-cover-skin",
+      "topic": "weather",
+      "review_status": "pending_review",
+      "content_kind": "source_summary",
+      "source_locator": "",
+      "review_note": "现有摘要尚未完成逐项原文核验；默认事实检索隔离，保留原记录。"
+    },
+    {
+      "id": "scenario-uv-index-plan",
+      "topic": "scenario",
+      "review_status": "pending_review",
+      "content_kind": "source_summary",
+      "source_locator": "",
+      "review_note": "现有摘要尚未完成逐项原文核验；默认事实检索隔离，保留原记录。"
+    },
+    {
+      "id": "care-shell-close-zips",
+      "topic": "care",
+      "review_status": "reviewed",
+      "content_kind": "source_summary",
+      "source_locator": "GORE-TEX Outerwear / Wash / Step 1",
+      "review_note": "2026-10-22 使用官方网页指定章节逐项对照后收窄/改写中文摘要；由 Codex 审查，非人工专家认证。"
+    },
+    {
+      "id": "care-shell-liquid-detergent",
+      "topic": "care",
+      "review_status": "reviewed",
+      "content_kind": "source_summary",
+      "source_locator": "GORE-TEX Outerwear / Wash / Step 2",
+      "review_note": "2026-10-22 使用官方网页指定章节逐项对照后收窄/改写中文摘要；由 Codex 审查，非人工专家认证。"
+    },
+    {
+      "id": "fabric-shell-dwr-beading",
+      "topic": "fabric",
+      "review_status": "reviewed",
+      "content_kind": "source_summary",
+      "source_locator": "Re-apply the DWR / Step 1; Special Care",
+      "review_note": "2026-10-22 使用官方网页指定章节逐项对照后收窄/改写中文摘要；由 Codex 审查，非人工专家认证。"
+    },
+    {
+      "id": "care-shell-reactivate-dwr",
+      "topic": "care",
+      "review_status": "reviewed",
+      "content_kind": "source_summary",
+      "source_locator": "DRY / Step 2; Special Care",
+      "review_note": "2026-10-22 使用官方网页指定章节逐项对照后收窄/改写中文摘要；由 Codex 审查，非人工专家认证。"
+    },
+    {
+      "id": "wardrobe-maintain-shell-first",
+      "topic": "wardrobe",
+      "review_status": "reviewed",
+      "content_kind": "source_summary",
+      "source_locator": "Re-apply the DWR; Special Care",
+      "review_note": "2026-10-22 使用官方网页指定章节逐项对照后收窄/改写中文摘要；由 Codex 审查，非人工专家认证。"
+    },
+    {
+      "id": "weather-heat-hydration-clothing",
+      "topic": "weather",
+      "review_status": "pending_review",
+      "content_kind": "source_summary",
+      "source_locator": "",
+      "review_note": "现有摘要尚未完成逐项原文核验；默认事实检索隔离，保留原记录。"
+    },
+    {
+      "id": "weather-cold-dry-layer",
+      "topic": "weather",
+      "review_status": "pending_review",
+      "content_kind": "source_summary",
+      "source_locator": "",
+      "review_note": "现有摘要尚未完成逐项原文核验；默认事实检索隔离，保留原记录。"
+    },
+    {
+      "id": "weather-uv-clothing-factor",
+      "topic": "weather",
+      "review_status": "pending_review",
+      "content_kind": "source_summary",
+      "source_locator": "",
+      "review_note": "现有摘要尚未完成逐项原文核验；默认事实检索隔离，保留原记录。"
+    },
+    {
+      "id": "weather-uv-hat-glasses",
+      "topic": "weather",
+      "review_status": "pending_review",
+      "content_kind": "source_summary",
+      "source_locator": "",
+      "review_note": "现有摘要尚未完成逐项原文核验；默认事实检索隔离，保留原记录。"
+    },
+    {
+      "id": "scenario-trip-ten-essentials",
+      "topic": "scenario",
+      "review_status": "pending_review",
+      "content_kind": "source_summary",
+      "source_locator": "",
+      "review_note": "现有摘要尚未完成逐项原文核验；默认事实检索隔离，保留原记录。"
+    },
+    {
+      "id": "scenario-trip-route-weather",
+      "topic": "scenario",
+      "review_status": "pending_review",
+      "content_kind": "source_summary",
+      "source_locator": "",
+      "review_note": "现有摘要尚未完成逐项原文核验；默认事实检索隔离，保留原记录。"
+    },
+    {
+      "id": "scenario-trip-emergency-layer",
+      "topic": "scenario",
+      "review_status": "pending_review",
+      "content_kind": "source_summary",
+      "source_locator": "",
+      "review_note": "现有摘要尚未完成逐项原文核验；默认事实检索隔离，保留原记录。"
+    },
+    {
+      "id": "care-wash-symbol-temperature",
+      "topic": "care",
+      "review_status": "reviewed",
+      "content_kind": "source_summary",
+      "source_locator": "Washing / introductory instructions",
+      "review_note": "对照所列官方章节后重写中文摘要；删除未在该章节核对的扩展结论。非人工专家认证。"
+    },
+    {
+      "id": "care-wash-detergent-dose",
+      "topic": "care",
+      "review_status": "reviewed",
+      "content_kind": "source_summary",
+      "source_locator": "Pro Tips for Best Laundry Results",
+      "review_note": "对照所列官方章节后重写中文摘要；删除未在该章节核对的扩展结论。非人工专家认证。"
+    },
+    {
+      "id": "care-repair-before-replace",
+      "topic": "care",
+      "review_status": "pending_review",
+      "content_kind": "source_summary",
+      "source_locator": "",
+      "review_note": "现有摘要尚未完成逐项原文核验；默认事实检索隔离，保留原记录。"
+    },
+    {
+      "id": "fabric-cotton-shrink-risk",
+      "topic": "fabric",
+      "review_status": "pending_review",
+      "content_kind": "source_summary",
+      "source_locator": "",
+      "review_note": "现有摘要尚未完成逐项原文核验；默认事实检索隔离，保留原记录。"
+    },
+    {
+      "id": "fabric-wool-moisture",
+      "topic": "fabric",
+      "review_status": "reviewed",
+      "content_kind": "source_summary",
+      "source_locator": "Dry away from direct sunlight or heat; How to dry a wool sweater",
+      "review_note": "2026-10-22 使用官方网页指定章节逐项对照后收窄/改写中文摘要；由 Codex 审查，非人工专家认证。"
+    },
+    {
+      "id": "wardrobe-purchase-cost-per-wear",
+      "topic": "wardrobe",
+      "review_status": "project_rule",
+      "content_kind": "heuristic",
+      "source_locator": "",
+      "review_note": "转为项目启发式建议；原外部链接不足以支持完整建议，解除权威引用关联。"
+    },
+    {
+      "id": "wardrobe-purchase-care-cost",
+      "topic": "wardrobe",
+      "review_status": "project_rule",
+      "content_kind": "heuristic",
+      "source_locator": "",
+      "review_note": "转为项目启发式建议；原外部链接不足以支持完整建议，解除权威引用关联。"
+    },
+    {
+      "id": "size-measure-same-garment",
+      "topic": "size",
+      "review_status": "reviewed",
+      "content_kind": "source_summary",
+      "source_locator": "How to Measure Product Size (With Illustrations) / introductory notes",
+      "review_note": "逐项核对指定官方网页文字章节后撰写中文摘要；非人工专家认证。未核对图片坐标以外的扩展测量方法。"
+    },
+    {
+      "id": "style-material-changes-formality",
+      "topic": "style",
+      "review_status": "project_rule",
+      "content_kind": "heuristic",
+      "source_locator": "",
+      "review_note": "转为项目启发式建议；原外部链接不足以支持完整建议，解除权威引用关联。"
+    },
+    {
+      "id": "size-body-versus-product",
+      "topic": "size",
+      "review_status": "reviewed",
+      "content_kind": "source_summary",
+      "source_locator": "Difference Between Product Measurements and Body Measurements",
+      "review_note": "逐项核对指定官方网页文字章节后撰写中文摘要；非人工专家认证。未核对图片坐标以外的扩展测量方法。"
+    },
+    {
+      "id": "size-flat-body-width",
+      "topic": "size",
+      "review_status": "reviewed",
+      "content_kind": "source_summary",
+      "source_locator": "How to Measure Product Size / Tops / B. Body Width (1/2 Chest Width)",
+      "review_note": "逐项核对指定官方网页文字章节后撰写中文摘要；非人工专家认证。未核对图片坐标以外的扩展测量方法。"
+    },
+    {
+      "id": "layer-base",
+      "topic": "weather",
+      "review_status": "reviewed",
+      "content_kind": "source_summary",
+      "source_locator": "Base Layer: Moisture Management",
+      "review_note": "对照所标注的来源段落核对中文概述和适用限制；色彩理论仅作为可选思路。"
+    },
+    {
+      "id": "layer-mid",
+      "topic": "weather",
+      "review_status": "reviewed",
+      "content_kind": "source_summary",
+      "source_locator": "Middle Layer: Insulation",
+      "review_note": "对照所标注的来源段落核对中文概述和适用限制；色彩理论仅作为可选思路。"
+    },
+    {
+      "id": "layer-shell",
+      "topic": "weather",
+      "review_status": "reviewed",
+      "content_kind": "source_summary",
+      "source_locator": "Outer Layer: Rain and Wind Protection",
+      "review_note": "对照所标注的来源段落核对中文概述和适用限制；色彩理论仅作为可选思路。"
+    },
+    {
+      "id": "layer-adjust",
+      "topic": "weather",
+      "review_status": "reviewed",
+      "content_kind": "source_summary",
+      "source_locator": "Cold, Rainy and Hot Layering Examples",
+      "review_note": "对照所标注的来源段落核对中文概述和适用限制；色彩理论仅作为可选思路。"
+    },
+    {
+      "id": "hiking-sun",
+      "topic": "scenario",
+      "review_status": "reviewed",
+      "content_kind": "source_summary",
+      "source_locator": "Sun-Protective Fabric",
+      "review_note": "对照所标注的来源段落核对中文概述和适用限制；色彩理论仅作为可选思路。"
+    },
+    {
+      "id": "hiking-breathable",
+      "topic": "scenario",
+      "review_status": "reviewed",
+      "content_kind": "source_summary",
+      "source_locator": "Breathable",
+      "review_note": "对照所标注的来源段落核对中文概述和适用限制；色彩理论仅作为可选思路。"
+    },
+    {
+      "id": "travel-mix",
+      "topic": "wardrobe",
+      "review_status": "reviewed",
+      "content_kind": "source_summary",
+      "source_locator": "Pick Neutral Colors",
+      "review_note": "对照所标注的来源段落核对中文概述和适用限制；色彩理论仅作为可选思路。"
+    },
+    {
+      "id": "travel-activities",
+      "topic": "scenario",
+      "review_status": "reviewed",
+      "content_kind": "source_summary",
+      "source_locator": "What to Pack",
+      "review_note": "对照所标注的来源段落核对中文概述和适用限制；色彩理论仅作为可选思路。"
+    },
+    {
+      "id": "travel-layers",
+      "topic": "scenario",
+      "review_status": "reviewed",
+      "content_kind": "source_summary",
+      "source_locator": "Layer Your Clothes",
+      "review_note": "对照所标注的来源段落核对中文概述和适用限制；色彩理论仅作为可选思路。"
+    },
+    {
+      "id": "interview-comfort",
+      "topic": "scenario",
+      "review_status": "reviewed",
+      "content_kind": "source_summary",
+      "source_locator": "Things to Consider When Choosing Professional Attire: Dress comfortably",
+      "review_note": "对照所标注的来源段落核对中文概述和适用限制；色彩理论仅作为可选思路。"
+    },
+    {
+      "id": "interview-neat",
+      "topic": "scenario",
+      "review_status": "reviewed",
+      "content_kind": "source_summary",
+      "source_locator": "Things to Consider When Choosing Professional Attire: Dress simply",
+      "review_note": "对照所标注的来源段落核对中文概述和适用限制；色彩理论仅作为可选思路。"
+    },
+    {
+      "id": "interview-expression",
+      "topic": "style",
+      "review_status": "reviewed",
+      "content_kind": "source_summary",
+      "source_locator": "What to Wear; Things to Consider",
+      "review_note": "对照所标注的来源段落核对中文概述和适用限制；色彩理论仅作为可选思路。"
+    },
+    {
+      "id": "color-analogous",
+      "topic": "color",
+      "review_status": "reviewed",
+      "content_kind": "source_summary",
+      "source_locator": "Analogous colours",
+      "review_note": "对照所标注的来源段落核对中文概述和适用限制；色彩理论仅作为可选思路。"
+    },
+    {
+      "id": "color-complementary",
+      "topic": "color",
+      "review_status": "reviewed",
+      "content_kind": "source_summary",
+      "source_locator": "Complementary colours",
+      "review_note": "对照所标注的来源段落核对中文概述和适用限制；色彩理论仅作为可选思路。"
+    },
+    {
+      "id": "color-neutral",
+      "topic": "color",
+      "review_status": "reviewed",
+      "content_kind": "source_summary",
+      "source_locator": "Chromatic vs achromatic colours",
+      "review_note": "对照所标注的来源段落核对中文概述和适用限制；色彩理论仅作为可选思路。"
+    },
+    {
+      "id": "heat-clothing",
+      "topic": "weather",
+      "review_status": "reviewed",
+      "content_kind": "source_summary",
+      "source_locator": "Steps to Protect Yourself",
+      "review_note": "对照所标注的来源段落核对中文概述和适用限制；色彩理论仅作为可选思路。"
+    },
+    {
+      "id": "heat-activity",
+      "topic": "scenario",
+      "review_status": "reviewed",
+      "content_kind": "source_summary",
+      "source_locator": "Steps to Protect Yourself",
+      "review_note": "对照所标注的来源段落核对中文概述和适用限制；色彩理论仅作为可选思路。"
+    },
+    {
+      "id": "wool-reverse",
+      "topic": "care",
+      "review_status": "reviewed",
+      "content_kind": "source_summary",
+      "source_locator": "Caring for wool: opening paragraphs",
+      "review_note": "对照所标注的来源段落核对中文概述和适用限制；色彩理论仅作为可选思路。"
+    },
+    {
+      "id": "wool-storage-prep",
+      "topic": "storage",
+      "review_status": "reviewed",
+      "content_kind": "source_summary",
+      "source_locator": "Caring for Wool",
+      "review_note": "对照所标注的来源段落核对中文概述和适用限制；色彩理论仅作为可选思路。"
+    },
+    {
+      "id": "wool-woven-brush",
+      "topic": "care",
+      "review_status": "reviewed",
+      "content_kind": "source_summary",
+      "source_locator": "Brushing",
+      "review_note": "对照所标注的来源段落核对中文概述和适用限制；色彩理论仅作为可选思路。"
+    }
+  ]
+}

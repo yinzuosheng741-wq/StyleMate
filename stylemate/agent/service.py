@@ -17,7 +17,7 @@ from stylemate.agent.policy import (
     discard_request_outfits,
     remaining_request_seconds,
 )
-from stylemate.agent.routing import MEASUREMENT_KNOWLEDGE_TERMS
+from stylemate.agent.routing import CONCEPT_KNOWLEDGE_TERMS, MEASUREMENT_KNOWLEDGE_TERMS
 from stylemate.agent.state import initial_state
 from stylemate.agent.telemetry import current_run_id, observe_run
 from stylemate.agent.toolkit import build_toolkit
@@ -321,6 +321,13 @@ class AgentService:
         lower = text.lower()
         if any(term in text for term in ("推荐购买", "买什么", "购买建议")):
             return self._call_named(toolkit, "recommend_purchases", {"scene": "日常"})
+        # Explicit knowledge questions should not become packing or outfit
+        # requests merely because they mention travel or 搭配. Care questions
+        # retain the dedicated material/label safety handling below.
+        if ("知识库" in text or any(term in text for term in CONCEPT_KNOWLEDGE_TERMS)) and not any(
+            word in lower for word in CARE_INTENT_TERMS
+        ):
+            return self._call_named(toolkit, "rag_search", {"query": text})
         destination = _travel_destination(text)
         continuing_travel = _is_travel_follow_up(state, text) if state else False
         if any(term in text for term in ("旅行行李", "旅游", "旅行", "行李清单")) or continuing_travel:

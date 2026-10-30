@@ -7,6 +7,7 @@ from dataclasses import dataclass
 
 WRITE_TOOLS = frozenset({"add_garment", "update_garment", "delete_garment"})
 MEASUREMENT_KNOWLEDGE_TERMS = ("尺码表", "商品尺寸", "成衣尺寸", "人体尺寸", "平铺", "胸宽", "测量方法")
+CONCEPT_KNOWLEDGE_TERMS = ("色轮", "配色原理", "同类色", "类似色", "邻近色", "互补色", "叠穿原理", "分层原理")
 SKILL_TOOLS = {
     "knowledge_qa": frozenset({"care_guide", "rag_search"}),
     "outfit_planning": frozenset({"get_user_location", "get_weather", "search_wardrobe",
@@ -19,7 +20,7 @@ SKILL_TOOLS = {
                                     "get_weather", "get_user_location", "rag_search"}),
 }
 _TERMS = {
-    "knowledge_qa": ("洗", "护理", "面料", "材质", "知识", "保养", "柔顺剂", "分层", "care", "wash") + MEASUREMENT_KNOWLEDGE_TERMS,
+    "knowledge_qa": ("洗", "护理", "面料", "材质", "知识", "保养", "柔顺剂", "分层", "care", "wash") + MEASUREMENT_KNOWLEDGE_TERMS + CONCEPT_KNOWLEDGE_TERMS,
     "outfit_planning": ("穿", "搭配", "搭一套", "通勤", "天气", "尺码", "outfit", "weather", "size"),
     "travel_planning": ("旅行", "旅游", "出差", "行李", "travel", "packing", "trip"),
     "wardrobe_management": ("衣橱", "衣柜", "库存", "查询", "找", "wardrobe", "search"),

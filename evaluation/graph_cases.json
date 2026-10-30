@@ -34,8 +34,7 @@
     "tool_calls": [{"name": "rag_search", "args": {"query": "色轮 配色 搭配"}}],
     "expected_tools": ["rag_search"],
     "contract": "accepted",
-    "expect_sources": false,
-    "expect_empty_knowledge": true
+      "expect_sources": true
   },
   {
     "id": "graph-search-category",

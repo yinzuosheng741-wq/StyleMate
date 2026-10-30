@@ -11,6 +11,8 @@ ALIASES = {
     "清洗": "洗涤",
     "羽绒服": "羽绒 down",
     "尺码号": "品牌尺码表",
+    "内层": "内层 贴身层",
+    "保暖层": "保暖层 中间层",
 }
 
 SUBJECTS = {
@@ -54,6 +56,10 @@ def knowledge_compatible(query: str, *, title: str, content: str, topic: str) ->
         return False
     if not requested and _UNCONFIRMED_CATEGORY.search(query) and re.search(r"拒水|防水|水珠|\bdwr\b", query, re.I):
         if not re.search(r"拒水|防水|水珠|\bdwr\b", f"{title} {content}", re.I):
+            return False
+        # Choosing a rain layer is not evidence about restoring an existing
+        # garment's failing finish; require a care/technology source instead.
+        if re.search(r"下降|失效|变差|恢复|消失|不再|不起", query) and topic not in {"care", "fabric", "wardrobe"}:
             return False
     # Use narrow question markers, so a care question mentioning clothing color
     # is not incorrectly routed to aesthetic color theory.
