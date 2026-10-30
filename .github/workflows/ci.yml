@@ -15,29 +15,6 @@ permissions:
   contents: read
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    timeout-minutes: 12
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-          cache: pip
-          cache-dependency-path: |
-            requirements.txt
-            requirements-common.txt
-            requirements-dev.txt
-      - run: python -m pip install --upgrade pip
-      - run: sudo apt-get update && sudo apt-get install -y libegl1 libopengl0
-      - run: python -m pip install -r requirements.txt -r requirements-dev.txt
-      - run: python scripts/validate.py
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: validation-linux
-          path: artifacts/validation/
-          retention-days: 14
   native-windows:
     runs-on: windows-latest
     timeout-minutes: 15

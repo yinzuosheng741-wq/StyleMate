@@ -17,7 +17,7 @@
 
 ![客户端衣橱](docs/assets/wardrobe.png)
 
-> 当前为开发预览版，独立分发包已在本机 Windows x64 验证。Linux CI 用于源码回归，不代表已提供 Linux / macOS 安装包。界面、API 基础连接和业务准确率是不同的验证范围，详见[核验报告](docs/PROJECT_AUDIT_20261030.md)。
+> 当前为 Windows 开发预览版，独立分发包已在本机 Windows x64 验证。界面、API 基础连接和业务准确率是不同的验证范围，详见[核验报告](docs/PROJECT_AUDIT_20261030.md)。
 
 ## 为什么做这个项目
 
@@ -110,7 +110,7 @@ IP 城市定位**默认关闭**，手动指定城市即可查天气。主动开�
 
 统一验证执行依赖检查、知识和素材审计、Ruff、编译、测试和固定评测质量门槛，输出到 `artifacts/validation/`。测试默认阻断联网，使用隔离数据；真实服务检查单独执行，不把开发者密钥交给 CI。
 
-Actions 配置了 Linux 与 Windows 源码测试。徽章展示远端状态；本地证据及实际限制见[核验报告](docs/PROJECT_AUDIT_20261030.md)，本地通过不能代替尚未运行的远端 CI。
+Actions 配置了 Windows 客户端测试和手动打包流程。徽章展示远端状态；本地证据及实际限制见[核验报告](docs/PROJECT_AUDIT_20261030.md)，本地通过不能代替尚未运行的远端 CI。
 
 最新的完整使用流程、真实接口复测及缺陷修复记录见[功能测试报告](docs/FUNCTIONAL_TEST_20261030.md)。
 

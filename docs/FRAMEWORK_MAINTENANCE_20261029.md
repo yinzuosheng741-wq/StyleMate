@@ -30,7 +30,7 @@
 python scripts/validate.py
 ```
 
-同一命令用于本地、Linux CI、Windows CI 和 Windows 打包前置检查。依次执行已安装依赖一致性、声明约束校验、健康检查、素材审计、Ruff、编译、pytest、离线规则与 Agent/RAG 评测；每步最多 300 秒，失败即返回非零。Windows 临时目录置于项目根目录下的短路径，避免图片文件名与用户哈希叠加超过传统路径长度限制。
+同一命令用于本地、Windows CI 和 Windows 打包前置检查。依次执行已安装依赖一致性、声明约束校验、健康检查、素材审计、Ruff、编译、pytest、离线规则与 Agent/RAG 评测；每步最多 300 秒，失败即返回非零。Windows 临时目录置于项目根目录下的短路径，避免图片文件名与用户哈希叠加超过传统路径长度限制。
 
 产物在 `artifacts/validation/`：各步日志、JUnit、Agent 覆盖率、最新评测报告、门槛结果和 `validation.json`。后者记录 Git revision、工作区是否有未提交修改，以及代码/测试/依赖/工作流指纹；验证结束会检查源码是否在运行期间变化。指纹覆盖 Python 与配置，不包含用户 `.env`。语料和题集指纹由评测报告单独记录。
 
