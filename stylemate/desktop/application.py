@@ -7,7 +7,6 @@ import os
 import sys
 import uuid
 from datetime import date
-from html import escape
 from pathlib import Path
 
 from PySide6.QtCore import QEvent, QObject, QPoint, QRunnable, QSettings, QSize, Qt, QThreadPool, QTimer, QUrl, Signal
@@ -56,6 +55,7 @@ from stylemate.branding import REPOSITORY_URL
 from stylemate.config.portable import DEFAULTS, ServiceConfigStore, application_root, apply_environment
 from stylemate.config.runtime import RuntimeSettings
 from stylemate.desktop.backup import create_backup
+from stylemate.desktop.chat_view import conversation_html
 from stylemate.desktop.icons import navigation_icon
 from stylemate.desktop.instance import acquire_instance_lock
 from stylemate.desktop.service_settings import ServiceSettingsDialog
@@ -700,6 +700,8 @@ class MainWindow(QMainWindow):
         chat = QVBoxLayout(conversation)
         chat.setContentsMargins(10, 0, 0, 0)
         self.transcript = QTextBrowser()
+        self.transcript.setObjectName("chatTranscript")
+        self.transcript.document().setDocumentMargin(22)
         self.transcript.setOpenLinks(False)
         self.transcript.anchorClicked.connect(self.open_source)
         chat.addWidget(self.transcript, 1)
@@ -718,15 +720,22 @@ class MainWindow(QMainWindow):
         for title, prompt in [("洗护帮助", "洗护帮助"), ("旅行行李", "我想规划旅行行李"), ("购买建议", "推荐购买")]:
             shortcuts.addWidget(button(title, lambda checked=False, p=prompt: self.input.setPlainText(p)))
         chat.addLayout(shortcuts)
+        composer = QFrame()
+        composer.setObjectName("chatComposer")
+        composer_layout = QVBoxLayout(composer)
+        composer_layout.setContentsMargins(12, 8, 12, 10)
+        composer_layout.setSpacing(4)
         self.input = QPlainTextEdit()
+        self.input.setObjectName("chatInput")
         self.input.setPlaceholderText("描述你的需求，例如：去杭州旅行三天…（Ctrl+Enter 发送）")
         self.input.textChanged.connect(self.save_draft)
         self.input.setMaximumHeight(90)
-        chat.addWidget(self.input)
+        composer_layout.addWidget(self.input)
         send = QHBoxLayout()
         send.addWidget(label("Ctrl+Enter 发送 · 草稿自动保存", "subtitle"), 1)
         send.addWidget(button("发送", self.send_chat, True))
-        chat.addLayout(send)
+        composer_layout.addLayout(send)
+        chat.addWidget(composer)
         split.addWidget(conversation)
         split.setSizes([200, 700])
         layout.addWidget(split, 1)
@@ -808,24 +817,9 @@ class MainWindow(QMainWindow):
 
     def refresh_chat(self):
         state = self.context.agent_repository.load_conversation(self.context.owner_id, self.context.conversation_id)
-        html = ['<body style="font-family:Microsoft YaHei UI;color:#293932;"><h3>出行衣橱助手</h3>']
         messages = state.transcript or state.messages
-        if not messages:
-            html.append("<p>你好，今天想怎么穿？也可以问我衣物洗护、旅行行李或购买建议。</p>")
         by_id = {g.id: g for g in self.garments()}
-        for message in messages:
-            color = "#355d48" if message.role == "assistant" else "#987450"
-            html.append(f'<p style="color:{color};"><b>{"出行衣橱助手" if message.role == "assistant" else "你"}</b></p>')
-            html.append('<p style="line-height:1.8;">' + escape(message.content).replace("\n", "<br>") + "</p>")
-            for outfit in message.outfits:
-                html.append("<p>搭配：" + escape("、".join(by_id[g].name if g in by_id else "已移除单品"
-                                                         for g in outfit.garment_ids)) + "</p>")
-            for source in message.sources:
-                url = QUrl(source.url)
-                if url.scheme() in {"https", "http"}:
-                    html.append(f'<p><a href="{escape(source.url, quote=True)}">{escape(source.title)}</a></p>')
-            html.append("<hr>")
-        self.transcript.setHtml("".join(html) + "</body>")
+        self.transcript.setHtml(conversation_html(messages, by_id))
         self.transcript.verticalScrollBar().setValue(self.transcript.verticalScrollBar().maximum())
         action = self.context.agent_repository.get_pending(self.context.owner_id, self.context.conversation_id)
         self.pending.setVisible(action is not None)

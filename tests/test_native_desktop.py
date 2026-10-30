@@ -20,7 +20,7 @@ from stylemate.config.runtime import RuntimeSettings  # noqa: E402
 from stylemate.desktop.application import GarmentDialog, MainWindow  # noqa: E402
 from stylemate.desktop.service_settings import ServiceSettingsDialog  # noqa: E402
 from stylemate.desktop.theme import STYLE  # noqa: E402
-from stylemate.domain.models import Garment  # noqa: E402
+from stylemate.domain.models import ConversationMessage, Garment, KnowledgeSource  # noqa: E402
 from stylemate.services.context import build_context  # noqa: E402
 
 
@@ -131,6 +131,41 @@ def test_chat_history_export_and_documents(window, tmp_path):
     filename = tmp_path / "export.json"
     window.write_export(str(filename), "{}")
     assert json.loads(filename.read_text("utf-8")) == {}
+
+
+def test_chat_distinguishes_roles_and_keeps_sources_safe_and_selectable(window):
+    conversation = window.context.conversation_id
+    state = window.context.agent_repository.load_conversation(window.context.owner_id, conversation)
+    state.transcript = [
+        ConversationMessage(role="user", content="明天穿什么？"),
+        ConversationMessage(role="assistant", content="**搭配建议**\n- 衬衫\n<script>不执行</script>", sources=[
+            KnowledgeSource(id="source", title="天气来源", url="https://example.com/weather"),
+            KnowledgeSource(id="unsafe", title="不安全链接", url="javascript:alert(1)"),
+        ]),
+    ]
+    window.context.agent_repository.save_conversation(state)
+    window.navigate(2)
+    rendered = window.transcript.toPlainText()
+    html = window.transcript.toHtml()
+    assert "你" in rendered and "衣橱助手" in rendered
+    assert "明天穿什么？" in rendered and "搭配建议" in rendered
+    assert "<script>不执行</script>" in rendered
+    assert "天气来源" in rendered and "不安全链接" not in rendered
+    assert "https://example.com/weather" in html and "javascript:alert" not in html
+    assert "**搭配建议**" not in rendered
+    assert window.transcript.textInteractionFlags() & Qt.TextInteractionFlag.TextSelectableByMouse
+
+
+def test_chat_long_messages_wrap_at_compact_window_width(window):
+    state = window.context.agent_repository.load_conversation(window.context.owner_id, window.context.conversation_id)
+    state.transcript = [ConversationMessage(role="user", content="很长的出行需求" * 100),
+                        ConversationMessage(role="assistant", content="详细的搭配建议" * 100)]
+    window.context.agent_repository.save_conversation(state)
+    window.resize(960, 680)
+    window.show()
+    window.navigate(2)
+    QTest.qWait(100)
+    assert window.transcript.horizontalScrollBar().maximum() == 0
 
 
 def test_background_failure_restores_interaction(window, monkeypatch):

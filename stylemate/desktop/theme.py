@@ -32,6 +32,9 @@ QLineEdit, QComboBox, QSpinBox, QDoubleSpinBox, QPlainTextEdit, QTextBrowser, QL
     border: 1px solid #dfe5de; background: white; border-radius: 8px; padding: 9px;
     selection-background-color: #356b50; selection-color: white; }
 QLineEdit:focus, QPlainTextEdit:focus { border-color: #81a38b; }
+QTextBrowser#chatTranscript { background: #ffffff; border: 1px solid #edf0eb; border-radius: 12px; padding: 0; }
+QFrame#chatComposer { background: #ffffff; border: 1px solid #d8e3d9; border-radius: 14px; }
+QPlainTextEdit#chatInput, QPlainTextEdit#chatInput:focus { background: transparent; border: none; padding: 4px; }
 QComboBox::drop-down { border: none; width: 24px; }
 QListWidget::item { padding: 9px 5px; border-radius: 5px; }
 QListWidget::item:selected { background: #e5efe3; color: #254f3b; }
