@@ -32,6 +32,7 @@ class OutfitRequest(BaseModel):
     fit_preference: str | None = None
     extra_constraints: list[str] = Field(default_factory=list)
     candidate_garment_ids: list[str] = Field(default_factory=list)
+    required_garment_id: str | None = Field(default=None, max_length=120)
 
 
 class OutfitRecommendation(BaseModel):

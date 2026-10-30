@@ -53,6 +53,7 @@ class OutfitArguments(StrictArguments):
     fit_preference: str | None = Field(default=None, max_length=80)
     extra_constraints: list[str] = Field(default_factory=list, max_length=12)
     candidate_garment_ids: list[str] = Field(default_factory=list, max_length=100)
+    required_garment_id: str | None = Field(default=None, min_length=1, max_length=120)
 
 
 class OpenOutfitArguments(OutfitArguments):
@@ -78,6 +79,10 @@ class WardrobeGapArguments(StrictArguments):
 
 
 class ItemStyleArguments(StrictArguments):
+    garment_id: str = Field(min_length=1, max_length=120)
+
+
+class GetGarmentArguments(StrictArguments):
     garment_id: str = Field(min_length=1, max_length=120)
 
 
@@ -132,6 +137,7 @@ READ_TOOL_SCHEMAS: dict[str, type[BaseModel]] = {
     "travel_packing": TravelArguments,
     "wardrobe_gap_check": WardrobeGapArguments,
     "item_style_analysis": ItemStyleArguments,
+    "get_garment": GetGarmentArguments,
 }
 
 WRITE_TOOL_SCHEMAS: dict[str, type[BaseModel]] = {

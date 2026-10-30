@@ -9,13 +9,13 @@ WRITE_TOOLS = frozenset({"add_garment", "update_garment", "delete_garment"})
 MEASUREMENT_KNOWLEDGE_TERMS = ("尺码表", "商品尺寸", "成衣尺寸", "人体尺寸", "平铺", "胸宽", "测量方法")
 CONCEPT_KNOWLEDGE_TERMS = ("色轮", "配色原理", "同类色", "类似色", "邻近色", "互补色", "叠穿原理", "分层原理")
 SKILL_TOOLS = {
-    "knowledge_qa": frozenset({"care_guide", "rag_search"}),
+    "knowledge_qa": frozenset({"care_guide", "rag_search", "get_garment"}),
     "outfit_planning": frozenset({"get_user_location", "get_weather", "search_wardrobe",
                                   "recommend_inventory_outfit", "recommend_open_outfit", "recommend_size",
-                                  "wardrobe_gap_check", "item_style_analysis"}),
+                                  "wardrobe_gap_check", "item_style_analysis", "get_garment"}),
     "travel_planning": frozenset({"get_user_location", "get_weather", "travel_packing",
                                   "search_wardrobe", "recommend_inventory_outfit", "rag_search"}),
-    "wardrobe_management": frozenset({"search_wardrobe", "item_style_analysis", "wardrobe_gap_check"}),
+    "wardrobe_management": frozenset({"search_wardrobe", "item_style_analysis", "wardrobe_gap_check", "get_garment"}),
     "purchase_planning": frozenset({"recommend_purchases", "wardrobe_gap_check", "search_wardrobe",
                                     "get_weather", "get_user_location", "rag_search"}),
 }

@@ -531,6 +531,10 @@ class MainWindow(QMainWindow):
         delete.setObjectName("danger")
         row.addWidget(delete)
         row.addStretch()
+        def ask_about():
+            dialog.accept()
+            self.select_chat_garment(garment.id)
+        row.addWidget(button("咨询这件衣物", ask_about))
         row.addWidget(button("关闭", dialog.reject))
         row.addWidget(button("编辑", edit, True))
         layout.addLayout(row)
@@ -697,6 +701,7 @@ class MainWindow(QMainWindow):
         toolbar.addWidget(self.sessions, 1)
         toolbar.addStretch(1)
         toolbar.addWidget(button("＋  新建对话", self.new_conversation))
+        toolbar.addWidget(button("选择衣物", self.choose_chat_garment))
         more = button("对话管理", lambda: None)
         menu = QMenu(more)
         menu.addAction("会话资料", self.manage_documents)
@@ -710,6 +715,12 @@ class MainWindow(QMainWindow):
         chat = QVBoxLayout(conversation)
         chat.setContentsMargins(0, 0, 0, 0)
         chat.setSpacing(8)
+        selected_row = QHBoxLayout()
+        self.selected_garment_label = label("", "subtitle", True)
+        selected_row.addWidget(self.selected_garment_label, 1)
+        self.clear_garment_button = button("取消选择", self.clear_chat_garment)
+        selected_row.addWidget(self.clear_garment_button)
+        chat.addLayout(selected_row)
         self.transcript = ChatTranscript(self.open_source)
         chat.addWidget(self.transcript, 1)
         self.pending = QPlainTextEdit()
@@ -764,6 +775,57 @@ class MainWindow(QMainWindow):
     def open_source(self, url):
         if url.scheme() in {"http", "https"}:
             QDesktopServices.openUrl(url)
+
+    def selected_garment_key(self):
+        return "selected-garments/" + self.context.conversation_id
+
+    def select_chat_garment(self, garment_id):
+        garment = self.context.repository.get_garment(self.context.owner_id, garment_id)
+        if garment is None:
+            self.notify("衣物已不存在，请重新选择")
+            return
+        self.preferences.setValue(self.selected_garment_key(), garment_id)
+        self.navigate(2)
+        self.refresh_chat()
+        self.input.setFocus()
+        self.notify("已选择衣物，可询问搭配或洗护")
+
+    def clear_chat_garment(self):
+        self.preferences.remove(self.selected_garment_key())
+        self.refresh_chat()
+
+    def choose_chat_garment(self):
+        dialog = QDialog(self)
+        dialog.setWindowTitle("选择衣橱中的单品")
+        dialog.resize(480, 520)
+        box = QVBoxLayout(dialog)
+        box.addWidget(label("选择要咨询的衣物", "cardTitle"))
+        search = QLineEdit()
+        search.setPlaceholderText("搜索衣物名称、类别或颜色")
+        box.addWidget(search)
+        items = QListWidget()
+        box.addWidget(items, 1)
+        garments = self.garments()
+        def refresh():
+            query = search.text().strip().casefold()
+            items.clear()
+            for garment in garments:
+                if query and query not in f"{garment.name} {garment.category} {garment.primary_color}".casefold():
+                    continue
+                item = QListWidgetItem(f"{garment.name}  ·  {garment.category}  ·  {garment.primary_color}")
+                item.setData(Qt.ItemDataRole.UserRole, garment.id)
+                items.addItem(item)
+        search.textChanged.connect(refresh)
+        refresh()
+        actions = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
+        actions.button(QDialogButtonBox.StandardButton.Ok).setText("选择")
+        actions.button(QDialogButtonBox.StandardButton.Cancel).setText("取消")
+        actions.accepted.connect(dialog.accept)
+        actions.rejected.connect(dialog.reject)
+        items.itemDoubleClicked.connect(lambda _item: dialog.accept())
+        box.addWidget(actions)
+        if dialog.exec() and items.currentItem():
+            self.select_chat_garment(items.currentItem().data(Qt.ItemDataRole.UserRole))
 
     def refresh_sessions(self):
         self.sessions.blockSignals(True)
@@ -841,6 +903,12 @@ class MainWindow(QMainWindow):
             self.search.selectAll()
 
     def refresh_chat(self):
+        selected_id = str(self.preferences.value(self.selected_garment_key(), ""))
+        selected = self.context.repository.get_garment(self.context.owner_id, selected_id) if selected_id else None
+        self.selected_garment_label.setVisible(bool(selected_id))
+        self.clear_garment_button.setVisible(bool(selected_id))
+        if selected_id:
+            self.selected_garment_label.setText(f"当前衣物：{selected.name}" if selected else "所选衣物已移除，请重新选择。")
         state = self.context.agent_repository.load_conversation(self.context.owner_id, self.context.conversation_id)
         messages = list(state.transcript or state.messages)
         waiting = self.pending_chat_text is not None
@@ -883,7 +951,12 @@ class MainWindow(QMainWindow):
             self.refresh_sessions()
             self.refresh_chat()
             self.notify("回复已保存")
-        self.background(lambda: self.context.agent_service.chat(self.context.owner_id, conversation_id, text),
+        selected_id = str(self.preferences.value(self.selected_garment_key(), ""))
+        def operation():
+            if selected_id:
+                return self.context.agent_service.chat(self.context.owner_id, conversation_id, text, garment_id=selected_id)
+            return self.context.agent_service.chat(self.context.owner_id, conversation_id, text)
+        self.background(operation,
                         completed, "助手正在整理衣橱与知识来源…")
 
     def resolve_action(self, confirmed):
@@ -900,6 +973,7 @@ class MainWindow(QMainWindow):
     def clear_conversation(self):
         if self.ask("清空会话", "确定删除当前会话的消息、临时资料和待确认操作？"):
             self.context.agent_service.clear(self.context.owner_id, self.context.conversation_id)
+            self.preferences.remove(self.selected_garment_key())
             self.input.clear()
             self.refresh_sessions()
             self.refresh_chat()

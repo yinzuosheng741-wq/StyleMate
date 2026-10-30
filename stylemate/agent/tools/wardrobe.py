@@ -6,6 +6,7 @@ from typing import Any
 
 from stylemate.agent.middleware import ToolContext
 from stylemate.agent.tool_schemas import (
+    GetGarmentArguments,
     ItemStyleArguments,
     OutfitArguments,
     WardrobeGapArguments,
@@ -21,6 +22,13 @@ def search_wardrobe(arguments: dict[str, Any], context: ToolContext) -> dict[str
     garments = context.wardrobe_repository.list_garments(context.owner_id)
     matched = [garment for garment in garments if _matches(garment, filters)]
     return {"garments": [_garment_data(garment) for garment in matched[:20]]}
+
+
+def get_garment(arguments: dict[str, Any], context: ToolContext) -> dict[str, Any]:
+    """Read one exact owned item; never expose another owner's records or images."""
+    garment_id = GetGarmentArguments.model_validate(arguments).garment_id
+    garment = context.wardrobe_repository.get_garment(context.owner_id, garment_id)
+    return {"found": True, "garment": _garment_data(garment)} if garment else {"found": False, "message": "未找到这件衣物，请重新选择。"}
 
 
 def recommend_inventory_outfit(arguments: dict[str, Any], context: ToolContext) -> dict[str, Any]:
@@ -54,6 +62,7 @@ def recommend_inventory_outfit(arguments: dict[str, Any], context: ToolContext) 
         or None,
         extra_constraints=values.extra_constraints,
         candidate_garment_ids=candidate_ids,
+        required_garment_id=values.required_garment_id,
     )
     recommendations = plan_outfits(request, garments, limit=3)
     return {
@@ -118,7 +127,7 @@ def _matches(garment: Any, filters: WardrobeSearchArguments) -> bool:
 
 
 def _garment_data(garment: Any) -> dict[str, Any]:
-    return garment.model_dump(mode="json", exclude={"image_ref"})
+    return garment.model_dump(mode="json", exclude={"image_ref", "image_hash"})
 
 
 def _season_basics(season: str) -> list[str]:

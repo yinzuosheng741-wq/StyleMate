@@ -105,6 +105,8 @@ def plan_outfits(
         selected = [*base, *(item for item in (shoe, outer) if item is not None)]
         if len({item.id for item in selected}) != len(selected):
             continue
+        if request.required_garment_id and request.required_garment_id not in {item.id for item in selected}:
+            continue
         checks = _hard_constraint_checks(request, selected, allowed_ids)
         if not all(checks.values()):
             continue
@@ -155,7 +157,7 @@ def _equivalent_options(garments: list[Garment], request: OutfitRequest) -> list
     representatives: dict[tuple, Garment] = {}
     for garment in sorted(garments, key=lambda item: item.id):
         # Ambiguous multi-role categories retain their identity for uniqueness checks.
-        identity = "" if garment.category in {"鞋履", "外套"} else garment.id
+        identity = "" if garment.category in {"鞋履", "外套"} and garment.id != request.required_garment_id else garment.id
         key = (garment.category, _color_family(garment.primary_color), tuple(sorted(garment.styles)),
                bool(request.color_preference and request.color_preference in garment.primary_color), identity)
         representatives.setdefault(key, garment)

@@ -135,6 +135,37 @@ def test_chat_history_export_and_documents(window, tmp_path):
     assert json.loads(filename.read_text("utf-8")) == {}
 
 
+def test_selected_garment_is_scoped_to_conversation_and_reaches_chat(window):
+    window.navigate(2)
+    garment = window.garments()[0]
+    first = window.context.conversation_id
+    window.select_chat_garment(garment.id)
+    assert garment.name in window.selected_garment_label.text()
+    window.input.setPlainText("这个怎么洗")
+    window.send_chat()
+    wait_idle(window)
+    assert garment.name in window.transcript.plain_text()
+    window.new_conversation()
+    assert not window.preferences.value(window.selected_garment_key(), "")
+    index = window.sessions.findData(first)
+    window.sessions.setCurrentIndex(index)
+    window.select_conversation(index)
+    assert window.preferences.value(window.selected_garment_key()) == garment.id
+    window.clear_chat_garment()
+    assert not window.preferences.value(window.selected_garment_key(), "")
+
+
+def test_item_details_can_open_chat_with_that_item(window, monkeypatch):
+    garment = window.garments()[0]
+    def open_dialog(dialog):
+        next(control for control in dialog.findChildren(QPushButton) if control.text() == "咨询这件衣物").click()
+        return QDialog.DialogCode.Accepted
+    monkeypatch.setattr(QDialog, "exec", open_dialog)
+    window.show_garment(garment)
+    assert window.pages.currentIndex() == 2
+    assert window.preferences.value(window.selected_garment_key()) == garment.id
+
+
 def test_chat_distinguishes_roles_and_keeps_sources_safe_and_selectable(window):
     conversation = window.context.conversation_id
     state = window.context.agent_repository.load_conversation(window.context.owner_id, conversation)

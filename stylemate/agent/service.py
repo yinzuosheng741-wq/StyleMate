@@ -93,7 +93,7 @@ class AgentService:
         self.profile_service = ProfileService(wardrobe_repository)
         self.observer = observer
 
-    def chat(self, owner_id: str, conversation_id: str, text: str) -> ConversationMessage:
+    def chat(self, owner_id: str, conversation_id: str, text: str, *, garment_id: str | None = None) -> ConversationMessage:
         from stylemate.agent.policy import request_policy
         from stylemate.agent.routing import route_skills
         from stylemate.agent.tool_schemas import READ_TOOL_SCHEMAS, WRITE_TOOL_SCHEMAS
@@ -101,21 +101,49 @@ class AgentService:
         if not isinstance(text, str) or not text.strip() or len(text) > 4000:
             raise ValueError("消息不能为空且不能超过 4000 个字符")
         route = route_skills(text, set(READ_TOOL_SCHEMAS) | set(WRITE_TOOL_SCHEMAS))
+        item_intent = _item_question(text)
+        requested_id = _garment_id(text)
+        matching = []
+        if item_intent and not requested_id:
+            matching = [g for g in self.wardrobe_repository.list_garments(owner_id) if g.name and g.name in text]
+            if len(matching) == 1:
+                requested_id = matching[0].id
+            elif len(matching) > 1 and garment_id in {g.id for g in matching}:
+                requested_id = garment_id
+                matching = []
+            elif not matching:
+                requested_id = garment_id
+        allowed = set(route.allowed_tools)
+        if item_intent and requested_id:
+            allowed.update({"get_garment", "care_guide", "recommend_inventory_outfit", "get_weather"})
         with observe_run(self.observer) as observation:
-            with request_policy(owner_id, conversation_id, route.allowed_tools) as policy:
+            with request_policy(owner_id, conversation_id, allowed) as policy:
                 try:
-                    reply = self._chat(owner_id, conversation_id, text)
+                    if requested_id or len(matching) > 1:
+                        reply = self._chat(owner_id, conversation_id, text, garment_id=requested_id,
+                                           ambiguous_item=len(matching) > 1)
+                    else:
+                        reply = self._chat(owner_id, conversation_id, text)
                     observation.outcome = "degraded" if any(t.status != "success" for t in reply.traces) else "completed"
                     return reply
                 finally:
                     observation.tool_calls = policy.calls
 
-    def _chat(self, owner_id: str, conversation_id: str, text: str) -> ConversationMessage:
+    def _chat(self, owner_id: str, conversation_id: str, text: str, *, garment_id: str | None = None,
+              ambiguous_item: bool = False) -> ConversationMessage:
         if not isinstance(text, str) or not text.strip() or len(text) > 4000:
             raise ValueError("消息不能为空且不能超过 4000 个字符")
         state = self.repository.load_conversation(owner_id, conversation_id)
         shortcut = self._shortcut_route(owner_id, conversation_id, text, state=state)
-        if shortcut is not None:
+        if ambiguous_item:
+            content, traces, sources = "找到多件同名衣物，请先在衣橱中选择具体的单品。", [], []
+        elif garment_id and _item_exclusion(text):
+            content, traces, sources = "你提到不穿这件衣物；请取消选择后说明其他搭配需求，我不会把它作为必选单品。", [], []
+        elif garment_id and _item_question(text):
+            content, traces, sources = self._selected_item_route(owner_id, conversation_id, text, garment_id)
+        elif _item_question(text) and re.search(r"这件|这条|这双|这个|它", text) and not garment_id:
+            content, traces, sources = "请先选择要咨询的衣物，或提供衣物的准确名称。", [], []
+        elif shortcut is not None:
             content, traces, sources = shortcut
         elif _is_deterministic_intent(text) or _is_travel_follow_up(state, text):
             content, traces, sources = self._route_without_model(
@@ -167,7 +195,9 @@ class AgentService:
 
         reply = ConversationMessage(role="assistant", run_id=current_run_id(), content=content, traces=traces, sources=sources,
                                     outfits=current_outfits(owner_id, conversation_id))
-        self._save_turn(state, text.strip(), reply)
+        selected = self.wardrobe_repository.get_garment(owner_id, garment_id) if garment_id and _item_question(text) else None
+        saved_text = f"{text.strip()}\n【关联衣物：{selected.name}】" if selected else text.strip()
+        self._save_turn(state, saved_text, reply)
         return reply
 
     def _shortcut_route(
@@ -427,6 +457,49 @@ class AgentService:
             [*general[2], *inventory[2]],
         )
 
+    def _selected_item_route(self, owner_id: str, conversation_id: str, text: str, garment_id: str):
+        toolkit = self._toolkit(owner_id, conversation_id)
+        item_payload = self._invoke_named(toolkit, "get_garment", {"garment_id": garment_id})
+        _, item_traces, _ = self._present_named("get_garment", item_payload)
+        item = _successful_result(item_payload).get("garment")
+        if not item:
+            return "未找到这件衣物，请重新从衣橱选择。", item_traces, []
+        name = item.get("name", "选中衣物")
+        if any(term in text.lower() for term in CARE_INTENT_TERMS):
+            material = (item.get("material") or "").strip()
+            if not material or material.casefold() in {"未知", "未填写", "不详", "unknown"}:
+                return f"{name}尚未记录材质。请查看衣物成分和洗护标签，补充后再查询；不能仅凭款式确定洗法。", item_traces, []
+            content, traces, sources = self._call_named(toolkit, "care_guide", {"material": material})
+            return (f"关于「{name}」（已记录材质：{material}）：\n{content}\n请以整件衣物的洗护标签为准。",
+                    [*item_traces, *traces], sources)
+        if any(term in text for term in ("搭配", "穿", "配什么", "怎么配")):
+            args = _outfit_arguments(text)
+            args["required_garment_id"] = garment_id
+            weather_text = ""
+            weather_traces = []
+            if "今天" in text or "天气" in text:
+                weather_payload = self._invoke_named(toolkit, "get_weather", {"city": _city(text)})
+                _, weather_traces, _ = self._present_named("get_weather", weather_payload)
+                weather = _successful_result(weather_payload)
+                if weather.get("available") and weather.get("temperature_c") is not None:
+                    args["temperature_c"] = weather["temperature_c"]
+                    args["weather_condition"] = weather.get("summary") or None
+                    weather_text = f"当前天气：{weather.get('summary', '')}，{weather['temperature_c']}℃。\n"
+                else:
+                    weather_text = "当前天气不可用，建议出门前核对天气。\n"
+            payload = self._invoke_named(toolkit, "recommend_inventory_outfit", args)
+            _, traces, _ = self._present_named("recommend_inventory_outfit", payload)
+            results = _successful_result(payload).get("recommendations", [])
+            by_id = {g.id: g.name for g in self.wardrobe_repository.list_garments(owner_id)}
+            lines = [f"以「{name}」为中心的衣橱搭配："]
+            for index, outfit in enumerate(results, 1):
+                lines.append(f"{index}. " + "、".join(by_id.get(g, "已移除单品") for g in outfit.get("garment_ids", [])))
+            if not results:
+                lines.append("当前衣橱中没有符合条件且包含这件单品的完整搭配，可调整限制或补充衣物。")
+            return weather_text + "\n".join(lines), [*item_traces, *weather_traces, *traces], []
+        return (f"「{name}」：{item.get('category', '')} · {item.get('primary_color', '')}；"
+                f"材质：{item.get('material') or '未记录'}。", item_traces, [])
+
     def _call_named(self, toolkit, name: str, args: dict[str, Any]):
         return self._present_named(name, self._invoke_named(toolkit, name, args))
 
@@ -639,6 +712,17 @@ def _is_deterministic_intent(text: str) -> bool:
 
 def _season(text: str) -> str:
     return next((s for s in "春夏秋冬" if s in text), "")
+
+
+def _item_exclusion(text: str) -> bool:
+    return bool(re.search(r"(?:不要|不想|不穿|别穿|排除).{0,4}(?:这件|这条|这双|这个|它)|"
+                          r"(?:这件|这条|这双|这个|它).{0,4}(?:不穿|不要穿|排除)", text))
+
+
+def _item_question(text: str) -> bool:
+    if re.search(r"删除|移除|修改|编辑|更新|新增|添加|录入", text):
+        return False
+    return any(term in text.lower() for term in (*CARE_INTENT_TERMS, "搭配", "穿", "配什么", "怎么配", "材质", "适合"))
 
 
 def _garment_id(text: str) -> str:

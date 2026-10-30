@@ -2,6 +2,7 @@
 
 from stylemate.agent.tools.styling import care_guide, get_user_location, get_weather, rag_search, recommend_size
 from stylemate.agent.tools.wardrobe import (
+    get_garment,
     item_style_analysis,
     recommend_inventory_outfit,
     search_wardrobe,
@@ -11,6 +12,7 @@ from stylemate.agent.tools.wardrobe import (
 __all__ = [
     "care_guide",
     "get_user_location",
+    "get_garment",
     "get_weather",
     "item_style_analysis",
     "rag_search",

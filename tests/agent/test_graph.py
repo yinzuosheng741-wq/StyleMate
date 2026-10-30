@@ -94,6 +94,7 @@ def test_every_agent_tool_exposes_a_strict_task_specific_schema():
     expected_fields = {
         "get_user_location": set(),
         "get_weather": {"city"},
+        "get_garment": {"garment_id"},
         "recommend_size": {"height_cm", "weight_kg", "fit_preference"},
             "care_guide": {"material"},
             "rag_search": {"query"},
@@ -109,6 +110,7 @@ def test_every_agent_tool_exposes_a_strict_task_specific_schema():
                 "fit_preference",
                 "extra_constraints",
                 "candidate_garment_ids",
+                "required_garment_id",
             },
             "recommend_purchases": {"season", "scene", "temperature_c"},
             "travel_packing": {
@@ -131,6 +133,7 @@ def test_every_agent_tool_exposes_a_strict_task_specific_schema():
             "fit_preference",
             "extra_constraints",
             "candidate_garment_ids",
+            "required_garment_id",
         },
         "wardrobe_gap_check": {"season"},
         "item_style_analysis": {"garment_id"},

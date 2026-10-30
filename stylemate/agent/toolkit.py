@@ -36,6 +36,7 @@ _TOOL_DESCRIPTIONS = {
     "recommend_inventory_outfit": "只使用当前用户真实库存，按场景、天气和偏好生成穿搭。",
     "wardrobe_gap_check": "检查当前用户衣橱在指定季节缺少的基础品类。",
     "item_style_analysis": "根据准确衣物编号分析当前用户的一件衣物。",
+    "get_garment": "根据准确编号读取当前用户的一件衣物，包括类别、颜色和已记录材质。",
     "add_garment": "准备手工新增衣物操作；只生成预览，必须等待用户确认。",
     "update_garment": "准备修改指定衣物操作；只生成预览，必须等待用户确认。",
     "delete_garment": "准备删除指定衣物操作；只生成预览，必须等待用户确认。",
@@ -96,6 +97,7 @@ def build_toolkit(
         ),
         "wardrobe_gap_check": (wardrobe_tools.wardrobe_gap_check, False, False),
         "item_style_analysis": (wardrobe_tools.item_style_analysis, False, False),
+        "get_garment": (wardrobe_tools.get_garment, False, False),
     }
     tools = [
         _read_tool(
