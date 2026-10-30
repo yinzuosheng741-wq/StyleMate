@@ -50,4 +50,4 @@ MIT 已按作者选择添加。第三方许可和素材权利单独列出，不�
 
 ## GitHub 状态
 
-本次按作者指定目标推送到 `yinzuosheng741-wq/StyleMate`，保留现有仓库标识；客户端显示名为“出行衣橱助手”。已使用本机 GitHub CLI 中的账号凭据完成代码与 README 推送。远端 CI 的实际结果以仓库 Actions 为准，本地通过记录不替代远端运行结果。后续若单独执行仓库更名，再同步 origin 与链接。
+客户端显示名为“出行衣橱助手”，GitHub 仓库标识为 `yinzuosheng741-wq/travel-wardrobe-assistant`（原为 `StyleMate`）。远端 CI 的实际结果以仓库 Actions 为准，本地通过记录不替代远端运行结果。

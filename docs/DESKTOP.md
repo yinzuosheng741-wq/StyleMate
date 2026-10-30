@@ -56,7 +56,7 @@
 
 打包脚本排除个人数据、密钥和网页运行时；如旧分发目录已有数据库，会拒绝覆盖。`scripts/build_portable.py` 可额外生成原生源码 ZIP，预备 runtime 必须包含 PySide6。`portable-lock.txt` 是 Windows / Python 3.12.4 验证环境快照，不是跨平台锁文件。
 
-本地仓库 origin 关联 [yinzuosheng741-wq/StyleMate](https://github.com/yinzuosheng741-wq/StyleMate)。代码推送后，可在 Actions 手动运行 `Build Windows Desktop` 并下载产物；工作流不会自动发布 Release。离线验证不替代真实模型、视觉、Embedding 和天气的联调。
+本地仓库 origin 关联 [yinzuosheng741-wq/travel-wardrobe-assistant](https://github.com/yinzuosheng741-wq/travel-wardrobe-assistant)。代码推送后，可在 Actions 手动运行 `Build Windows Desktop` 并下载产物；工作流不会自动发布 Release。离线验证不替代真实模型、视觉、Embedding 和天气的联调。
 
 ## 本次本地验证
 

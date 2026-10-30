@@ -6,7 +6,7 @@
 
 本地优先的 Windows 便携桌面助手 · 衣物管理 · 天气穿搭 · 旅行行李 · AI 洗护问答
 
-[![CI](https://github.com/yinzuosheng741-wq/StyleMate/actions/workflows/ci.yml/badge.svg)](https://github.com/yinzuosheng741-wq/StyleMate/actions/workflows/ci.yml)
+[![CI](https://github.com/yinzuosheng741-wq/travel-wardrobe-assistant/actions/workflows/ci.yml/badge.svg)](https://github.com/yinzuosheng741-wq/travel-wardrobe-assistant/actions/workflows/ci.yml)
 [![MIT License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 ![Python](https://img.shields.io/badge/Python-3.11%20%7C%203.12-blue.svg)
 ![UI](https://img.shields.io/badge/UI-PySide6-41CD52.svg)
@@ -49,14 +49,14 @@
 
 软件已包含 Python、Qt 和运行依赖。不要只复制 exe；退出后整个文件夹可迁移到另一台电脑。首次运行初始化 128 件演示衣物；已有数据不会被覆盖，已删除的演示衣物不会在重启时恢复。
 
-**获取构建产物**：查看仓库 [Actions](https://github.com/yinzuosheng741-wq/StyleMate/actions/workflows/desktop-release.yml)，运行 `Build Windows Desktop` 后下载产物；维护者可将其中的 ZIP 上传到 Releases。GitHub 源码 ZIP 不包含 exe，本文不把尚未发布的 Release 当成可下载版本。
+**获取构建产物**：查看仓库 [Actions](https://github.com/yinzuosheng741-wq/travel-wardrobe-assistant/actions/workflows/desktop-release.yml)，运行 `Build Windows Desktop` 后下载产物；维护者可将其中的 ZIP 上传到 Releases。GitHub 源码 ZIP 不包含 exe，本文不把尚未发布的 Release 当成可下载版本。
 
 ### 从源码运行
 
 要求 Python 3.11 或 3.12，以下使用 PowerShell：
 
 ```powershell
-git clone https://github.com/yinzuosheng741-wq/StyleMate.git travel-wardrobe-assistant
+git clone https://github.com/yinzuosheng741-wq/travel-wardrobe-assistant.git
 cd travel-wardrobe-assistant
 python -m venv .venv
 .venv\Scripts\python.exe -m pip install -r requirements.txt
