@@ -34,10 +34,13 @@ artifacts/*
 !artifacts/knowledge_review_20261029.json
 dist/
 data/desktop/
+data/config/
 .pytest-tmp/
 .pytest-tmp-*/
 .pytest_cache/
 .ruff_cache/
+.coverage*
+htmlcov/
 .test-tmp/
 .test-tmp-*/
 .vscode/

@@ -26,14 +26,10 @@ def selected_files(root: Path):
     def eligible(path):
         return visible_files is None or path.relative_to(root).as_posix() in visible_files
 
-    common = {"desktop.py", "Start.cmd", "README.md", ".env.example", "requirements.txt",
-              "requirements-portable.txt", "portable-lock.txt", "app.py", "pyproject.toml"}
-    directories = (["stylemate", "assets/demo", "data/knowledge", "docs", ".streamlit"]
-                   if (root / "stylemate").is_dir() else
-                   ["agent", "config", "domain", "evaluation", "ingestion", "model", "prompts", "providers",
-                    "rag", "retrieval", "storage", "tools", "utils", "web", "workflows", "data/evaluation", "docs"])
-    if (root / "stylemate").is_dir():
-        directories.append("evaluation")
+    common = {"desktop.py", "Start.cmd", "Start.vbs", "README.md", "LICENSE", "THIRD_PARTY_NOTICES.md", "CONTRIBUTING.md", "SECURITY.md", ".env.example", "requirements.txt",
+              "requirements-desktop.txt", "requirements-common.txt",
+              "requirements-portable.txt", "portable-lock.txt", "pyproject.toml"}
+    directories = ["stylemate", "assets/demo", "data/knowledge", "docs", "evaluation", "licenses"]
     for name in sorted(common):
         if (root / name).is_file() and eligible(root / name):
             yield root / name
@@ -42,7 +38,7 @@ def selected_files(root: Path):
             if not path.is_file() or path.is_symlink() or not eligible(path):
                 continue
             parts = path.relative_to(root).parts
-            if any(part.startswith(".") and part != ".streamlit" for part in parts):
+            if any(part.startswith(".") for part in parts):
                 continue
             if "__pycache__" in parts or path.suffix in {".pyc", ".db", ".sqlite3", ".log"}:
                 continue
@@ -65,7 +61,7 @@ def selected_files(root: Path):
 
 
 def build(output: Path, runtime: Path | None = None) -> dict:
-    name = "StyleMate" if (ROOT / "stylemate").is_dir() else "ResearchRadar"
+    name = "TravelWardrobeAssistant"
     if runtime is not None and not (runtime / "python.exe").is_file():
         raise ValueError("prepared_embedded_python_required")
     manifest = {"application": name, "runtime_included": runtime is not None, "files": {}}

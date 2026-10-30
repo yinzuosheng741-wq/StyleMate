@@ -54,6 +54,9 @@ class SessionWardrobeRepository:
             for payload in self._owner(owner_id)["favorites"].values()
         ]
 
+    def delete_favorite(self, owner_id: str, outfit_id: str) -> None:
+        self._owner(owner_id)["favorites"].pop(outfit_id, None)
+
     def save_feedback(self, feedback: OutfitFeedback) -> None:
         owner = self._owner(feedback.owner_id)
         owner["feedback"][feedback.outfit_id] = feedback.model_dump(mode="json")

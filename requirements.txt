@@ -1,13 +1,2 @@
-python-dotenv==1.0.1
-pydantic==2.9.2
-Pillow==11.0.0
-streamlit==1.40.1
-requests==2.32.3
-dashscope==1.26.7
-openai>=2.45,<3
-langchain==1.3.14
-langchain-core==1.5.4
-langchain-openai==1.4.3
-langgraph==1.2.9
-chromadb==1.5.9
-pypdf==6.15.0
+-r requirements-common.txt
+PySide6==6.8.3

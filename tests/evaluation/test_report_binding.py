@@ -56,6 +56,7 @@ def test_portable_snapshot_includes_active_report_and_dataset_versions():
     manifest = json.loads((root / "artifacts/evaluation_manifest.json").read_text("utf-8"))
     assert "artifacts/" + manifest["report"] in names
     assert "evaluation/rag_cases.json" in names
+    assert "requirements-common.txt" in names
 
 
 def test_inconsistent_coverage_denominator_is_not_presented_as_current(tmp_path):

@@ -50,6 +50,16 @@ def test_local_demo_wardrobe_seeds_once(tmp_path: Path):
     assert repository.get_metadata(DEMO_SEED_KEY) == "demo_wardrobe_v1"
 
 
+def test_fresh_v2_install_includes_items_that_also_have_legacy_ids(tmp_path: Path):
+    manifest_path = _write_manifest(tmp_path, version="demo_wardrobe_v2")
+    payload = json.loads(manifest_path.read_text("utf-8"))
+    payload["legacy_ids"] = ["demo-item-0"]
+    manifest_path.write_text(json.dumps(payload), encoding="utf-8")
+    repository = SQLiteWardrobeRepository(tmp_path / "stylemate.db")
+    assert seed_local_demo_wardrobe(repository, LocalImageStore(tmp_path / "uploads"), manifest_path) == 2
+    assert len(repository.list_garments("local-user")) == 2
+
+
 def test_deleted_demo_item_stays_deleted_after_restart(tmp_path: Path):
     manifest_path = _write_manifest(tmp_path)
     database_path = tmp_path / "stylemate.db"

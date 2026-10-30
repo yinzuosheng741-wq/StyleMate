@@ -14,6 +14,7 @@ from langgraph.graph import END, START, StateGraph
 from stylemate.agent.policy import check_request_deadline
 from stylemate.agent.routing import route_skills
 from stylemate.agent.state import AgentState, model_messages
+from stylemate.agent.telemetry import record_counter
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +25,7 @@ _STOP_MESSAGE = "本轮工具调用次数已达上限，请缩小问题后再试
 
 def _system_prompt() -> str:
     path = Path(__file__).resolve().parent.parent / "prompts" / "agent_system.txt"
-    return path.read_text(encoding="utf-8") if path.exists() else "你是 StyleMate 衣橱助手。回答简洁、基于工具结果，衣橱写操作必须先等待确认。"
+    return path.read_text(encoding="utf-8") if path.exists() else "你是出行衣橱助手。回答简洁、基于工具结果，衣橱写操作必须先等待确认。"
 
 
 def build_agent_graph(model, tools: list[BaseTool]):
@@ -50,7 +51,9 @@ def build_agent_graph(model, tools: list[BaseTool]):
         allowed = set(state.get("allowed_tools", []))
         visible_tools = [tool for tool in tools if tool.name in allowed]
         logger.info("agent_model_started call=%d tools=%d", state.get("model_calls", 0) + 1, len(visible_tools))
-        response = model.bind_tools(visible_tools).invoke(model_messages(state, _system_prompt()))
+        bound_model = model.bind_tools(visible_tools)
+        record_counter("model_calls")
+        response = bound_model.invoke(model_messages(state, _system_prompt()))
         check_request_deadline()
         if not isinstance(response, AIMessage):
             response = AIMessage(content=str(getattr(response, "content", response) or ""))

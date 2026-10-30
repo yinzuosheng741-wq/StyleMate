@@ -1,0 +1,2 @@
+# Compatibility alias: the default installation is the complete native client.
+-r requirements.txt

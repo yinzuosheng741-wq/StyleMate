@@ -19,6 +19,7 @@ from stylemate.agent.policy import (
 )
 from stylemate.agent.routing import MEASUREMENT_KNOWLEDGE_TERMS
 from stylemate.agent.state import initial_state
+from stylemate.agent.telemetry import current_run_id, observe_run
 from stylemate.agent.toolkit import build_toolkit
 from stylemate.agent.tools.write_actions import cancel_action, confirm_action
 from stylemate.domain.models import (
@@ -81,7 +82,7 @@ def _deadline_result():
 
 
 class AgentService:
-    def __init__(self, *, settings, agent_repository, wardrobe_repository, wardrobe_service, retriever=None, model=None, weather_client=None):
+    def __init__(self, *, settings, agent_repository, wardrobe_repository, wardrobe_service, retriever=None, model=None, weather_client=None, observer=None):
         self.settings = settings
         self.repository = agent_repository
         self.wardrobe_repository = wardrobe_repository
@@ -90,6 +91,7 @@ class AgentService:
         self.model = model
         self.weather_client = weather_client
         self.profile_service = ProfileService(wardrobe_repository)
+        self.observer = observer
 
     def chat(self, owner_id: str, conversation_id: str, text: str) -> ConversationMessage:
         from stylemate.agent.policy import request_policy
@@ -99,8 +101,14 @@ class AgentService:
         if not isinstance(text, str) or not text.strip() or len(text) > 4000:
             raise ValueError("消息不能为空且不能超过 4000 个字符")
         route = route_skills(text, set(READ_TOOL_SCHEMAS) | set(WRITE_TOOL_SCHEMAS))
-        with request_policy(owner_id, conversation_id, route.allowed_tools):
-            return self._chat(owner_id, conversation_id, text)
+        with observe_run(self.observer) as observation:
+            with request_policy(owner_id, conversation_id, route.allowed_tools) as policy:
+                try:
+                    reply = self._chat(owner_id, conversation_id, text)
+                    observation.outcome = "degraded" if any(t.status != "success" for t in reply.traces) else "completed"
+                    return reply
+                finally:
+                    observation.tool_calls = policy.calls
 
     def _chat(self, owner_id: str, conversation_id: str, text: str) -> ConversationMessage:
         if not isinstance(text, str) or not text.strip() or len(text) > 4000:
@@ -157,7 +165,7 @@ class AgentService:
             content, traces, sources = _deadline_result()
         from stylemate.agent.policy import current_outfits
 
-        reply = ConversationMessage(role="assistant", content=content, traces=traces, sources=sources,
+        reply = ConversationMessage(role="assistant", run_id=current_run_id(), content=content, traces=traces, sources=sources,
                                     outfits=current_outfits(owner_id, conversation_id))
         self._save_turn(state, text.strip(), reply)
         return reply

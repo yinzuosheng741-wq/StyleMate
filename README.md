@@ -1,165 +1,151 @@
-# StyleMate 个人衣橱助手
+<div align="center">
 
-洗护更新（2026-10-28）：毛衣、针织衫或冲锋衣的类别不再充当材质/品牌依据；条件不足先澄清，改写后继续按原问题检查范围。当前离线指标及历史标签冲突见[洗护范围与验证](docs/CARE_SCOPE_20261028.md)。
+# 出行衣橱助手
 
-知识更新（2026-10-29）：核对 FTC 整件衣物护理、UNIQLO 香港及澳门测量章节，现有 21 条已审核摘要、21 条项目启发、24 条待核验。测量知识已接通对话路由，当前报告与语料指纹一致；见[测量知识与证据增量](docs/MEASUREMENT_KNOWLEDGE_20261029.md)。此前 7 条 ACI、GINETEX 审核记录见[历史知识增量](docs/KNOWLEDGE_EXPANSION_20261028.md)。
+**整理衣橱，搭好今天，准备下一次出行。**
 
-框架更新（2026-10-27）：修复工具超时重试和业务流程重复天气调用，统一请求时间边界；高星项目对标、架构取舍与验证范围见[框架演进设计](docs/FRAMEWORK_EVOLUTION_20261027.md)。
+本地优先的 Windows 便携桌面助手 · 衣物管理 · 天气穿搭 · 旅行行李 · AI 洗护问答
 
-2026-10-27 更新：衣橱界面采用暖纸色、陶土色和衣架标识，精简按钮与输入区的重复描边。见[视觉识别设计](docs/VISUAL_IDENTITY_20261027.md)。任务草稿、完整导出与全宽工作台见[桌面交互设计](docs/DESKTOP_REFINEMENT_20261027.md)，真实衣物卡片与评测版本绑定见[工作区与验证设计](docs/WORKSPACE_AND_VALIDATION_20261027.md)。
+[![CI](https://github.com/yinzuosheng741-wq/StyleMate/actions/workflows/ci.yml/badge.svg)](https://github.com/yinzuosheng741-wq/StyleMate/actions/workflows/ci.yml)
+[![MIT License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+![Python](https://img.shields.io/badge/Python-3.11%20%7C%203.12-blue.svg)
+![UI](https://img.shields.io/badge/UI-PySide6-41CD52.svg)
 
-![StyleMate 桌面工作区](docs/assets/workspace-identity-20261027.png)
+[快速开始](#快速开始) · [功能](#功能) · [服务配置](#服务配置) · [开发与验证](#开发与验证) · [贡献](CONTRIBUTING.md)
 
-截图使用关闭外部服务的演示环境；无图片单品显示品类占位。桌面启动见[桌面便携版](docs/DESKTOP.md)，知识审核与限制见[审查台账](docs/KNOWLEDGE_REVIEW_20261022.md)。
+</div>
 
-StyleMate 是一个本地优先的个人衣橱应用。它使用 Streamlit 提供衣橱管理和穿搭界面，使用有边界的 LangGraph Agent 编排天气、库存、知识检索和写操作；库存真实性、穿搭约束与数据写入由确定性代码控制。
+![客户端衣橱](docs/assets/wardrobe.png)
 
-项目面向单用户本地使用和面试展示，不包含账号系统，也不作为多用户 SaaS 部署。
+> 当前为开发预览版，独立分发包已在本机 Windows x64 验证。Linux CI 用于源码回归，不代表已提供 Linux / macOS 安装包。界面、API 基础连接和业务准确率是不同的验证范围，详见[核验报告](docs/PROJECT_AUDIT_20261030.md)。
 
-## 主要功能
+## 为什么做这个项目
 
-- **本地衣橱**：衣物元数据保存到 SQLite，图片保存到本地目录，支持筛选、编辑和删除。
-- **演示数据**：首次使用 local 模式时初始化 128 件演示单品，覆盖上装、下装、外套、连衣裙、鞋履、包袋和配饰。
-- **图片入库**：校验图片格式与大小，多模态模型先判断主体是否属于服装、鞋履、包袋或配饰，再生成可人工修改的结构化草稿。
-- **穿搭推荐**：只从当前衣橱选择衣物，并结合天气、季节、场景和用户明确提出的限制进行过滤与评分。
-- **衣橱助手**：支持连续对话、历史会话、天气穿搭、购买建议、洗护问答和旅行行李规划。
-- **知识检索**：对内置知识和当前会话文档执行有限术语扩展、BM25 与向量召回，通过 RRF 融合结果并返回来源。Windows 默认用 SQLite 精确向量后端，可选 Chroma；用户和会话范围在候选构建时再次检查。
-- **写操作保护**：Agent 的新增、修改和删除请求先生成待确认操作，用户确认后才写入本地数据库。
-- **服务降级**：文本模型、Embedding、Chroma 或天气接口不可用时，保留确定性规则和 BM25 能力；多模态模型不可用时不会接受图片入库。
+衣橱里有衣服，出门前依然会犹豫：今天的天气穿什么、旅行三天带哪些、这件衣物该怎么洗。出行衣橱助手把真实衣物库存、个人偏好、天气和知识来源放在一个窗口里，帮助完成从整理到出门准备的流程。
+
+项目原名 StyleMate。Python 包名与已有数据库文件名保留，以兼容既有衣橱；产品界面使用新的中文名。
+
+## 功能
+
+| 场景 | 可以做什么 | 服务要求 |
+| --- | --- | --- |
+| 整理衣橱 | 照片卡片、名称/颜色/材质/风格搜索、类别季节筛选、排序分页、详情编辑与删除 | 离线可用 |
+| 添加衣物 | 手动录入，或识别照片后编辑草稿并确认入库 | 手动离线；识别需视觉模型 |
+| 今天怎么穿 | 根据真实库存、场景、季节和排除条件生成搭配并收藏 | 规则离线；实时天气可选 |
+| 出行准备 | 在对话中说明目的地、天数、活动和限制，获取旅行行李与穿搭建议 | AI 对话和实时天气可选 |
+| 洗护与知识 | 查询带来源的知识摘要，添加当前会话的 PDF/TXT/Markdown 资料 | 关键词检索离线；向量可选 |
+| 对话与资料 | 历史会话、草稿恢复、资料管理、Markdown 对话导出 | 离线存储；模型回答需配置 |
+| 本地数据 | 偏好设置、JSON 清单导出、含数据库与照片的 ZIP 备份 | 离线可用 |
+
+衣橱写操作先展示修改前后内容，确认后才执行。搭配只使用当前库存，规则分数仅用于候选排序。出行能力聚焦衣物、天气与行李准备，暂不提供路线导航、订票或酒店预订。
 
 ## 快速开始
 
-推荐使用 Python 3.11。以下命令以 PowerShell 为例：
+### Windows 便携客户端
+
+1. 获取项目公开构建产物 `TravelWardrobeAssistant-Windows-Portable.zip`。
+2. 完整解压到可写目录，双击 **`出行衣橱助手.exe`**。
+3. 首次启动配置模型与天气服务，也可点击“暂不配置”，直接使用离线衣橱。
+
+软件已包含 Python、Qt 和运行依赖。不要只复制 exe；退出后整个文件夹可迁移到另一台电脑。首次运行初始化 128 件演示衣物；已有数据不会被覆盖，已删除的演示衣物不会在重启时恢复。
+
+**获取构建产物**：查看仓库 [Actions](https://github.com/yinzuosheng741-wq/StyleMate/actions/workflows/desktop-release.yml)，运行 `Build Windows Desktop` 后下载产物；维护者可将其中的 ZIP 上传到 Releases。GitHub 源码 ZIP 不包含 exe，本文不把尚未发布的 Release 当成可下载版本。
+
+### 从源码运行
+
+要求 Python 3.11 或 3.12，以下使用 PowerShell：
 
 ```powershell
-git clone https://github.com/yinzuosheng741-wq/StyleMate.git
-cd StyleMate
+git clone https://github.com/yinzuosheng741-wq/StyleMate.git travel-wardrobe-assistant
+cd travel-wardrobe-assistant
 python -m venv .venv
-.venv\Scripts\Activate.ps1
-python -m pip install -r requirements.txt
-Copy-Item .env.example .env
-python -m streamlit run app.py --server.port 8511
+.venv\Scripts\python.exe -m pip install -r requirements.txt
+.venv\Scripts\python.exe desktop.py
 ```
 
-启动后在浏览器访问 `http://localhost:8511`。
+安装依赖后，也可双击 `Start.vbs` 隐藏控制台启动，或运行 `Start.cmd` 查看诊断输出。`requirements-desktop.txt` 和 `requirements-portable.txt` 均引用默认原生运行依赖。
 
-仓库没有部署公开在线演示地址。GitHub 访客需要克隆项目后在本地运行。
+## 服务配置
 
-### 首次启动
+从首次启动向导，或“设置 → 服务状态 → 配置模型、天气与定位”打开配置窗口。各能力可以分别启用，修改后保存即可应用。
 
-`.env.example` 默认使用 `APP_MODE=local`。当 `data/stylemate.db` 不存在时，应用会从 `assets/demo/wardrobe.json` 初始化 128 件演示衣物，并把对应图片复制到本地图片存储。
+![配置向导](docs/assets/service-setup.png)
 
-local 模式下的编辑和删除会永久保存。用户删除的演示衣物不会在下次启动时被迁移逻辑恢复。
+| 能力 | 填写内容 | 选型要求 |
+| --- | --- | --- |
+| 对话 | 兼容接口地址、API Key、模型名称 | 模型应支持工具调用；也可接本机服务 |
+| 图片识别 | 视觉接口地址、Key、模型名称 | 必须支持图片输入 |
+| 语义检索 | 向量接口地址、Key、模型名称 | 必须是 Embedding 模型，不能填对话模型 |
+| 高德天气 | 自己的 Web 服务 Key、默认城市 | 城市名称会解析为行政区编码 |
+| Open-Meteo 天气 | 默认城市，无需 Key | 免费接口限非商业使用，有限额及可用性限制 |
 
-## 模型与外部服务配置
+图片与向量页可复用对话的地址、密钥；三个模型名称分别填写。支持导入已有 `.env`，包括常见 OpenAI-compatible / DashScope / 高德密钥别名。连接测试发送少量请求，视觉测试使用生成色块，不上传个人衣橱照片。
 
-不填写 API Key 也可以查看本地衣橱、运行确定性穿搭规则和使用 BM25 检索。图片识别、模型对话、在线 Embedding 和实时天气需要配置对应服务。
+IP 城市定位**默认关闭**，手动指定城市即可查天气。主动开启后，高德可在未指定城市时通过网络出口 IP 推测城市；结果可能受 VPN 影响，不等同于 GPS。可随时关闭在线天气。
 
-| 变量 | 用途 |
+“已配置”只表示填写了配置。连接测试验证基础响应，不保证模型工具调用或衣物识别准确率。免费接口条款见 [Open-Meteo](https://open-meteo.com/en/pricing)，完整说明见[便携版指南](docs/PORTABLE_20261030.md)。
+
+## 数据、隐私与备份
+
+| 位置 | 内容 |
 | --- | --- |
-| `APP_MODE` | `local` 或 `demo`，默认 `local` |
-| `LLM_PROVIDER` | 文本模型提供方标识 |
-| `LLM_API_KEY` / `LLM_BASE_URL` | OpenAI-compatible 文本模型配置 |
-| `TEXT_MODEL_NAME` | 文本模型名称 |
-| `VISION_API_KEY` / `VISION_BASE_URL` | 多模态衣物识别配置 |
-| `VISION_MODEL_NAME` | 多模态模型名称 |
-| `EMBEDDING_API_KEY` / `EMBEDDING_BASE_URL` | 在线向量模型配置 |
-| `EMBEDDING_MODEL_NAME` | Embedding 模型名称 |
-| `AMAP_API_KEY` | 高德定位与天气配置 |
+| `data/stylemate.db` | 衣物信息、偏好、收藏、会话与资料 |
+| `data/uploads/` | 衣物照片 |
+| `data/config/services.env` | 本机私有服务配置 |
+| `data/desktop/ui.ini` | 草稿、窗口位置和上次会话 |
+| `data/knowledge/` | 内置带来源的知识记录 |
 
-密钥只应写入本地 `.env` 或部署平台的 Secret 配置，不能提交到 Git。
+默认保存在程序目录，不要求注册本项目账号。启用外部模型、向量、天气或定位时，相应输入会发送到你选择的服务；本地存储不等于所有功能均不联网。
 
-## 实现边界
+密钥在 UI 中遮挡，配置文件本身**没有加密**。不要公开使用过的个人目录；公开构建包不包含开发者密钥、数据库或草稿。
 
-- LangGraph 只负责模型调用与结构化工具编排，单轮设置模型调用和工具调用上限。
-- 推荐算法先执行库存、季节、温度和显式排除条件等硬约束，再计算场景、风格、配色和完整度评分。
-- 会话上下文保留最近消息，并把主题、场景、地点、衣物编号和临时限制保存为有界的结构化事实。
-- 长期偏好必须经用户确认后保存；衣橱写操作使用带有效期的 PendingAction 快照。
-- RAG 检索结果必须具有可验证来源；有限改写后仍没有有效引用时明确返回未找到。
-- 这是单 Agent 应用，不宣称多 Agent 协同、模型训练或面向生产环境的多用户能力。
+“创建完整备份”生成数据库在线快照、关联照片及 SHA-256 清单，不包含密钥、界面状态或向量缓存。JSON 清单只是衣物元数据导出，不能代替备份。恢复与升级见[客户端指南](docs/DESKTOP.md)。
 
-## 数据与素材
+## 开发与验证
 
-以下内容会提交到 GitHub：
+```powershell
+.venv\Scripts\python.exe -m pip install -r requirements-dev.txt
+.venv\Scripts\python.exe scripts/validate.py
+```
 
-- 源码、测试、知识库和离线评测脚本；
-- 128 张 768 x 768 WebP 演示图片；
-- 演示衣物 manifest、素材作者、原图地址、尺寸和授权信息；
-- 固定测试集生成的离线评测结果。
+统一验证执行依赖检查、知识和素材审计、Ruff、编译、测试和固定评测质量门槛，输出到 `artifacts/validation/`。测试默认阻断联网，使用隔离数据；真实服务检查单独执行，不把开发者密钥交给 CI。
 
-以下内容只保留在本地，并已通过 `.gitignore` 排除：
+Actions 配置了 Linux 与 Windows 源码测试。徽章展示远端状态；本地证据及实际限制见[核验报告](docs/PROJECT_AUDIT_20261030.md)，本地通过不能代替尚未运行的远端 CI。
 
-- `.env` 和真实 API Key；
-- `data/stylemate.db`；
-- `data/uploads/`、`data/chroma/` 和用户上传文档；
-- `.venv/`、测试缓存和运行日志。
+Windows 打包：
 
-演示图片来自 Auckland Museum，通过 Wikimedia Commons 核验为 `CC BY 4.0`。完整来源与处理方式见 [assets/demo/SOURCE.md](assets/demo/SOURCE.md)，逐条元数据位于 [assets/demo/wardrobe.json](assets/demo/wardrobe.json)。
+```powershell
+.venv\Scripts\python.exe -m pip install pyinstaller==6.11.1
+.venv\Scripts\python.exe scripts/build_desktop.py
+```
 
-## 项目结构
+输出目录 `dist/native/出行衣橱助手/`，公开 ZIP 为 `dist/TravelWardrobeAssistant-Windows-Portable.zip`。旧输出存在个人配置或数据库时拒绝覆盖。`portable-lock.txt` 是特定 Windows / Python 环境快照，不作为跨平台锁文件。
+
+## 架构
 
 ```text
-StyleMate/
-├─ app.py                 # Streamlit 入口
-├─ stylemate/             # 正式运行时代码
-│  ├─ agent/              # LangGraph、工具、中间件、记忆与 AgentService
-│  ├─ config/             # 环境配置
-│  ├─ demo/               # 会话级样例数据
-│  ├─ domain/             # Pydantic 领域模型
-│  ├─ gateways/           # 多模态服务网关
-│  ├─ model/              # 文本模型工厂
-│  ├─ rag/                # 语料、文档切分与混合检索
-│  ├─ repositories/       # Session 与 SQLite 仓储
-│  ├─ rules/              # 确定性穿搭规则
-│  ├─ services/           # 衣橱、初始化与画像服务
-│  ├─ skills/             # 入库、穿搭、知识问答三个领域 Skill
-│  ├─ storage/            # 本地与会话图片存储
-│  └─ ui/                 # Streamlit 状态和组件
-├─ assets/demo/           # 128 件演示衣物、manifest 和授权说明
-├─ data/knowledge/        # 内置知识记录与来源
-├─ evaluation/            # 固定离线评测
-├─ artifacts/             # 已生成的评测结果
-├─ scripts/               # 素材与知识库维护脚本
-└─ tests/                 # 自动化测试
+Qt 原生界面 → 业务服务 → SQLite / 照片 / 会话资料
+                    ├─ 确定性穿搭与库存约束
+                    ├─ 有界 LangGraph → 模型与工具 → 写操作确认
+                    └─ 知识检索 → BM25 / 可选向量 → 来源
 ```
 
-## 验证
+`desktop/` 为页面、配置和备份；`services/` 为应用服务；`agent/` 为编排、工具与记忆；`repositories/` 为存储；`rag/` 为检索；`rules/` 为确定性规则；`evaluation/` 和 `tests/` 保存评测及回归用例。工具使用有界线程池、超时和调用预算；写操作通过带有效期的快照确认，见[框架说明](docs/FRAMEWORK_MAINTENANCE_20261029.md)。
 
-仓库通过 GitHub Actions 在 `main` 推送和 Pull Request 时使用 Python 3.11 执行 healthcheck、素材授权审计、静态编译、Ruff 和自动化测试。CI 不配置真实模型、视觉服务、Embedding 或天气 Key，因此验证的是可重复的本地逻辑、输入边界与降级路径，不替代线上服务联调。
+## 已知限制与常见问题
 
-本地安装开发依赖后运行：
+- **没有模型 Key？** 可管理衣橱、手动录入、规则搭配和关键词检索；照片识别需要视觉服务。
+- **接口返回 401 / 404 / 429？** 分别检查密钥授权、接口路径或模型名称、额度或限流；设置页可测试连接。
+- **备份失败？** 检查目录权限、剩余空间及照片是否缺失。失败时保留已有备份。
+- **云同步、多用户、自动更新？** 暂不支持。当前聚焦单用户，同一数据目录限制一个客户端实例。
+- **回答准确率？** 不作保证。检索题集的本地 Hash Embedding 基线 Recall@5 为 0.2389，存在证据不足和历史题目范围冲突；固定门槛只阻止已知回归。护理建议以该件衣物洗标和品牌说明为准。
 
-```powershell
-python -m pip install -r requirements-dev.txt
-python -m pytest -q
-python -m ruff check .
-python scripts/audit_demo_sources.py
-python -m evaluation.run_eval --output artifacts/evaluation.json
-python -m evaluation.run_agent_eval --output artifacts/agent_evaluation_local.json
-```
+后续方向：提高已审核知识覆盖及检索质量、扩充独立业务验证、改进出行准备体验。未完成的方向不写成现成功能。
 
-每次代码或依赖变化后，应以最新 CI 和本地命令输出为准，不把历史的固定通过数写成当前结论。
+## 贡献与许可证
 
-> 运行时可在“关于项目 → 运行时诊断”查看文本模型、视觉识别、向量检索和天气服务是否已配置。诊断只输出能力状态与检索计数，不包含密钥、对话原文或向量。
+欢迎提交可复现的 Bug、交互改进和带官方来源的知识修订。见[贡献指南](CONTRIBUTING.md)和 [安全说明](SECURITY.md)。报告时不要上传密钥、个人照片或完整私有配置。
 
-随仓库保留的离线评估样例：
+项目代码采用 [MIT](LICENSE)。第三方组件与素材保留各自许可，见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。演示图片来自 Auckland Museum / Wikimedia Commons，CC BY 4.0，见[逐项来源](assets/demo/SOURCE.md)；演示数据不作为识别准确率测试集。
 
-| 检查项 | 结果 |
-| --- | ---: |
-| 自动化测试 | 由 GitHub Actions 和本地 `pytest` 验证 |
-| 演示衣物审计 | 128 件，7 个类别，全部 CC BY 4.0 |
-| 穿搭规则离线用例 | 10 条 |
-| Agent / RAG 离线用例 | 101 条 |
-| 固定用例工具选择准确率 | 100% |
-| 固定用例写操作保护率 | 100% |
-| 历史题集标注 ID 可用覆盖 | 17/60（28.33%）；其中 13 条兼容当前范围规则 |
-| 当前已发布事实 | 21 条；另有 21 条项目启发、24 条待核验 |
-| RAG Recall@5 | 0.2389 |
-| RAG MRR@5 | 0.2181 |
-| RAG nDCG@5 | 0.2167 |
-
-RAG 指标来自仓库内 60 条固定用例和可复现的本地 Hash Embedding，只用于验证检索、排序和融合链路，不代表某个在线 Embedding 模型的实际效果。延迟会受运行环境影响，因此不在项目介绍中承诺固定数值。在线模型需要单独配置并重新评测。
-
-本批未删除减分题。当前有 4 条范围冲突题：3 条冲锋衣标签要求直接返回 GORE-TEX 专属资料，另有 1 条羊毛题要求返回未包含羊毛专项说明的通用部件护理摘要。报告保留全部 60 题分母和冲突题 ID；分数变化来自语料与知识路由更新，不证明真实模型或独立用户问题的效果提升。
-
-当前展示报告由 `artifacts/evaluation_manifest.json` 指定，并核对语料和三个题集的指纹。使用新的报告文件名时同步更新 manifest；旧版 0.95 来自审核前语料，保留作历史记录，不作为当前结果。
+界面组织参考 [LocalSend](https://github.com/localsend/localsend) 和 [Files](https://github.com/files-community/Files)，实现采用自己的 Qt 页面、图标和主题。

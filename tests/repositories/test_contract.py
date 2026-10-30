@@ -114,6 +114,17 @@ def test_repository_profile_favorite_and_feedback_round_trips_are_isolated(repo)
     assert stored_feedback(repo, "owner-2", "outfit-2").note == "另一位用户的反馈"
 
 
+def test_delete_favorite_preserves_other_owner_and_survives_reload(repo):
+    repo.save_favorite(favorite("owner-1", "same-id", "自己的收藏"))
+    repo.save_favorite(favorite("owner-2", "same-id", "他人的收藏"))
+    repo.delete_favorite("owner-1", "same-id")
+    repo.delete_favorite("owner-1", "missing")
+    if isinstance(repo, SQLiteWardrobeRepository):
+        repo = SQLiteWardrobeRepository(repo.path)
+    assert repo.list_favorites("owner-1") == []
+    assert len(repo.list_favorites("owner-2")) == 1
+
+
 def test_sqlite_repository_round_trips_through_a_fresh_instance(tmp_path: Path):
     database_path = tmp_path / "stylemate.db"
     original = SQLiteWardrobeRepository(database_path)

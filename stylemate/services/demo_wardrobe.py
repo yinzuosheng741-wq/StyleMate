@@ -45,7 +45,10 @@ def seed_local_demo_wardrobe(
     if marker == "demo_wardrobe_v1" and version == "demo_wardrobe_v1":
         return 0
 
-    legacy_ids = _read_ids(repository, f"{LEGACY_DEMO_SEED_KEY}{_SEED_IDS_SUFFIX}") | manifest_legacy_ids
+    legacy_ids = _read_ids(repository, f"{LEGACY_DEMO_SEED_KEY}{_SEED_IDS_SUFFIX}")
+    # Manifest IDs describe a previous release, not deletions in a brand-new database.
+    if marker == "demo_wardrobe_v1":
+        legacy_ids |= manifest_legacy_ids
     progress_key = f"{DEMO_SEED_KEY}{_SEED_IDS_SUFFIX}"
     progress_ids = _read_ids(repository, progress_key)
     inserted = 0

@@ -154,6 +154,10 @@ class SQLiteWardrobeRepository:
             ).fetchall()
         return [FavoriteOutfit.model_validate_json(payload) for (payload,) in rows]
 
+    def delete_favorite(self, owner_id: str, outfit_id: str) -> None:
+        with self._connection() as connection, connection:
+            connection.execute("DELETE FROM favorites WHERE owner_id = ? AND outfit_id = ?", (owner_id, outfit_id))
+
     def save_feedback(self, feedback: OutfitFeedback) -> None:
         with self._connection() as connection, connection:
             connection.execute(

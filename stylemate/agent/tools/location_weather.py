@@ -6,7 +6,7 @@ import requests
 from pydantic import BaseModel
 
 _AMAP_BASE_URL = "https://restapi.amap.com/v3"
-_FailureReason = Literal["", "missing_key", "timeout", "upstream_error", "invalid_response"]
+_FailureReason = Literal["", "missing_key", "timeout", "upstream_error", "invalid_response", "disabled", "location_disabled", "missing_city"]
 
 
 class LocationResult(BaseModel):

@@ -4,9 +4,7 @@ from __future__ import annotations
 
 import json
 import re
-from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures import TimeoutError as FutureTimeout
-from contextvars import copy_context
 from dataclasses import dataclass
 from time import monotonic
 from typing import Any, Callable
@@ -14,7 +12,9 @@ from typing import Any, Callable
 import requests
 from pydantic import BaseModel, ValidationError
 
+from stylemate.agent.execution import READ_TOOL_RUNNER, ToolCapacityExceeded
 from stylemate.agent.policy import remaining_request_seconds
+from stylemate.agent.telemetry import record_counter
 from stylemate.domain.models import AgentTraceStep, ToolExecution, ToolSpec
 from stylemate.repositories.base import WardrobeRepository
 
@@ -36,7 +36,15 @@ ToolHandler = Callable[[dict[str, Any], ToolContext], Any]
 class ToolExecutor:
     """Validate, time-bound, and trace a single read tool call."""
 
-    def execute(
+    def __init__(self, runner=None):
+        self.runner = runner if runner is not None else READ_TOOL_RUNNER
+
+    def execute(self, spec, arguments, context, handler):
+        result = self._execute(spec, arguments, context, handler)
+        record_counter("tool_successes" if result.status == "success" else "tool_failures")
+        return result
+
+    def _execute(
         self,
         spec: ToolSpec,
         arguments: dict[str, Any],
@@ -82,6 +90,9 @@ class ToolExecutor:
                         duration_ms=_duration_ms(started),
                     ),
                 )
+            except ToolCapacityExceeded:
+                record_counter("capacity_rejections")
+                return self._failure(spec.name, started, "后台工具繁忙，请稍后重试。", "tool_capacity_exhausted")
             except FutureTimeout:
                 # A waiting timeout cannot kill a running Python thread. Never
                 # overlap a retry with that worker or accept its eventual result.
@@ -108,20 +119,23 @@ class ToolExecutor:
         validated: BaseModel = spec.arguments_model.model_validate(arguments)
         return validated.model_dump(exclude_none=True)
 
-    @staticmethod
     def _call_with_timeout(
+        self,
         timeout_seconds: float,
         handler: ToolHandler,
         arguments: dict[str, Any],
         context: ToolContext,
     ) -> Any:
-        executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="tool-read")
-        # ContextVar policy must survive the executor thread boundary.
-        future = executor.submit(copy_context().run, handler, arguments, context)
+        def invoke():
+            record_counter("tool_attempts")
+            return handler(arguments, context)
+        future = self.runner.submit(invoke)
         try:
             return future.result(timeout=timeout_seconds)
         finally:
-            executor.shutdown(wait=False, cancel_futures=True)
+            # Cancel work that has not started. Running reads retain their capacity
+            # until the future finishes; timeout never frees a still-running slot.
+            future.cancel()
 
     @staticmethod
     def _owns_returned_garments(data: Any, context: ToolContext) -> bool:

@@ -87,6 +87,7 @@ class KnowledgeSource(BaseModel):
 class ConversationMessage(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     role: Literal["user", "assistant"]
+    run_id: str | None = None
     content: str = Field(min_length=1, max_length=12000)
     traces: list[AgentTraceStep] = Field(default_factory=list)
     sources: list[KnowledgeSource] = Field(default_factory=list)

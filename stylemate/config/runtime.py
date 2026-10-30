@@ -20,6 +20,9 @@ class RuntimeSettings:
     tool_timeout_seconds: int = 5
     max_document_bytes: int = 4 * 1024 * 1024
     max_document_chars: int = 200_000
+    weather_provider: str = "amap"
+    weather_city: str = ""
+    allow_ip_location: bool = False
 
     @property
     def dashscope_base_url(self) -> str:
@@ -49,4 +52,7 @@ class RuntimeSettings:
             vision_base_url=os.getenv("VISION_BASE_URL", ""),
             embedding_base_url=os.getenv("EMBEDDING_BASE_URL", ""),
             embedding_model_name=os.getenv("EMBEDDING_MODEL_NAME", "text-embedding-v4"),
+            weather_provider=os.getenv("WEATHER_PROVIDER", "amap"),
+            weather_city=os.getenv("WEATHER_CITY", ""),
+            allow_ip_location=os.getenv("ALLOW_IP_LOCATION", "0") == "1",
         )

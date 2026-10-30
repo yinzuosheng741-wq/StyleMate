@@ -11,7 +11,8 @@ def runtime_diagnostics(settings: Any, retriever: Any | None = None) -> dict[str
     embedding_key = bool(os.getenv("EMBEDDING_API_KEY") or os.getenv("DASHSCOPE_API_KEY"))
     text_key = bool(os.getenv("LLM_API_KEY") or os.getenv("DASHSCOPE_API_KEY"))
     vision_key = bool(os.getenv("VISION_API_KEY") or os.getenv("DASHSCOPE_API_KEY"))
-    weather_key = bool(os.getenv("AMAP_API_KEY") or os.getenv("GAODE_API_KEY"))
+    weather_key = (getattr(settings, "weather_provider", "amap") == "open-meteo" or
+                   (getattr(settings, "weather_provider", "amap") == "amap" and bool(os.getenv("AMAP_API_KEY") or os.getenv("GAODE_API_KEY"))))
     result: dict[str, Any] = {
         "mode": settings.app_mode,
         "text_model": settings.text_model_name,
@@ -24,6 +25,8 @@ def runtime_diagnostics(settings: Any, retriever: Any | None = None) -> dict[str
     }
     if retriever is not None and hasattr(retriever, "stats"):
         result["retriever_stats"] = retriever.stats()
+    from stylemate.agent.execution import READ_TOOL_RUNNER
+    result["read_tool_executor"] = READ_TOOL_RUNNER.stats()
     return result
 
 

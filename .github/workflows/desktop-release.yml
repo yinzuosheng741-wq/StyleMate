@@ -1,0 +1,40 @@
+name: Build Windows Desktop
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    env:
+      QT_QPA_PLATFORM: offscreen
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: |
+            requirements.txt
+            requirements-common.txt
+            requirements-desktop.txt
+            requirements-dev.txt
+      - run: python -m pip install -r requirements-desktop.txt -r requirements-dev.txt pyinstaller==6.11.1
+      - run: python scripts/validate.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: desktop-validation
+          path: artifacts/validation/
+          retention-days: 14
+      - run: python scripts/build_desktop.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: TravelWardrobeAssistant-Windows
+          path: dist/TravelWardrobeAssistant-Windows-Portable.zip
+          if-no-files-found: error
+          retention-days: 14

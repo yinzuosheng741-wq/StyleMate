@@ -1,4 +1,4 @@
-param([string[]]$PytestArgs = @('-q'))
+param([string[]]$PytestArgs = @('-q'), [switch]$KeepTemp)
 
 $ErrorActionPreference = 'Stop'
 $projectRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
@@ -22,5 +22,13 @@ try {
 } finally {
     $env:TEMP, $env:TMP = $savedTemp, $savedTmp
 }
-# Preserve temporary artifacts for diagnosis. They are ignored by Git.
+# Preserve failed-test artifacts; successful runs should not accumulate caches.
+if ($testExitCode -eq 0 -and -not $KeepTemp) {
+    $resolvedTestRoot = [IO.Path]::GetFullPath($testRoot)
+    if (-not $resolvedTestRoot.StartsWith($projectRoot + [IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase) -or
+        -not [IO.Path]::GetFileName($resolvedTestRoot).StartsWith('.pytest-tmp-')) {
+        throw 'Refusing cleanup outside the test workspace.'
+    }
+    Remove-Item -LiteralPath $resolvedTestRoot -Recurse -Force
+}
 exit $testExitCode
