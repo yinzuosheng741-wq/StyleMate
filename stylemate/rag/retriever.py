@@ -7,7 +7,6 @@ import logging
 import math
 import os
 import re
-import sys
 from collections import Counter
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
@@ -169,10 +168,10 @@ def user_vector_id(conversation_id: str, document_id: str, chunk_id: str = "") -
 
 
 def create_chroma_client(mode: str = "demo", path: str = "data/chroma"):
-    """Select portable exact search on Windows, or opt into native Chroma."""
+    """Use the bundled exact-search backend everywhere; Chroma is explicit opt-in."""
     if mode not in {"demo", "local"}:
         raise ValueError("mode must be demo or local")
-    backend = os.getenv("STYLEMATE_VECTOR_BACKEND", "sqlite" if sys.platform == "win32" else "chroma")
+    backend = os.getenv("STYLEMATE_VECTOR_BACKEND", "sqlite")
     if backend == "sqlite":
         from stylemate.rag.portable_vectors import PortableVectorClient
         return PortableVectorClient(None if mode == "demo" else Path(path) / "portable-vectors.sqlite3")

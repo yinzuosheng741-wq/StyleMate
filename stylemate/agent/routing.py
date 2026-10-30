@@ -27,7 +27,7 @@ _TERMS = {
 }
 _WRITE_TERMS = {
     "add_garment": ("新增", "添加", "录入", "入库", "add "),
-    "update_garment": ("修改", "更新", "编辑", "改成", "update ", "edit "),
+    "update_garment": ("修改", "更新", "编辑", "改成", "改为", "改名", "重命名", "update ", "edit "),
     "delete_garment": ("删除", "移除", "删掉", "delete ", "remove "),
 }
 
@@ -41,7 +41,7 @@ _NON_ACTION = re.compile(
 )
 _REQUEST_PREFIX = re.compile(
     r"^(?:(?:请|麻烦|帮我|替我|帮忙|现在|立即|直接|我想|我要|我需要|我希望)\s*)*"
-    r"(?:新增|添加|录入|入库|修改|更新|编辑|删除|移除|删掉|把|将|"
+    r"(?:新增|添加|录入|入库|修改|更新|编辑|改名|重命名|删除|移除|删掉|把|将|"
     r"(?:please\s+)?(?:add|update|edit|delete|remove)\b)", re.I,
 )
 
@@ -64,7 +64,7 @@ def explicit_write_tools(text: str) -> set[str]:
             clause = clause.strip().casefold()
             if not clause or _NON_ACTION.search(clause) or re.search(r"[?？]|吗|么|呢", clause):
                 continue
-            if re.search(r"(?:删除|移除|修改|更新|添加)(?:前|后|过|了)", clause):
+            if re.search(r"(?:删除|移除|修改|更新|添加|改成|改为|改名|重命名)(?:为)?(?:前|后|过|了)", clause):
                 continue
             if not _REQUEST_PREFIX.search(clause):
                 continue

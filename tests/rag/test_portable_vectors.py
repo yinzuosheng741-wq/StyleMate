@@ -3,6 +3,23 @@ import pytest
 from stylemate.rag.portable_vectors import PortableVectorClient
 
 
+def test_default_backend_runs_without_optional_chroma(tmp_path, monkeypatch):
+    import builtins
+
+    from stylemate.rag.retriever import create_chroma_client
+    monkeypatch.delenv("STYLEMATE_VECTOR_BACKEND", raising=False)
+    original = builtins.__import__
+    def without_chroma(name, *args, **kwargs):
+        if name == "chromadb" or name.startswith("chromadb."):
+            raise ModuleNotFoundError("optional Chroma is not installed")
+        return original(name, *args, **kwargs)
+    monkeypatch.setattr(builtins, "__import__", without_chroma)
+    collection = create_chroma_client("local", str(tmp_path)).get_or_create_collection("test")
+    collection.upsert(ids=["shirt"], documents=["test shirt"], embeddings=[[1.0, 0.0]])
+    reopened = create_chroma_client("local", str(tmp_path)).get_collection("test")
+    assert reopened.query(query_embeddings=[[1.0, 0.0]], n_results=1)["ids"] == [["shirt"]]
+
+
 def test_persistent_vectors_survive_reopen_and_filter_before_ranking(tmp_path):
     path = tmp_path / "vectors.sqlite3"
     client = PortableVectorClient(path)

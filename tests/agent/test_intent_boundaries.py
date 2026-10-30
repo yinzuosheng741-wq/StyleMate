@@ -19,6 +19,9 @@ from tests.agent.test_service import service
     'Explain "delete this garment"', "do not delete garment g-1", "how do I delete a garment?",
     "如果删除失败，删除记录会恢复吗", "帮我看看删除功能", "我已经删除了衣服",
     "如果找到重复项，请删除衣物编号g-1", "删除后衣物就没了", "删除了这件衣服",
+    "不要把白衬衫名称改为外套", "如何重命名衣物？", "如果把名称改为外套会怎样？",
+    "他说“把白衬衫名称改为外套”", "我已经重命名了衣服", "改名功能在哪里",
+    "重命名了这件衣服", "把白衬衫名称改为了通勤衬衫",
 ])
 def test_non_action_messages_cannot_open_write_proposal_tools(text):
     route = route_skills(text, {tool.name for tool in toolkit().tools})
@@ -29,6 +32,9 @@ def test_non_action_messages_cannot_open_write_proposal_tools(text):
     ("请帮我删除衣物编号g-1", {"delete_garment"}),
     ("把白衬衫从衣橱移除", {"delete_garment"}),
     ("将白衬衫颜色改成米色", {"update_garment"}),
+    ("请把编号 g-1 的衣服名称改为“出行衬衫”，等我确认后再改。", {"update_garment"}),
+    ("帮我将白衬衫改名为通勤衬衫", {"update_garment"}),
+    ("重命名编号 g-1 为通勤衬衫", {"update_garment"}),
     ("新增一件白色上衣", {"add_garment"}),
     ("Please delete garment g-1", {"delete_garment"}),
     ("不要删除白衬衫，但请更新裤子的颜色", {"update_garment"}),

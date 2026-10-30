@@ -112,6 +112,8 @@ IP 城市定位**默认关闭**，手动指定城市即可查天气。主动开�
 
 Actions 配置了 Linux 与 Windows 源码测试。徽章展示远端状态；本地证据及实际限制见[核验报告](docs/PROJECT_AUDIT_20261030.md)，本地通过不能代替尚未运行的远端 CI。
 
+最新的完整使用流程、真实接口复测及缺陷修复记录见[功能测试报告](docs/FUNCTIONAL_TEST_20261030.md)。
+
 Windows 打包：
 
 ```powershell
