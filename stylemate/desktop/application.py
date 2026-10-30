@@ -24,7 +24,6 @@ from PySide6.QtGui import (
 )
 from PySide6.QtWidgets import (
     QApplication,
-    QComboBox,
     QDialog,
     QDialogButtonBox,
     QFileDialog,
@@ -43,10 +42,8 @@ from PySide6.QtWidgets import (
     QProgressBar,
     QPushButton,
     QScrollArea,
-    QSplitter,
     QStackedWidget,
     QTabWidget,
-    QTextBrowser,
     QVBoxLayout,
     QWidget,
 )
@@ -55,13 +52,14 @@ from stylemate.branding import REPOSITORY_URL
 from stylemate.config.portable import DEFAULTS, ServiceConfigStore, application_root, apply_environment
 from stylemate.config.runtime import RuntimeSettings
 from stylemate.desktop.backup import create_backup
-from stylemate.desktop.chat_view import conversation_html
+from stylemate.desktop.chat_view import ChatTranscript
 from stylemate.desktop.icons import navigation_icon
 from stylemate.desktop.instance import acquire_instance_lock
 from stylemate.desktop.service_settings import ServiceSettingsDialog
 from stylemate.desktop.theme import STYLE
+from stylemate.desktop.widgets import ArrowComboBox
 from stylemate.diagnostics import runtime_diagnostics
-from stylemate.domain.models import FavoriteOutfit, Garment, OutfitRecommendation, OutfitRequest
+from stylemate.domain.models import ConversationMessage, FavoriteOutfit, Garment, OutfitRecommendation, OutfitRequest
 from stylemate.services.context import build_context, validated_garment_update
 from stylemate.services.conversation_export import conversation_export
 
@@ -86,7 +84,7 @@ def button(text, action, primary=False):
 
 
 def combo(items):
-    result = QComboBox()
+    result = ArrowComboBox()
     result.addItems(items)
     return result
 
@@ -120,10 +118,10 @@ def scroll_content():
 
 def app_icon():
     pixmap = QPixmap(64, 64)
-    pixmap.fill(QColor("#203d35"))
+    pixmap.fill(QColor("#282b2e"))
     painter = QPainter(pixmap)
     painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-    painter.setPen(QPen(QColor("#e1e7cb"), 3))
+    painter.setPen(QPen(QColor("#f3f4f5"), 3))
     painter.drawArc(26, 11, 14, 14, 0, 270 * 16)
     painter.drawPolyline([QPoint(x, y)
                           for x, y in [(32, 25), (12, 43), (52, 43), (32, 25)]])
@@ -209,6 +207,7 @@ class MainWindow(QMainWindow):
         self.context = context
         self.config_store = config_store or ServiceConfigStore()
         self.busy = False
+        self.pending_chat_text = None
         self.active_task = None
         self.pool = QThreadPool(self)
         self.pool.setMaxThreadCount(1)
@@ -230,11 +229,19 @@ class MainWindow(QMainWindow):
         shell.setContentsMargins(0, 0, 0, 0)
         shell.setSpacing(0)
         sidebar, side = panel("sidebar")
-        sidebar.setFixedWidth(190)
-        side.setContentsMargins(16, 30, 16, 20)
-        side.addWidget(label("出行衣橱助手", "brand"))
-        side.addWidget(label("你的日常衣橱", "eyebrow"))
-        side.addSpacing(28)
+        sidebar.setFixedWidth(206)
+        side.setContentsMargins(16, 24, 16, 20)
+        brand_row = QHBoxLayout()
+        brand_row.setSpacing(10)
+        mark = label("衣", "brandMark")
+        mark.setFixedSize(32, 32)
+        mark.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        brand_row.addWidget(mark)
+        brand_row.addWidget(label("出行衣橱助手", "brand"), 1)
+        side.addLayout(brand_row)
+        side.addSpacing(22)
+        side.addWidget(label("工作空间", "eyebrow"))
+        side.addSpacing(4)
         self.navigation = []
         for index, (title, icon) in enumerate([
             ("我的衣橱", "wardrobe"), ("今日搭配", "outfits"), ("衣橱助手", "chat"),
@@ -244,7 +251,7 @@ class MainWindow(QMainWindow):
                 side.addStretch()
             nav = button(title, lambda checked=False, i=index: self.navigate(i))
             nav.setIcon(navigation_icon(icon))
-            nav.setIconSize(QSize(20, 20))
+            nav.setIconSize(QSize(18, 18))
             nav.setObjectName("nav")
             nav.setCheckable(True)
             self.navigation.append(nav)
@@ -253,8 +260,8 @@ class MainWindow(QMainWindow):
         side.addWidget(label("衣橱保存在本机", "eyebrow"))
         shell.addWidget(sidebar)
         body = QVBoxLayout()
-        body.setContentsMargins(28, 28, 28, 10)
-        body.setSpacing(18)
+        body.setContentsMargins(28, 24, 28, 8)
+        body.setSpacing(12)
         self.pages = QStackedWidget()
         self.build_wardrobe()
         self.build_outfits()
@@ -332,6 +339,9 @@ class MainWindow(QMainWindow):
 
     def task_failed(self, message):
         self.finish_task()
+        if self.pending_chat_text is not None:
+            self.pending_chat_text = None
+            self.refresh_chat()
         self.error(message)
         self.notify("操作未完成，可重试")
 
@@ -357,7 +367,7 @@ class MainWindow(QMainWindow):
         result.setAlignment(Qt.AlignmentFlag.AlignCenter)
         result.setFixedHeight(height)
         result.setMinimumWidth(0)
-        result.setStyleSheet("background: #f4f5f0; border-radius: 8px; color: #95a08d; font-size: 20px;")
+        result.setStyleSheet("background: #f2f2f1; border-radius: 8px; color: #a1a5a8; font-size: 20px;")
         pixmap = QPixmap()
         if garment.image_ref:
             try:
@@ -677,14 +687,16 @@ class MainWindow(QMainWindow):
 
     def build_chat(self):
         layout = self.page("衣橱助手", "穿搭、洗护与旅行建议。修改衣橱前，会先请你确认。")
-        split = QSplitter()
-        session_panel = QWidget()
-        sessions = QVBoxLayout(session_panel)
-        sessions.setContentsMargins(0, 0, 10, 0)
-        sessions.addWidget(button("新建对话", self.new_conversation))
-        self.sessions = QListWidget()
-        self.sessions.itemClicked.connect(self.select_conversation)
-        sessions.addWidget(self.sessions)
+        toolbar = QHBoxLayout()
+        toolbar.setSpacing(8)
+        toolbar.addWidget(label("对话", "eyebrow"))
+        self.sessions = ArrowComboBox()
+        self.sessions.setObjectName("chatSessions")
+        self.sessions.setMaximumWidth(360)
+        self.sessions.activated.connect(self.select_conversation)
+        toolbar.addWidget(self.sessions, 1)
+        toolbar.addStretch(1)
+        toolbar.addWidget(button("＋  新建对话", self.new_conversation))
         more = button("对话管理", lambda: None)
         menu = QMenu(more)
         menu.addAction("会话资料", self.manage_documents)
@@ -692,18 +704,13 @@ class MainWindow(QMainWindow):
         menu.addSeparator()
         menu.addAction("清空当前会话", self.clear_conversation)
         more.setMenu(menu)
-        sessions.addWidget(more)
-        session_panel.setMinimumWidth(155)
-        session_panel.setMaximumWidth(240)
-        split.addWidget(session_panel)
+        toolbar.addWidget(more)
+        layout.addLayout(toolbar)
         conversation = QWidget()
         chat = QVBoxLayout(conversation)
-        chat.setContentsMargins(10, 0, 0, 0)
-        self.transcript = QTextBrowser()
-        self.transcript.setObjectName("chatTranscript")
-        self.transcript.document().setDocumentMargin(22)
-        self.transcript.setOpenLinks(False)
-        self.transcript.anchorClicked.connect(self.open_source)
+        chat.setContentsMargins(0, 0, 0, 0)
+        chat.setSpacing(8)
+        self.transcript = ChatTranscript(self.open_source)
         chat.addWidget(self.transcript, 1)
         self.pending = QPlainTextEdit()
         self.pending.setReadOnly(True)
@@ -717,11 +724,23 @@ class MainWindow(QMainWindow):
         actions.addStretch()
         chat.addLayout(actions)
         shortcuts = QHBoxLayout()
+        shortcuts.addStretch(1)
+        suggestion_group = QWidget()
+        suggestion_group.setMaximumWidth(820)
+        suggestion_layout = QHBoxLayout(suggestion_group)
+        suggestion_layout.setContentsMargins(0, 0, 0, 0)
+        suggestion_layout.setSpacing(8)
         for title, prompt in [("洗护帮助", "洗护帮助"), ("旅行行李", "我想规划旅行行李"), ("购买建议", "推荐购买")]:
-            shortcuts.addWidget(button(title, lambda checked=False, p=prompt: self.input.setPlainText(p)))
+            suggestion = button(title, lambda checked=False, p=prompt: self.input.setPlainText(p))
+            suggestion.setObjectName("chatSuggestion")
+            suggestion_layout.addWidget(suggestion)
+        suggestion_layout.addStretch()
+        shortcuts.addWidget(suggestion_group, 10)
+        shortcuts.addStretch(1)
         chat.addLayout(shortcuts)
         composer = QFrame()
         composer.setObjectName("chatComposer")
+        composer.setMaximumWidth(820)
         composer_layout = QVBoxLayout(composer)
         composer_layout.setContentsMargins(12, 8, 12, 10)
         composer_layout.setSpacing(4)
@@ -735,16 +754,19 @@ class MainWindow(QMainWindow):
         send.addWidget(label("Ctrl+Enter 发送 · 草稿自动保存", "subtitle"), 1)
         send.addWidget(button("发送", self.send_chat, True))
         composer_layout.addLayout(send)
-        chat.addWidget(composer)
-        split.addWidget(conversation)
-        split.setSizes([200, 700])
-        layout.addWidget(split, 1)
+        composer_row = QHBoxLayout()
+        composer_row.addStretch(1)
+        composer_row.addWidget(composer, 10)
+        composer_row.addStretch(1)
+        chat.addLayout(composer_row)
+        layout.addWidget(conversation, 1)
 
     def open_source(self, url):
         if url.scheme() in {"http", "https"}:
             QDesktopServices.openUrl(url)
 
     def refresh_sessions(self):
+        self.sessions.blockSignals(True)
         self.sessions.clear()
         sessions = self.context.agent_service.list_conversations(self.context.owner_id)
         known = {s["conversation_id"] for s in sessions}
@@ -755,12 +777,12 @@ class MainWindow(QMainWindow):
                     text = str(self.preferences.value(key, "")).strip()
                     if text:
                         sessions.insert(0, {"conversation_id": conversation_id, "title": "草稿 · " + text[:24]})
+        if self.context.conversation_id not in {s["conversation_id"] for s in sessions}:
+            sessions.insert(0, {"conversation_id": self.context.conversation_id, "title": "新对话"})
         for session in sessions:
-            item = QListWidgetItem(session.get("title", "历史会话"))
-            item.setData(Qt.ItemDataRole.UserRole, session["conversation_id"])
-            self.sessions.addItem(item)
-            if session["conversation_id"] == self.context.conversation_id:
-                self.sessions.setCurrentItem(item)
+            self.sessions.addItem(session.get("title", "历史会话"), session["conversation_id"])
+        self.sessions.setCurrentIndex(self.sessions.findData(self.context.conversation_id))
+        self.sessions.blockSignals(False)
 
     def new_conversation(self):
         if self.busy:
@@ -772,9 +794,12 @@ class MainWindow(QMainWindow):
         self.refresh_chat()
         self.notify("已创建新会话，发送消息后自动保存")
 
-    def select_conversation(self, item):
+    def select_conversation(self, index):
+        conversation_id = self.sessions.itemData(index)
+        if not conversation_id or conversation_id == self.context.conversation_id:
+            return
         self.save_draft()
-        self.context.conversation_id = item.data(Qt.ItemDataRole.UserRole)
+        self.context.conversation_id = conversation_id
         self.restore_draft()
         self.refresh_chat()
 
@@ -817,10 +842,12 @@ class MainWindow(QMainWindow):
 
     def refresh_chat(self):
         state = self.context.agent_repository.load_conversation(self.context.owner_id, self.context.conversation_id)
-        messages = state.transcript or state.messages
+        messages = list(state.transcript or state.messages)
+        waiting = self.pending_chat_text is not None
+        if waiting:
+            messages.append(ConversationMessage(role="user", content=self.pending_chat_text))
         by_id = {g.id: g for g in self.garments()}
-        self.transcript.setHtml(conversation_html(messages, by_id))
-        self.transcript.verticalScrollBar().setValue(self.transcript.verticalScrollBar().maximum())
+        self.transcript.set_messages(messages, by_id, waiting=waiting)
         action = self.context.agent_repository.get_pending(self.context.owner_id, self.context.conversation_id)
         self.pending.setVisible(action is not None)
         self.confirm_action.setVisible(action is not None)
@@ -848,7 +875,10 @@ class MainWindow(QMainWindow):
             self.error("请将单条消息控制在 4000 字以内。")
             return
         conversation_id = self.context.conversation_id
+        self.pending_chat_text = text
+        self.refresh_chat()
         def completed(reply):
+            self.pending_chat_text = None
             self.input.clear()
             self.refresh_sessions()
             self.refresh_chat()

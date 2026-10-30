@@ -17,6 +17,8 @@
 
 ![客户端衣橱](docs/assets/wardrobe.png)
 
+![衣橱助手对话界面示例](docs/assets/chat.png)
+
 > 当前为 Windows 开发预览版，独立分发包已在本机 Windows x64 验证。界面、API 基础连接和业务准确率是不同的验证范围，详见[核验报告](docs/PROJECT_AUDIT_20261030.md)。
 
 ## 为什么做这个项目

@@ -9,7 +9,7 @@ def navigation_icon(name):
     canvas.setDevicePixelRatio(2)
     painter = QPainter(canvas)
     painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-    painter.setPen(QPen(QColor("#557763"), 1.6, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap,
+    painter.setPen(QPen(QColor("#626870"), 1.6, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap,
                         Qt.PenJoinStyle.RoundJoin))
     if name == "wardrobe":
         painter.drawRoundedRect(QRectF(4, 3, 16, 17), 2, 2)

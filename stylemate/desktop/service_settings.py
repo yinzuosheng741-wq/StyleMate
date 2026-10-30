@@ -4,7 +4,6 @@ from PySide6.QtCore import QThreadPool, QUrl
 from PySide6.QtGui import QDesktopServices
 from PySide6.QtWidgets import (
     QCheckBox,
-    QComboBox,
     QDialog,
     QFileDialog,
     QFormLayout,
@@ -19,6 +18,7 @@ from PySide6.QtWidgets import (
 )
 
 from stylemate.config.portable import DEFAULTS, FIELDS, validate_config
+from stylemate.desktop.widgets import ArrowComboBox
 from stylemate.services.connection_check import check_service
 
 
@@ -81,7 +81,7 @@ class ServiceSettingsDialog(QDialog):
             body.addStretch()
         body = self.section("天气与定位")
         form = QFormLayout()
-        self.weather_provider = QComboBox()
+        self.weather_provider = ArrowComboBox()
         for title, value in [("高德（自己的 Web 服务 Key）", "amap"), ("Open-Meteo（免 Key，限非商业使用）", "open-meteo"), ("关闭在线天气", "disabled")]:
             self.weather_provider.addItem(title, value)
         form.addRow("天气服务", self.weather_provider)

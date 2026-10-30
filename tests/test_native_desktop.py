@@ -1,6 +1,7 @@
 """Native UI integration tests with isolated local data and no remote services."""
 import json
 import os
+import threading
 import time
 from io import BytesIO
 from pathlib import Path
@@ -13,7 +14,7 @@ pytest.importorskip("PySide6")
 from PIL import Image  # noqa: E402
 from PySide6.QtCore import Qt  # noqa: E402
 from PySide6.QtTest import QTest  # noqa: E402
-from PySide6.QtWidgets import QApplication, QDialog, QFileDialog, QPushButton  # noqa: E402
+from PySide6.QtWidgets import QApplication, QDialog, QFileDialog, QPushButton, QTextBrowser  # noqa: E402
 
 from stylemate.config.portable import ServiceConfigStore  # noqa: E402
 from stylemate.config.runtime import RuntimeSettings  # noqa: E402
@@ -124,7 +125,8 @@ def test_chat_history_export_and_documents(window, tmp_path):
     wait_idle(window)
     state = window.context.agent_repository.load_conversation(window.context.owner_id, window.context.conversation_id)
     assert len(state.transcript or state.messages) >= 2
-    assert "查看衣橱" in window.transcript.toPlainText()
+    assert "查看衣橱" in window.transcript.plain_text()
+    assert len(window.transcript.user_bubbles) == 1
     document = window.context.agent_service.ingest_document(window.context.owner_id, window.context.conversation_id,
                                                             "test.txt", "text/plain", "我的风格偏好是简约".encode())
     assert document.filename == "test.txt"
@@ -145,15 +147,17 @@ def test_chat_distinguishes_roles_and_keeps_sources_safe_and_selectable(window):
     ]
     window.context.agent_repository.save_conversation(state)
     window.navigate(2)
-    rendered = window.transcript.toPlainText()
-    html = window.transcript.toHtml()
-    assert "你" in rendered and "衣橱助手" in rendered
+    rendered = window.transcript.plain_text()
+    assistant = window.transcript.findChild(QTextBrowser, "assistantMessage")
+    html = assistant.toHtml()
+    assert len(window.transcript.user_bubbles) == 1
+    assert window.transcript.findChild(QTextBrowser, "assistantMessage") is not None
     assert "明天穿什么？" in rendered and "搭配建议" in rendered
     assert "<script>不执行</script>" in rendered
     assert "天气来源" in rendered and "不安全链接" not in rendered
     assert "https://example.com/weather" in html and "javascript:alert" not in html
     assert "**搭配建议**" not in rendered
-    assert window.transcript.textInteractionFlags() & Qt.TextInteractionFlag.TextSelectableByMouse
+    assert assistant.textInteractionFlags() & Qt.TextInteractionFlag.TextSelectableByMouse
 
 
 def test_chat_long_messages_wrap_at_compact_window_width(window):
@@ -166,6 +170,45 @@ def test_chat_long_messages_wrap_at_compact_window_width(window):
     window.navigate(2)
     QTest.qWait(100)
     assert window.transcript.horizontalScrollBar().maximum() == 0
+    assistant = window.transcript.findChild(QTextBrowser, "assistantMessage")
+    assert assistant.height() >= assistant.document().size().height()
+    assert window.transcript.verticalScrollBar().maximum() > 0
+    assert window.transcript.verticalScrollBar().value() == window.transcript.verticalScrollBar().maximum()
+
+
+def test_chat_user_and_assistant_rows_have_distinct_alignment(window):
+    state = window.context.agent_repository.load_conversation(window.context.owner_id, window.context.conversation_id)
+    state.transcript = [ConversationMessage(role="user", content="今天穿什么？"),
+                        ConversationMessage(role="assistant", content="根据天气选择轻薄外套。")]
+    window.context.agent_repository.save_conversation(state)
+    window.resize(960, 680)
+    window.show()
+    window.navigate(2)
+    QTest.qWait(120)
+    user = window.transcript.user_bubbles[0][0]
+    assistant = window.transcript.findChild(QTextBrowser, "assistantMessage")
+    user_x = user.mapTo(window.transcript.viewport(), user.rect().center()).x()
+    assistant_x = assistant.mapTo(window.transcript.viewport(), assistant.rect().topLeft()).x()
+    assert user_x > assistant_x
+
+
+def test_chat_shows_sent_message_immediately_and_retains_draft_on_failure(window, monkeypatch):
+    window.navigate(2)
+    release = threading.Event()
+    def fail(*_args):
+        release.wait(5)
+        raise RuntimeError("offline test failure")
+    monkeypatch.setattr(window.context.agent_service, "chat", fail)
+    monkeypatch.setattr(window, "error", lambda _message: None)
+    window.input.setPlainText("旅行应该带什么")
+    window.send_chat()
+    assert window.busy and "旅行应该带什么" in window.transcript.plain_text()
+    state = window.context.agent_repository.load_conversation(window.context.owner_id, window.context.conversation_id)
+    assert not (state.transcript or state.messages)
+    release.set()
+    wait_idle(window)
+    assert "旅行应该带什么" not in window.transcript.plain_text()
+    assert window.input.toPlainText() == "旅行应该带什么"
 
 
 def test_background_failure_restores_interaction(window, monkeypatch):
@@ -187,9 +230,10 @@ def test_drafts_survive_switches_and_are_listed_without_sending(window):
     window.new_conversation()
     second = window.context.conversation_id
     window.input.setPlainText("第二个草稿")
-    item = next(window.sessions.item(i) for i in range(window.sessions.count())
-                if window.sessions.item(i).data(Qt.ItemDataRole.UserRole) == first)
-    window.select_conversation(item)
+    index = window.sessions.findData(first)
+    assert index >= 0
+    window.sessions.setCurrentIndex(index)
+    window.select_conversation(index)
     assert window.input.toPlainText() == "还没发出的旅行计划"
     assert window.preferences.value("drafts/" + second) == "第二个草稿"
     # A new window reads the same isolated settings and resumes the active draft.
