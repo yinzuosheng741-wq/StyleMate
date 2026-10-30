@@ -8,11 +8,11 @@ import math
 import os
 import re
 from collections import Counter
-from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal, Protocol
 
+from stylemate.agent.execution import BoundedToolRunner
 from stylemate.domain.models import UserDocument
 from stylemate.rag.models import KnowledgeRecord, RetrievalHit, UserDocumentChunk
 from stylemate.rag.query_planning import knowledge_compatible, lexical_queries
@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 
 RRF_K = 60
 RECALL_MULTIPLIER = 3
+EMBEDDING_RUNNER = BoundedToolRunner(max_workers=4)
 
 
 @dataclass(frozen=True)
@@ -52,18 +53,22 @@ class EmbeddingUnavailableError(RuntimeError):
 class DashScopeEmbeddingAdapter:
     model = "text-embedding-v4"
 
-    def __init__(self, request_timeout_seconds: float = 8.0):
+    def __init__(self, request_timeout_seconds: float = 8.0, api_key: str = "", model_name: str = "text-embedding-v4"):
         self.request_timeout_seconds = request_timeout_seconds
+        self.api_key = api_key
+        self.model = model_name
 
     def _embed(self, texts: list[str], text_type: str) -> list[list[float]]:
         import dashscope
 
         try:
+            kwargs = {"api_key": self.api_key} if self.api_key else {}
             response = dashscope.TextEmbedding.call(
                 model=self.model,
                 input=texts,
                 text_type=text_type,
                 timeout=self.request_timeout_seconds,
+                **kwargs,
             )
             if getattr(response, "status_code", None) != 200:
                 raise EmbeddingUnavailableError("embedding service unavailable")
@@ -150,6 +155,8 @@ class OpenAICompatibleEmbeddingAdapter:
 
 def embedding_namespace(embedding: EmbeddingAdapter) -> str:
     identity = str(getattr(embedding, "model", type(embedding).__name__))
+    if isinstance(embedding, OpenAICompatibleEmbeddingAdapter):
+        identity += "\x1f" + embedding.base_url.rstrip("/")
     return hashlib.sha256(identity.encode("utf-8")).hexdigest()[:12]
 
 
@@ -303,12 +310,8 @@ class HybridRetriever:
         return hits
 
     def _embedding_call(self, method, value):
-        executor = ThreadPoolExecutor(max_workers=1)
-        future = executor.submit(method, value)
-        try:
-            return future.result(timeout=self.embedding_timeout_seconds)
-        finally:
-            executor.shutdown(wait=False, cancel_futures=True)
+        future = EMBEDDING_RUNNER.submit(method, value)
+        return future.result(timeout=self.embedding_timeout_seconds)
 
     def _embed_documents(self, texts: list[str], batch_size: int = 16) -> list[list[float]]:
         vectors: list[list[float]] = []
@@ -371,7 +374,7 @@ class HybridRetriever:
                 for record in self.records
             ).encode("utf-8")
         ).hexdigest()
-        if signature == self._builtin_sync_signature:
+        if signature == self._builtin_sync_signature and self._builtin_sync_result:
             self._stats["builtin_sync_cache_hits"] += 1
             return self._builtin_sync_result
         self._builtin_sync_signature = signature
@@ -430,7 +433,7 @@ class HybridRetriever:
         ).hexdigest()
         signature_key = (owner_id, conversation_id)
         previous_sync = self._user_sync_signatures.get(signature_key)
-        if previous_sync and previous_sync[0] == signature:
+        if previous_sync and previous_sync[0] == signature and previous_sync[1]:
             self._stats["user_sync_cache_hits"] += 1
             return previous_sync[1]
         try:

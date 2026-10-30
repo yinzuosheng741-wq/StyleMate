@@ -102,6 +102,16 @@ def test_open_meteo_works_without_key_and_shows_resolved_location():
     assert all("key" not in kwargs["params"] for _, kwargs in session.calls)
 
 
+@pytest.mark.parametrize("code,humidity", [(4, 60), (200, 60), (0, 101), (0, -1)])
+def test_open_meteo_rejects_unknown_weather_codes_and_invalid_humidity(code, humidity):
+    session = FakeSession([{"results": [{"name": "杭州", "latitude": 30, "longitude": 120}]},
+                           {"current": {"temperature_2m": 21.5, "relative_humidity_2m": humidity,
+                                        "weather_code": code}}])
+    client = WeatherClient(RuntimeSettings("demo", "", "", weather_provider="open-meteo"), session=session)
+    result = client.weather("杭州")
+    assert not result.available and result.reason == "invalid_response"
+
+
 def test_model_probe_sends_minimal_request_and_redacts_error():
     session = FakeSession(status=401)
     result = check_service("text", configured(), session)

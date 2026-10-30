@@ -77,8 +77,12 @@ class WeatherClient:
         if not math.isfinite(temperature):
             return WeatherResult(available=False, reason="invalid_response")
         code = int(data["weather_code"])
+        humidity = int(data["relative_humidity_2m"])
+        if code not in {0, 1, 2, 3, 45, 48, 51, 53, 55, 56, 57, 61, 63, 65, 66, 67,
+                        71, 73, 75, 77, 80, 81, 82, 85, 86, 95, 96, 99} or not 0 <= humidity <= 100:
+            return WeatherResult(available=False, reason="invalid_response")
         summary = ("晴" if code == 0 else "多云" if code <= 3 else "雾" if code <= 48 else
                    "雪" if code in {71, 73, 75, 77, 85, 86} else "雷雨" if code >= 95 else "雨")
         name = " / ".join(str(location[key]) for key in ("name", "admin1", "country") if location.get(key))
         return WeatherResult(available=True, city=name, summary=summary + "（Open-Meteo）",
-                             temperature_c=temperature, humidity=int(data["relative_humidity_2m"]))
+                             temperature_c=temperature, humidity=humidity)

@@ -1,5 +1,6 @@
 """Application services and validated wardrobe operations for the native client."""
 
+import hashlib
 import os
 from dataclasses import dataclass
 from typing import Callable
@@ -59,6 +60,10 @@ def _weather_loader(settings: RuntimeSettings) -> Callable[[str], WeatherResult]
     return client.weather
 
 
+def _credential_fingerprint(value: str) -> str:
+    return hashlib.sha256(value.encode("utf-8")).hexdigest() if value else ""
+
+
 def build_context(
     state: dict,
     settings: RuntimeSettings,
@@ -98,13 +103,13 @@ def build_context(
     service = WardrobeService(repository, image_store, settings.max_upload_bytes)
     profile_service = ProfileService(repository)
     actual_vision = vision or _build_vision_gateway(settings)
-    weather_client = state.setdefault(
-        "stylemate_weather_client",
-        WeatherClient(
-            settings,
-            os.getenv("AMAP_API_KEY") or os.getenv("GAODE_API_KEY", ""),
-        ),
-    )
+    weather_key = os.getenv("AMAP_API_KEY") or os.getenv("GAODE_API_KEY", "")
+    weather_signature = (settings.weather_provider, settings.weather_city, settings.allow_ip_location,
+                         settings.weather_timeout_seconds, _credential_fingerprint(weather_key))
+    if state.get("stylemate_weather_signature") != weather_signature:
+        state["stylemate_weather_client"] = WeatherClient(settings, weather_key)
+        state["stylemate_weather_signature"] = weather_signature
+    weather_client = state["stylemate_weather_client"]
     actual_weather = weather_loader or weather_client.weather
     conversation_id = state.setdefault(
         "stylemate_conversation_id", "wardrobe-assistant"
@@ -113,6 +118,8 @@ def build_context(
         settings.text_provider_name,
         settings.text_base_url,
         settings.text_model_name,
+        settings.model_timeout_seconds,
+        _credential_fingerprint(os.getenv("LLM_API_KEY") or os.getenv("OPENAI_API_KEY") or os.getenv("DASHSCOPE_API_KEY", "")),
     )
     if state.get("stylemate_chat_model_signature") != model_signature:
         state["stylemate_chat_model"] = build_chat_model_from_env(settings)
@@ -121,7 +128,8 @@ def build_context(
     retriever_signature = (
         settings.embedding_base_url,
         settings.embedding_model_name,
-        bool(os.getenv("EMBEDDING_API_KEY") or os.getenv("DASHSCOPE_API_KEY")),
+        _credential_fingerprint(os.getenv("EMBEDDING_API_KEY") or os.getenv("DASHSCOPE_API_KEY", "")),
+        settings.rag_timeout_seconds,
     )
     if state.get("stylemate_retriever_signature") != retriever_signature:
         embedding = _build_embedding(settings)
@@ -186,7 +194,7 @@ def _build_embedding(settings: RuntimeSettings):
             settings.embedding_model_name,
             settings.rag_timeout_seconds,
         )
-    return DashScopeEmbeddingAdapter(settings.rag_timeout_seconds)
+    return DashScopeEmbeddingAdapter(settings.rag_timeout_seconds, api_key, settings.embedding_model_name)
 
 
 def load_sample_wardrobe(context: AppContext) -> int:

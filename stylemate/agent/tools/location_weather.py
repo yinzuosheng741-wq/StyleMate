@@ -1,5 +1,6 @@
 """Standalone Amap location and weather client."""
 
+import math
 from typing import Literal
 
 import requests
@@ -72,12 +73,16 @@ class AmapClient:
         result_city = live.get("city", city)
         if not isinstance(summary, str) or not summary or not isinstance(result_city, str):
             return WeatherResult(available=False, reason="invalid_response")
+        temperature = self._as_float(live.get("temperature"))
+        humidity = self._as_int(live.get("humidity"))
+        if temperature is None or not math.isfinite(temperature) or (humidity is not None and not 0 <= humidity <= 100):
+            return WeatherResult(available=False, reason="invalid_response")
         return WeatherResult(
             available=True,
             city=result_city,
             summary=summary,
-            temperature_c=self._as_float(live.get("temperature")),
-            humidity=self._as_int(live.get("humidity")),
+            temperature_c=temperature,
+            humidity=humidity,
         )
 
     def _get(self, path: str, params: dict[str, str]) -> tuple[dict | None, _FailureReason]:
@@ -105,12 +110,12 @@ class AmapClient:
     def _as_float(value: object) -> float | None:
         try:
             return float(value) if value not in (None, "") else None
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
             return None
 
     @staticmethod
     def _as_int(value: object) -> int | None:
         try:
             return int(value) if value not in (None, "") else None
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
             return None

@@ -1,3 +1,5 @@
+import pytest
+
 from stylemate.agent.tools.location_weather import AmapClient
 
 
@@ -41,3 +43,11 @@ def test_missing_amap_key_returns_configuration_result_without_http():
 
     assert result.available is False
     assert result.reason == "missing_key"
+
+
+@pytest.mark.parametrize("temperature,humidity", [("NaN", "50"), ("inf", "50"), ("", "50"), ("25", "120")])
+def test_invalid_weather_observations_do_not_become_outfit_inputs(temperature, humidity):
+    session = FakeSession({"status": "1", "lives": [{"city": "杭州", "weather": "晴",
+                                                      "temperature": temperature, "humidity": humidity}]})
+    result = AmapClient("test", 5, session).weather("杭州")
+    assert not result.available and result.reason == "invalid_response"

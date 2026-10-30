@@ -127,6 +127,50 @@ def test_dashscope_adapter_wraps_bad_responses_and_passes_configured_timeout(mon
     assert calls[0]["timeout"] == 2.5
 
 
+def test_embedding_namespace_separates_providers_with_the_same_model_name():
+    from stylemate.rag.retriever import embedding_namespace
+
+    first = OpenAICompatibleEmbeddingAdapter("key", "https://one.example/v1", "shared-name")
+    second = OpenAICompatibleEmbeddingAdapter("key", "https://two.example/v1", "shared-name")
+    assert embedding_namespace(first) != embedding_namespace(second)
+
+
+def test_dashscope_embedding_uses_the_explicit_key_and_model(monkeypatch):
+    import dashscope
+
+    calls = []
+    class Response:
+        status_code = 200
+        output = {"embeddings": [{"embedding": [1.0, 0.0]}]}
+
+    monkeypatch.setattr(dashscope.TextEmbedding, "call", lambda **kwargs: calls.append(kwargs) or Response())
+    adapter = DashScopeEmbeddingAdapter(api_key="test-embedding-key", model_name="test-embedding-model")
+    assert adapter.embed_query("example") == [1.0, 0.0]
+    assert calls[0]["api_key"] == "test-embedding-key"
+    assert calls[0]["model"] == "test-embedding-model"
+
+
+def test_failed_builtin_embedding_sync_can_be_retried():
+    class RecoveringEmbedding:
+        model = "test-recovery"
+        attempts = 0
+
+        def embed_documents(self, texts):
+            self.attempts += 1
+            if self.attempts == 1:
+                raise RuntimeError("temporary failure")
+            return [[1.0, 0.0] for _ in texts]
+
+        def embed_query(self, _text):
+            return [1.0, 0.0]
+
+    embedding = RecoveringEmbedding()
+    retriever = HybridRetriever([_record()], SessionAgentRepository({}), embedding, create_chroma_client("demo"))
+    assert not retriever._builtin_sync_result
+    assert retriever.sync_builtin_index()
+    assert embedding.attempts == 2
+
+
 def test_dashscope_adapter_wraps_vector_count_mismatch(monkeypatch):
     class BadResponse:
         status_code = 200

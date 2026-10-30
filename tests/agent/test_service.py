@@ -218,6 +218,33 @@ def test_direct_travel_request_extracts_destination_and_days():
     assert "透气" in reply.content
 
 
+def test_travel_missing_days_asks_before_planning_and_accepts_follow_up():
+    class Weather:
+        def weather(self, city):
+            assert city == "成都"
+            return WeatherResult(available=True, city=city, summary="晴", temperature_c=20)
+
+    app = service()
+    app.weather_client = Weather()
+    first = app.chat("owner-a", "thread-a", "去成都旅游")
+    assert "天数" in first.content and not first.traces
+    reply = app.chat("owner-a", "thread-a", "三天")
+    assert "3天行程行李清单" in reply.content
+    assert [trace.name for trace in reply.traces] == ["get_weather", "travel_packing"]
+
+
+def test_travel_accepts_chinese_day_count_in_direct_request():
+    class Weather:
+        def weather(self, city):
+            assert city == "成都"
+            return WeatherResult(available=True, city=city, summary="晴", temperature_c=20)
+
+    app = service()
+    app.weather_client = Weather()
+    reply = app.chat("owner-a", "thread-a", "去成都旅游四天")
+    assert "4天行程行李清单" in reply.content
+
+
 def test_weather_shortcut_passes_live_temperature_into_general_outfit():
     class HotWeatherClient:
         def weather(self, _city):

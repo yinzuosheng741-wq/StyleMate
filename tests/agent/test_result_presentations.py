@@ -5,6 +5,16 @@ from stylemate.demo.sample_data import sample_garments
 from tests.agent.test_service import service
 
 
+def test_deterministic_knowledge_answer_cites_only_the_displayed_snippet():
+    payload = {"result": {"results": [{"snippet": "实际展示的建议", "source_url": "https://example.com/first"},
+                                      {"snippet": "没有展示的建议", "source_url": "https://example.com/second"}]},
+               "sources": [{"title": "第一条", "url": "https://example.com/first"},
+                           {"title": "第二条", "url": "https://example.com/second"}]}
+    answer, _, sources = service()._present_named("rag_search", payload)
+    assert answer == "实际展示的建议"
+    assert [source.url for source in sources] == ["https://example.com/first"]
+
+
 def test_inventory_result_is_typed_saved_and_does_not_leak_to_next_turn_or_owner():
     app = service()
     for garment in sample_garments():

@@ -27,6 +27,27 @@ def test_demo_context_reuses_session_state():
     assert first.owner_id == "demo-user"
 
 
+def test_reused_context_refreshes_connections_after_credential_and_weather_changes(monkeypatch):
+    from dataclasses import replace
+
+    import stylemate.services.context as context_module
+
+    created = []
+    monkeypatch.setattr(context_module, "build_chat_model_from_env", lambda _settings: created.append(object()) or created[-1])
+    monkeypatch.setattr(context_module, "_build_embedding", lambda _settings: None)
+    monkeypatch.setenv("LLM_API_KEY", "test-key-one")
+    monkeypatch.setenv("AMAP_API_KEY", "weather-one")
+    state = {}
+    first = build_context(state, settings("demo"))
+    monkeypatch.setenv("LLM_API_KEY", "test-key-two")
+    monkeypatch.setenv("AMAP_API_KEY", "weather-two")
+    second = build_context(state, replace(settings("demo"), weather_city="杭州"))
+    assert first.agent_service.model is not second.agent_service.model
+    assert first.weather_client is not second.weather_client
+    assert second.weather_client.settings.weather_city == "杭州"
+    assert second.weather_client.amap.api_key == "weather-two"
+
+
 def test_sample_load_is_idempotent():
     context = build_context({}, settings("demo"))
 

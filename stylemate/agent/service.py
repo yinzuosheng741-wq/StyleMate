@@ -331,6 +331,8 @@ class AgentService:
         destination = _travel_destination(text)
         continuing_travel = _is_travel_follow_up(state, text) if state else False
         if any(term in text for term in ("旅行行李", "旅游", "旅行", "行李清单")) or continuing_travel:
+            if not destination and continuing_travel and state and state.facts.locations:
+                destination = state.facts.locations[-1]
             if not destination:
                 return (
                     "请告诉我旅行目的地、行程天数和主要活动，"
@@ -338,10 +340,13 @@ class AgentService:
                     [],
                     [],
                 )
+            days = _travel_days(text)
+            if days is None:
+                return "请告诉我旅行的行程天数，例如：4天。", [], []
             return self._travel_route(
                 toolkit,
                 destination=destination,
-                days=_travel_days(text),
+                days=days,
                 activities=_travel_activities(text),
             )
         if any(word in lower for word in CARE_INTENT_TERMS):
@@ -498,7 +503,14 @@ class AgentService:
         else:
             content = str(result.get("message") if isinstance(result, dict) and result.get("message") else result)
         traces = [_trace(payload["trace"])] if isinstance(payload.get("trace"), dict) else []
-        sources = [_source(item) for item in payload.get("sources", []) if _source(item) is not None]
+        source_items = payload.get("sources", [])
+        if name in {"care_guide", "rag_search"} and isinstance(result, dict):
+            # The deterministic answer displays only the first snippet. Do not
+            # attribute it to other retrieved documents that were not displayed.
+            snippets = result.get("results", []) if not failed else []
+            url = snippets[0].get("source_url") if snippets else None
+            source_items = [item for item in source_items if isinstance(item, dict) and item.get("url") == url][:1]
+        sources = [_source(item) for item in source_items if _source(item) is not None]
         return content, traces, sources
 
     def _save_turn(self, state: ConversationState, user_text: str, reply: ConversationMessage) -> None:
@@ -555,9 +567,23 @@ def _city(text: str) -> str:
     return match.group(1).replace("的", "") if match else ""
 
 
-def _travel_days(text: str) -> int:
-    match = re.search(r"(\d{1,2})\s*(?:天|晚)", text)
-    return max(1, min(30, int(match.group(1)))) if match else 3
+def _travel_days(text: str) -> int | None:
+    match = re.search(r"(\d{1,2}|[一二两三四五六七八九十]{1,3})\s*(?:天|晚)", text)
+    if not match:
+        return None
+    value = match.group(1)
+    digits = {"一": 1, "二": 2, "两": 2, "三": 3, "四": 4, "五": 5, "六": 6,
+              "七": 7, "八": 8, "九": 9}
+    if value.isdigit():
+        count = int(value)
+    elif "十" in value:
+        left, _, right = value.partition("十")
+        if len(left) > 1 or len(right) > 1:
+            return None
+        count = (digits.get(left, 1) * 10) + digits.get(right, 0)
+    else:
+        count = digits.get(value, 0)
+    return count if 1 <= count <= 30 else None
 
 
 def _travel_destination(text: str) -> str:
@@ -568,11 +594,13 @@ def _travel_destination(text: str) -> str:
     )
     if explicit:
         candidate = explicit.group(1)
+        candidate = re.sub(r"[一二两三四五六七八九十]+(?:天|晚).*$", "", candidate)
         for suffix in ("旅游", "旅行", "出差", "游玩"):
             candidate = candidate.removesuffix(suffix)
         return candidate.removesuffix("市")
     continuation = re.match(r"^\s*([\u4e00-\u9fff]{2,8})(?:市)?(?:[，,\s]|$)", text)
-    return continuation.group(1).removesuffix("市") if continuation else ""
+    candidate = continuation.group(1).removesuffix("市") if continuation else ""
+    return "" if _travel_days(candidate) is not None else candidate
 
 
 def _travel_activities(text: str) -> list[str]:
@@ -587,7 +615,7 @@ def _travel_activities(text: str) -> list[str]:
 def _is_travel_follow_up(state: ConversationState | None, text: str) -> bool:
     if state is None or "旅行" not in state.facts.scenes:
         return False
-    return bool(_travel_destination(text) or re.search(r"\d{1,2}\s*(?:天|晚)", text))
+    return bool(_travel_destination(text) or _travel_days(text) is not None)
 
 
 def _is_deterministic_intent(text: str) -> bool:
