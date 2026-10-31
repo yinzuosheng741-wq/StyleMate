@@ -1,0 +1,164 @@
+{
+  "model": "jiaorong-deepseek-v4-flash",
+  "model_output_budget": 900,
+  "retrieval": "configured real embedding with same canonical corpus",
+  "scope": "8 synthetic public questions, single trial, includes deterministic service routes; answers retained for Codex review, not independent human scoring",
+  "rows": [
+    {
+      "id": "existing-size",
+      "query": "知识库里，平铺胸宽和人体胸围是同一个量吗",
+      "answer": "UNIQLO 香港及澳门上装测量图把胸宽列为半胸宽：衣物完全平铺后，测量腋下左右侧缝之间的宽度。这是成衣的平铺宽度，不能把该数值直接当成人体胸围，也不能据此断言另一件衣物一定合身。\n适用范围：UNIQLO 香港及澳门该页面上装的平铺胸宽测量位置。\n限制：不适用于所有品牌、文胸或未采用相同测量方法的尺码表。",
+      "traces": [
+        {
+          "name": "rag_search",
+          "status": "success",
+          "summary": "{\"answer_status\": \"evidence_found\", \"attempts\": 1, \"effective_query\": \"知识库里，平铺胸宽和人体胸围是同一个量吗\", \"query\": \"知识库里，平铺胸宽和人体胸围是同一个量吗\", \"query_rewritten\": false, \"res...",
+          "duration_ms": 375
+        }
+      ],
+      "sources": [
+        {
+          "id": "UNIQLO Hong Kong & Macau Customer Service",
+          "title": "平铺胸宽不是人体胸围",
+          "url": "https://faq-hk.uniqlo.com/pkb_Home_UQ_HK?c=category_uq_tw:UQHK_C2&fs=Search&id=kA0Ie000000TOgx&l=en_US&pn=1"
+        }
+      ],
+      "duration_ms": 374
+    },
+    {
+      "id": "existing-gore",
+      "query": "知识库里，GORE-TEX 外套洗涤是否适合用柔顺剂",
+      "answer": "GORE-TEX 外套一般洗护说明建议使用少量液体洗涤剂，不使用粉状洗涤剂、柔顺剂、去渍剂或漂白剂。具体成衣的制造商洗标仍需先核对，不能把该说明推广到所有材质。\n适用范围：GORE-TEX 外套的一般洗涤，受具体洗标限制。\n限制：只支持摘要中列出的适用范围；具体产品说明与洗标优先，不能泛化到所有衣物。",
+      "traces": [
+        {
+          "name": "care_guide",
+          "status": "success",
+          "summary": "{\"answer_status\": \"evidence_found\", \"attempts\": 1, \"effective_query\": \"知识库里，GORE-TEX 外套洗涤是否适合用柔顺剂 衣物洗护注意事项\", \"query\": \"知识库里，GORE-TEX 外套洗涤是否适合用柔顺剂 衣物洗护注意事项\", ...",
+          "duration_ms": 343
+        }
+      ],
+      "sources": [
+        {
+          "id": "GORE-TEX Brand",
+          "title": "功能外套慎选洗涤剂",
+          "url": "https://www.gore-tex.com/support/care/outerwear"
+        }
+      ],
+      "duration_ms": 341
+    },
+    {
+      "id": "gap-silk",
+      "query": "知识库里，真丝衬衫允许水洗时应怎样清洗和干燥",
+      "answer": "知识库暂未找到直接答案。",
+      "traces": [
+        {
+          "name": "care_guide",
+          "status": "success",
+          "summary": "{\"answer_status\": \"not_found\", \"attempts\": 2, \"effective_query\": \"知识库里，真丝衬衫允许水洗时应怎样清洗和干燥 衣物洗护注意事项 相关资料\", \"query\": \"知识库里，真丝衬衫允许水洗时应怎样清洗和干燥 衣物洗护注意事项\", \"query_r...",
+          "duration_ms": 0
+        }
+      ],
+      "sources": [],
+      "duration_ms": 6
+    },
+    {
+      "id": "gap-down",
+      "query": "知识库里，羽绒服怎么洗涤干燥和收纳",
+      "answer": "知识库暂未找到直接答案。",
+      "traces": [
+        {
+          "name": "care_guide",
+          "status": "success",
+          "summary": "{\"answer_status\": \"not_found\", \"attempts\": 2, \"effective_query\": \"知识库里，羽绒服怎么洗涤干燥和收纳 衣物洗护注意事项 相关资料\", \"query\": \"知识库里，羽绒服怎么洗涤干燥和收纳 衣物洗护注意事项\", \"query_rewritten\":...",
+          "duration_ms": 0
+        }
+      ],
+      "sources": [],
+      "duration_ms": 5
+    },
+    {
+      "id": "negative-tax",
+      "query": "知识库里，年终税务申报需要准备哪些材料",
+      "answer": "我检索了内置知识库，但没有找到与「年终税务申报材料」相关的条目。当前知识库内容主要覆盖衣物尺码、旅行打包、收纳等衣橱与出行主题，与税务申报无关。\n\n因此我无法基于知识库给出税务申报所需材料的清单，也不能凭空编造或引用无关来源。\n\n如果你需要，我可以帮你：\n- 检索知识库中其他主题（如衣物洗护、出行打包、尺码选择等）；\n- 或者你上传相关税务文档后，我再基于文档内容整理。\n\n请问你希望继续哪个方向？",
+      "traces": [
+        {
+          "name": "skill_router",
+          "status": "success",
+          "summary": "knowledge_qa",
+          "duration_ms": 0
+        },
+        {
+          "name": "rag_search",
+          "status": "success",
+          "summary": "{\"answer_status\": \"evidence_found\", \"attempts\": 1, \"effective_query\": \"年终税务申报需要准备哪些材料\", \"query\": \"年终税务申报需要准备哪些材料\", \"query_rewritten\": false, \"results\": [{\"ap...",
+          "duration_ms": 953
+        }
+      ],
+      "sources": [],
+      "duration_ms": 34226
+    },
+    {
+      "id": "negative-housing",
+      "query": "知识库里，房屋租赁合同违约金怎么算",
+      "answer": "**结论：当前知识库中没有与“房屋租赁合同违约金计算”相关的资料，我没有找到可引用的依据，无法给出具体计算规则。**\n\n说明如下：\n\n- 我检索了知识库中关于“租赁合同违约金”“违约赔偿标准”的内容，返回的结果全部是衣物洗护、尺码测量、面试着装等衣橱类条目，与租赁违约金无关。\n- 按照我的工作边界，没有可靠来源时我不会补充未经工具支持的数值、法律条款或计算方式，因此这里不提供具体违约金比例或金额的推算。\n\n你可以尝试这样做：\n\n- 若你有上传的合同/文档，可以告诉我文档名称，我再用知识库检索其中关于违约金的具体条款；\n- 若想了解一般性法律依据（如《民法典》关于违约金调整的规定），建议由你提供文档后我再检索，或咨询专业法律人士核实。\n\n如果你把相关合同内容或条款贴进来，我可以帮你进一步梳理。",
+      "traces": [
+        {
+          "name": "skill_router",
+          "status": "success",
+          "summary": "knowledge_qa",
+          "duration_ms": 0
+        },
+        {
+          "name": "rag_search",
+          "status": "success",
+          "summary": "{\"answer_status\": \"evidence_found\", \"attempts\": 1, \"effective_query\": \"房屋租赁合同违约金计算\", \"query\": \"房屋租赁合同违约金计算\", \"query_rewritten\": false, \"results\": [{\"applicab...",
+          "duration_ms": 407
+        },
+        {
+          "name": "rag_search",
+          "status": "success",
+          "summary": "{\"answer_status\": \"evidence_found\", \"attempts\": 1, \"effective_query\": \"租赁合同违约 赔偿标准 法律条款\", \"query\": \"租赁合同违约 赔偿标准 法律条款\", \"query_rewritten\": false, \"results\": [...",
+          "duration_ms": 485
+        }
+      ],
+      "sources": [],
+      "duration_ms": 15691
+    },
+    {
+      "id": "negative-unknown-material",
+      "query": "知识库里，火星纤维夹克要用哪种溶剂清洗",
+      "answer": "请先提供这件衣物的材质成分或洗护标签；仅凭衣物类别还不能确定洗涤、烘干等处理方法。",
+      "traces": [
+        {
+          "name": "care_guide",
+          "status": "success",
+          "summary": "{\"answer_status\": \"needs_clarification\", \"message\": \"请先提供这件衣物的材质成分或洗护标签；仅凭衣物类别还不能确定洗涤、烘干等处理方法。\", \"missing_conditions\": [\"material_or_care_label\"], \"query\": \"...",
+          "duration_ms": 0
+        }
+      ],
+      "sources": [],
+      "duration_ms": 2
+    },
+    {
+      "id": "negative-exact-brand-size",
+      "query": "知识库里，2026款星云品牌X99西装M码胸围多少厘米",
+      "answer": "在我能访问的知识库中，**没有找到**「2026 款星云 X99 西装 M 码胸围」的具体数值。\n\n检索到的内容均不适用于该产品：\n\n- 命中的资料全部来自 UNIQLO 香港及澳门的上装尺码测量说明，只适用于 UNIQLO 自家的尺码表，不能用来推断星云品牌 X99 西装的具体尺寸。\n- 其中只有一般性原则可参考：尺码表中的“胸宽”通常指衣物平铺后的半胸宽，不等于人体胸围；衣物尺寸也不同于人体尺寸，购买前应核对该品牌该款的具体尺码表。\n\n建议你提供以下任一信息，我才能继续帮你：\n\n1. 星云品牌 X99 西装官方尺码表或商品页面（可上传到知识库）；\n2. 该款衣物在你衣橱中的编号，我读取已记录尺寸后给你匹配建议；\n3. 若你手上有实物，可用软尺按腋下左右侧缝平铺测量后告诉我，我帮你对照选购。\n\n需要的话，我也可以先按西装该尺码的常规着用场景，给你一份穿搭或出行建议。",
+      "traces": [
+        {
+          "name": "skill_router",
+          "status": "success",
+          "summary": "knowledge_qa",
+          "duration_ms": 0
+        },
+        {
+          "name": "rag_search",
+          "status": "success",
+          "summary": "{\"answer_status\": \"evidence_found\", \"attempts\": 1, \"effective_query\": \"2026款 星云 X99 西装 M码 胸围 尺寸\", \"query\": \"2026款 星云 X99 西装 M码 胸围 尺寸\", \"query_rewritten\": fal...",
+          "duration_ms": 563
+        }
+      ],
+      "sources": [],
+      "duration_ms": 9324
+    }
+  ]
+}

@@ -9,6 +9,7 @@ import os
 import re
 from collections import Counter
 from dataclasses import dataclass
+from difflib import SequenceMatcher
 from pathlib import Path
 from typing import Literal, Protocol
 
@@ -261,7 +262,8 @@ class HybridRetriever:
 
         if mode in {"vector", "hybrid"} and self.embedding is not None:
             try:
-                semantic = self._semantic_ranking(query, owner_id, conversation_id, recall_limit)
+                semantic = self._semantic_ranking(query, owner_id, conversation_id, recall_limit,
+                                                  allowed_keys=frozenset(candidate_map))
                 rankings.append(semantic)
                 vector_count = len(semantic)
             except Exception:
@@ -279,22 +281,26 @@ class HybridRetriever:
         maximum_rrf_score = len(rankings) / (RRF_K + 1)
         ranked_keys = sorted(fused, key=lambda key: (-fused[key], key))
         hits: list[RetrievalHit] = []
-        seen_user_documents: set[str] = set()
+        document_excerpts: dict[str, list[str]] = {}
         for key in ranked_keys:
             candidate = candidate_map.get(key)
             if candidate is None:
                 continue
+            snippet = _snippet(candidate.content, query)
             if candidate.document_id:
-                if candidate.document_id in seen_user_documents:
+                excerpts = document_excerpts.setdefault(candidate.document_id, [])
+                # Preserve two complementary passages while limiting dominance
+                # by one document and suppressing near-identical overlap.
+                if len(excerpts) >= 2 or any(SequenceMatcher(None, snippet, old, autojunk=False).ratio() >= 0.85 for old in excerpts):
                     continue
-                seen_user_documents.add(candidate.document_id)
+                excerpts.append(snippet)
             title = candidate.title
             if candidate.page_number is not None:
                 title = f"{title}（第 {candidate.page_number} 页）"
             hits.append(
                 RetrievalHit(
                     title=title,
-                    snippet=_snippet(candidate.content, query),
+                    snippet=snippet,
                     source_name=candidate.source_name,
                     source_url=candidate.source_url,
                     topic=candidate.topic,
@@ -518,6 +524,8 @@ class HybridRetriever:
         owner_id: str,
         conversation_id: str,
         recall_limit: int,
+        *,
+        allowed_keys: frozenset[str],
     ) -> list[str]:
         collections = [
             (self._builtin_collection(), None),
@@ -526,11 +534,15 @@ class HybridRetriever:
                 {"conversation_id": conversation_id},
             ),
         ]
-        collections = [
-            (collection, where)
-            for collection, where in collections
-            if collection.count() > 0
-        ]
+        scoped_collections = []
+        for collection, where in collections:
+            prefix = "user:" if where is not None else "builtin:"
+            eligible = sorted(key for key in allowed_keys if key.startswith(prefix))
+            if not eligible or collection.count() == 0:
+                continue
+            restriction = {"retrieval_key": {"$in": eligible}}
+            scoped_collections.append((collection, {"$and": [where, restriction]} if where else restriction))
+        collections = scoped_collections
         if not collections:
             return []
         self._stats["query_embedding_requests"] += 1
@@ -678,8 +690,27 @@ def _bm25_score(
     return score
 
 
-def _snippet(content: str, query: str, limit: int = 180) -> str:
-    position = content.find(query[:2]) if query else -1
-    start = max(0, position - 30) if position >= 0 else 0
+def _snippet(content: str, query: str, limit: int = 360) -> str:
+    """Choose a bounded window covering query terms, not the query's first two characters.
+
+    Short reviewed records remain whole. This is excerpt selection, not a
+    semantic relevance score or permission to infer missing facts.
+    """
+    if len(content) <= limit:
+        return content.strip()
+    terms = {token for token in _tokenize(query) if len(token) >= 2}
+    lower = content.lower()
+    starts = {0}
+    for term in terms:
+        for match in re.finditer(re.escape(term), lower):
+            starts.add(max(0, min(match.start() - 40, len(content) - limit)))
+    def window_score(offset):
+        window = lower[offset:offset + limit]
+        positions = [window.find(term) for term in terms if term in window]
+        # Prefer placing matched terms near the start, leaving room for the
+        # explanation after them instead of cutting immediately after a noun.
+        return len(positions), -sum(positions) / len(positions) if positions else 0
+
+    start = max(sorted(starts), key=window_score)
     fragment = content[start:start + limit].strip()
-    return fragment + ("..." if start + limit < len(content) else "")
+    return ("..." if start else "") + fragment + ("..." if start + limit < len(content) else "")

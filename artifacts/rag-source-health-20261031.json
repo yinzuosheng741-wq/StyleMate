@@ -1,0 +1,244 @@
+{
+  "checked_at": "2026-10-31T06:50:29.605800+00:00",
+  "scope": "single bounded GET per registered source; HTTP success does not establish content accuracy or source endorsement; no HTML/PDF bodies retained",
+  "rows": [
+    {
+      "id": "ftc-care-labels",
+      "url": "https://www.ftc.gov/business-guidance/resources/clothes-captioning-complying-care-labeling-rule",
+      "semantic_verification": false,
+      "status_code": 404,
+      "final_url": "https://www.ftc.gov/business-guidance/resources/clothes-captioning-complying-care-labeling-rule",
+      "content_type": "text/html",
+      "sample_bytes": 1301,
+      "sample_truncated": false,
+      "sample_sha256": "6cb6ddd1f7eefd58b6094bfb287c9fafa16b34eb1dfbf27416431220d9e45e5e"
+    },
+    {
+      "id": "ginetex-care-symbols",
+      "url": "https://www.ginetex.net/userfiles/files/gin_bro_gb_rz_brochure_web.pdf",
+      "semantic_verification": false,
+      "status_code": 200,
+      "final_url": "https://www.ginetex.net/userfiles/files/gin_bro_gb_rz_brochure_web.pdf",
+      "content_type": "application/pdf",
+      "sample_bytes": 2097152,
+      "sample_truncated": true,
+      "sample_sha256": "6ccbc41c4ae7589c5a13fd19222f92cb7f51f9884fc132c1931533dfa84e6ea3"
+    },
+    {
+      "id": "woolmark-care",
+      "url": "https://www.woolmark.com/care/care-for-wool/",
+      "semantic_verification": false,
+      "status_code": 200,
+      "final_url": "https://www.woolmark.com/care/care-for-wool/",
+      "content_type": "text/html; charset=utf-8",
+      "sample_bytes": 123601,
+      "sample_truncated": false,
+      "sample_sha256": "29ea0efdeb91ef4c6f92299c9b25ff7b232a4a178f1f0ee9ca31acfc34c437c2"
+    },
+    {
+      "id": "aci-laundry",
+      "url": "https://www.cleaninginstitute.org/cleaning-tips/clothes/laundry-basics",
+      "semantic_verification": false,
+      "status_code": 403,
+      "final_url": "https://www.cleaninginstitute.org/cleaning-tips/clothes/laundry-basics",
+      "content_type": "text/html; charset=UTF-8",
+      "sample_bytes": 5662,
+      "sample_truncated": false,
+      "sample_sha256": "72f21f452c8523db7914be0ad01ccd1bd04524e887d7e8edbb9d81af5a009037"
+    },
+    {
+      "id": "aci-stains",
+      "url": "https://www.cleaninginstitute.org/cleaning-tips/clothes/stain-removal-guide",
+      "semantic_verification": false,
+      "status_code": 403,
+      "final_url": "https://www.cleaninginstitute.org/cleaning-tips/clothes/stain-removal-guide",
+      "content_type": "text/html; charset=UTF-8",
+      "sample_bytes": 5677,
+      "sample_truncated": false,
+      "sample_sha256": "3a513d5307b79320d406a18e92627991c3aaf01d5d3da000f8e8faf991c761c3"
+    },
+    {
+      "id": "rei-layering",
+      "url": "https://www.rei.com/learn/expert-advice/layering-basics.html",
+      "semantic_verification": false,
+      "error_type": "ReadTimeout"
+    },
+    {
+      "id": "patagonia-repairs",
+      "url": "https://www.patagonia.com/repairs/",
+      "semantic_verification": false,
+      "status_code": 200,
+      "final_url": "https://www.patagonia.com/repairs/",
+      "content_type": "text/html",
+      "sample_bytes": 3300,
+      "sample_truncated": false,
+      "sample_sha256": "29fa8dcff45d5cf0e303a8f9999d407abacde5047074fb0754f36c94c43b83dd"
+    },
+    {
+      "id": "canva-colour-wheel",
+      "url": "https://www.canva.com/colors/color-wheel/",
+      "semantic_verification": false,
+      "status_code": 200,
+      "final_url": "https://www.canva.com/colors/color-wheel/",
+      "content_type": "text/html; charset=utf-8",
+      "sample_bytes": 238136,
+      "sample_truncated": false,
+      "sample_sha256": "33a977533e3675a498d6718f156514088836bc3882ad9308dfdfce64639da14e"
+    },
+    {
+      "id": "nike-size-fit",
+      "url": "https://www.nike.com/help/a/size-charts",
+      "semantic_verification": false,
+      "status_code": 200,
+      "final_url": "https://www.nike.com/help/a/size-charts",
+      "content_type": "text/html; charset=UTF-8",
+      "sample_bytes": 583422,
+      "sample_truncated": false,
+      "sample_sha256": "1ab3bf595b3f343fa4c92c211b5e595e8993020d203193baee553163652ac9e5"
+    },
+    {
+      "id": "uniqlo-measurements",
+      "url": "https://faq-sg.uniqlo.com/articles/en_US/FAQ/Product-Measurement-Guidelines-SG",
+      "semantic_verification": false,
+      "status_code": 403,
+      "final_url": "https://faq-sg.uniqlo.com/articles/en_US/FAQ/Product-Measurement-Guidelines-SG",
+      "content_type": "text/html",
+      "sample_bytes": 455,
+      "sample_truncated": false,
+      "sample_sha256": "5a743397057781e5ee57d02b508bb455d3034122bd553e4f9551c116d5c9d401"
+    },
+    {
+      "id": "nws-heat-wave",
+      "url": "https://www.weather.gov/safety/heat-during",
+      "semantic_verification": false,
+      "status_code": 200,
+      "final_url": "https://www.weather.gov/safety/heat-during",
+      "content_type": "text/html; charset=UTF-8",
+      "sample_bytes": 32885,
+      "sample_truncated": false,
+      "sample_sha256": "860207b817ecced958e7bfcf8287697787bca4badd5079e99e30fac00cb800ce"
+    },
+    {
+      "id": "nws-cold-weather",
+      "url": "https://www.weather.gov/safety/cold-during",
+      "semantic_verification": false,
+      "status_code": 200,
+      "final_url": "https://www.weather.gov/safety/cold-during",
+      "content_type": "text/html; charset=UTF-8",
+      "sample_bytes": 33975,
+      "sample_truncated": false,
+      "sample_sha256": "691c9498af313baa1502c0dcb46841b04f1d53e0748ff5c738e90ea6c54d9743"
+    },
+    {
+      "id": "epa-sun-safety",
+      "url": "https://www.epa.gov/sunsafety/sun-safety-tips",
+      "semantic_verification": false,
+      "status_code": 200,
+      "final_url": "https://www.epa.gov/sunsafety/sun-safety-tips",
+      "content_type": "text/html; charset=UTF-8",
+      "sample_bytes": 58004,
+      "sample_truncated": false,
+      "sample_sha256": "28382c4b3bdb0bea8d8314065866acbd7a190a727ebbf53885d4866f81b7b63c"
+    },
+    {
+      "id": "goretex-outerwear-care",
+      "url": "https://www.gore-tex.com/support/care/outerwear",
+      "semantic_verification": false,
+      "status_code": 200,
+      "final_url": "https://www.gore-tex.com/support/care/outerwear",
+      "content_type": "text/html; charset=UTF-8",
+      "sample_bytes": 245930,
+      "sample_truncated": false,
+      "sample_sha256": "bff06bd4bf2d8846c7521c7954625de54ceb619b88b2cffaba29e3278f4466dd"
+    },
+    {
+      "id": "nps-ten-essentials",
+      "url": "https://www.nps.gov/articles/10essentials.htm",
+      "semantic_verification": false,
+      "status_code": 200,
+      "final_url": "https://www.nps.gov/articles/10essentials.htm",
+      "content_type": "text/html;charset=UTF-8",
+      "sample_bytes": 49027,
+      "sample_truncated": false,
+      "sample_sha256": "4828becb65cf7c1e3616848fef380b1b8250ad268b79daa1aed44ebae128b462"
+    },
+    {
+      "id": "aad-sun-protection",
+      "url": "https://www.aad.org/public/everyday-care/sun-protection/shade-clothing-sunscreen",
+      "semantic_verification": false,
+      "status_code": 200,
+      "final_url": "https://www.aad.org/public/everyday-care/sun-protection/shade-clothing-sunscreen",
+      "content_type": "text/html; charset=utf-8",
+      "sample_bytes": 156545,
+      "sample_truncated": false,
+      "sample_sha256": "3982c468533412bb881eb695f8246cb92ce48c9f662a33655de554d4c9b9d375"
+    },
+    {
+      "id": "ginetex-care-symbols-web",
+      "url": "https://www.ginetex.net/GB/labelling/care-symbols.asp",
+      "semantic_verification": false,
+      "status_code": 200,
+      "final_url": "https://www.ginetex.net/GB/labelling/care-symbols.asp",
+      "content_type": "text/html; Charset=utf-8",
+      "sample_bytes": 76950,
+      "sample_truncated": false,
+      "sample_sha256": "40a4ee5324305f83cffbf6bd5a99ba4373873b688ec0858cc58398e259092d0a"
+    },
+    {
+      "id": "uniqlo-hk-measurements",
+      "url": "https://faq-hk.uniqlo.com/pkb_Home_UQ_HK?c=category_uq_tw:UQHK_C2&fs=Search&id=kA0Ie000000TOgx&l=en_US&pn=1",
+      "semantic_verification": false,
+      "status_code": 403,
+      "final_url": "https://faq-hk.uniqlo.com/pkb_Home_UQ_HK?c=category_uq_tw:UQHK_C2&fs=Search&id=kA0Ie000000TOgx&l=en_US&pn=1",
+      "content_type": "text/html",
+      "sample_bytes": 406,
+      "sample_truncated": false,
+      "sample_sha256": "91f07588ff0989e97b31621994fc9cad6b506124027c9e875db32acbc9cbc28d"
+    },
+    {
+      "id": "rei-packing",
+      "url": "https://www.rei.com/learn/expert-advice/traveling-light.html",
+      "semantic_verification": false,
+      "error_type": "ReadTimeout"
+    },
+    {
+      "id": "rei-hiking-clothes",
+      "url": "https://www.rei.com/learn/expert-advice/how-to-choose-hiking-clothes.html",
+      "semantic_verification": false,
+      "error_type": "ReadTimeout"
+    },
+    {
+      "id": "ucdavis-attire",
+      "url": "https://careercenter.ucdavis.edu/interviews-and-offers/what-to-wear",
+      "semantic_verification": false,
+      "status_code": 403,
+      "final_url": "https://careercenter.ucdavis.edu/interviews-and-offers/what-to-wear",
+      "content_type": "text/html; charset=UTF-8",
+      "sample_bytes": 5655,
+      "sample_truncated": false,
+      "sample_sha256": "e0cf00a1210b3e062c81274ea3e4c44df0742d5cf085e826e7f5c365b3f3d61f"
+    },
+    {
+      "id": "adobe-color-wheel",
+      "url": "https://www.adobe.com/uk/creativecloud/design/discover/color-wheel.html",
+      "semantic_verification": false,
+      "status_code": 403,
+      "final_url": "https://www.adobe.com/uk/creativecloud/design/discover/color-wheel.html",
+      "content_type": "text/html",
+      "sample_bytes": 438,
+      "sample_truncated": false,
+      "sample_sha256": "c524bf96cdb3578c5dd1019858da5fa39a3e540421441a9abacf18643945b2a3"
+    },
+    {
+      "id": "cdc-extreme-heat",
+      "url": "https://www.cdc.gov/climate-health/php/resources/protect-yourself-from-the-dangers-of-extreme-heat.html",
+      "semantic_verification": false,
+      "status_code": 403,
+      "final_url": "https://www.cdc.gov/climate-health/php/resources/protect-yourself-from-the-dangers-of-extreme-heat.html",
+      "content_type": "text/html",
+      "sample_bytes": 496,
+      "sample_truncated": false,
+      "sample_sha256": "22369ccac762d80d497637d4a5fed7b2143d7e406c19dca5baec6aa5832bff1d"
+    }
+  ]
+}

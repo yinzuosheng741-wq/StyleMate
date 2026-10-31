@@ -44,6 +44,12 @@ artifacts/*
 !artifacts/benchmark-20261031-framework-live.json
 !artifacts/benchmark-20261031-framework-v2.json
 !artifacts/framework-release-20261031.json
+!artifacts/rag-audit-before-real-20261031.json
+!artifacts/rag-audit-final-real-20261031.json
+!artifacts/rag-source-health-20261031.json
+!artifacts/rag-answer-samples-20261031.json
+!artifacts/rag-answer-samples-final-20261031.json
+!artifacts/rag-release-20261031.json
 dist/
 data/desktop/
 data/config/

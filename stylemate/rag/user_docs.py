@@ -132,23 +132,23 @@ def _split_sections(text: str) -> list[_Section]:
     body_blocks: list[str] = []
 
     def flush() -> None:
-        body = "\n\n".join(body_blocks).strip()
+        body = "\n".join(body_blocks).strip()
         if body:
             sections.append(_Section(title=title, body=body))
         body_blocks.clear()
 
-    for block in re.split(r"\n\s*\n+", normalized):
-        lines = [line.strip() for line in block.splitlines() if line.strip()]
-        if not lines:
-            continue
-        heading = _heading_text(lines[0], len(lines) == 1)
+    lines = normalized.splitlines()
+    for index, raw_line in enumerate(lines):
+        line = raw_line.strip()
+        standalone = (index == 0 or not lines[index - 1].strip()) and (
+            index + 1 == len(lines) or not lines[index + 1].strip()
+        )
+        heading = _heading_text(line, standalone)
         if heading:
             flush()
             title = heading
-            if len(lines) > 1:
-                body_blocks.append("\n".join(lines[1:]))
         else:
-            body_blocks.append("\n".join(lines))
+            body_blocks.append(line)
     flush()
     if sections:
         return sections

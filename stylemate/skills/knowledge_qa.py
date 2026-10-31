@@ -8,7 +8,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from stylemate.domain.models import SkillOutcome, SkillSpec
 from stylemate.rag.models import RetrievalHit
-from stylemate.rag.query_planning import knowledge_compatible
+from stylemate.rag.query_planning import knowledge_compatible, requests_exact_product_measurement
 from stylemate.skills.runtime import SkillRun
 
 
@@ -78,6 +78,16 @@ class KnowledgeQASkill:
         rewritten: bool,
     ) -> SkillOutcome:
         results = [_result_payload(hit) for hit in hits]
+        # Built-in size entries describe measurement concepts, not per-product
+        # dimensions. A user-supplied size chart may still contain the answer.
+        if requests_exact_product_measurement(original_query) and not any(hit.document_id for hit in hits):
+            return run.finish(status="fallback", data={
+                "query": original_query, "effective_query": effective_query,
+                "query_rewritten": rewritten, "attempts": attempts,
+                "answer_status": "needs_clarification", "missing_conditions": ["product_size_chart"],
+                "results": [], "sources": [],
+                "message": "当前知识库没有这款产品的具体尺寸数据。请提供准确品牌、款号及官方尺码表；通用测量方法不能代替该款实测尺寸。",
+            }, message="请提供这款产品的官方尺码表或测量数据。")
         status = "success" if results else "fallback"
         return run.finish(
             status=status,
@@ -142,7 +152,7 @@ def _valid_cited_hits(hits: list[RetrievalHit], original_query: str) -> list[Ret
 def _result_payload(hit: RetrievalHit) -> dict:
     return {
         "title": hit.title,
-        "snippet": hit.snippet[:240],
+        "snippet": hit.snippet[:400],
         "source_name": hit.source_name,
         "source_url": str(hit.source_url),
         "topic": hit.topic,

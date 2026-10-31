@@ -1,0 +1,48 @@
+{
+  "status": "candidate_plan_not_loaded_by_runtime",
+  "checked_at": "2026-10-31",
+  "reviewer": "codex-source-comparison-not-human-expert",
+  "purpose": "Targeted source plan for a separately versioned corpus expansion. These pages are not imported into the default fact corpus by this file.",
+  "sources": [
+    {
+      "url": "https://www.arket.com/en-ww/editorial/silk-care-guide/",
+      "publisher": "ARKET",
+      "status": "page_read_and_compared",
+      "locators": ["Hand washing", "Machine washing", "Drying silk", "Storing silk"],
+      "candidate_facts": ["部分真丝成衣要求干洗；允许水洗时，该指南建议冷水和适合真丝的温和洗涤剂。", "该真丝护理指南建议避免拧绞，阴凉处平放干燥，避开日晒和热源。"],
+      "applicability": "品牌真丝护理指南；具体成衣洗标优先。",
+      "limitations": "不能据此允许所有真丝、混纺、带衬里或装饰产品水洗；不提供干洗溶剂配方。"
+    },
+    {
+      "url": "https://www.rei.com/learn/expert-advice/how-to-wash-down-jacket.html",
+      "publisher": "REI Expert Advice / Nikwax author",
+      "status": "page_read_and_compared",
+      "locators": ["Instructions: Wash", "Instructions: Dry", "Instructions: Storage"],
+      "candidate_facts": ["该羽绒服指南要求先查看具体成衣说明，再选择清洗产品与方法。", "该指南描述低温烘干并充分干透，以及避免长期压在紧小收纳袋中；不能给所有羽绒服固定烘干分钟数。"],
+      "applicability": "REI 发布的 Nikwax 羽绒服清洗产品流程；烘干须与成衣要求相容。",
+      "limitations": "带有产品推广背景，不是所有羽绒成衣的统一程序，也不适用于禁止烘干的产品。"
+    },
+    {
+      "url": "https://www.uniqlo.com/au/en/news/topics/2021101801/",
+      "publisher": "UNIQLO TODAY AU",
+      "status": "page_read_and_compared",
+      "locators": ["WASHING YOUR PREMIUM LINEN: 1", "WASHING YOUR PREMIUM LINEN: 2", "WASHING YOUR PREMIUM LINEN: 3"],
+      "candidate_facts": ["优衣库该亚麻衬衫指南建议冷水轻柔洗涤，并缩短脱水过程以减少紧密褶皱。", "该指南描述晾晒和有支撑的衣架收纳；折叠时宜松放，避免上方重压。"],
+      "applicability": "文中 Premium Linen 亚麻衬衫及其产品护理条件。",
+      "limitations": "不自动推广到所有亚麻混纺、西装、涂层或带装饰产品；实际洗标优先。"
+    },
+    {
+      "url": "https://www.cleaninginstitute.org/cleaning-tips/clothes/laundry-basics",
+      "publisher": "American Cleaning Institute",
+      "status": "existing_source_needs_specific_claim_review",
+      "locators": ["Fabric care labels", "Machine wash settings"],
+      "candidate_topics": ["棉类衣物的一般标签与分色原则", "按衣物要求选择洗涤与干燥程序"],
+      "limitations": "现有 pending 记录中的缩水断言需重新逐句核实，不因 URL 有效就直接发布。"
+    }
+  ],
+  "release_requirements": [
+    "每条摘要保存具体来源、章节、适用材质/产品、禁忌及审核时间。",
+    "知识扩充后建立新的题集版本；原来标注为无答案的问题可能已过时，保留原报告并明确区分语料版本。",
+    "再次测量 Recall、排名、域外误召回、上下文保留与引用支持，不能只检查记录数增长。"
+  ]
+}

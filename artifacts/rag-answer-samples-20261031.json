@@ -1,0 +1,238 @@
+{
+  "model": "jiaorong-deepseek-v4-flash",
+  "model_output_budget": 900,
+  "retrieval": "configured real embedding with same canonical corpus",
+  "scope": "8 synthetic public questions, single trial, includes deterministic service routes; answers retained for Codex review, not independent human scoring",
+  "rows": [
+    {
+      "id": "existing-size",
+      "query": "知识库里，平铺胸宽和人体胸围是同一个量吗",
+      "answer": "UNIQLO 香港及澳门上装测量图把胸宽列为半胸宽：衣物完全平铺后，测量腋下左右侧缝之间的宽度。这是成衣的平铺宽度，不能把该数值直接当成人体胸围，也不能据此断言另一件衣物一定合身。\n适用范围：UNIQLO 香港及澳门该页面上装的平铺胸宽测量位置。\n限制：不适用于所有品牌、文胸或未采用相同测量方法的尺码表。",
+      "traces": [
+        {
+          "name": "rag_search",
+          "status": "success",
+          "summary": "{\"answer_status\": \"evidence_found\", \"attempts\": 1, \"effective_query\": \"知识库里，平铺胸宽和人体胸围是同一个量吗\", \"query\": \"知识库里，平铺胸宽和人体胸围是同一个量吗\", \"query_rewritten\": false, \"res...",
+          "duration_ms": 688
+        }
+      ],
+      "sources": [
+        {
+          "id": "UNIQLO Hong Kong & Macau Customer Service",
+          "title": "平铺胸宽不是人体胸围",
+          "url": "https://faq-hk.uniqlo.com/pkb_Home_UQ_HK?c=category_uq_tw:UQHK_C2&fs=Search&id=kA0Ie000000TOgx&l=en_US&pn=1"
+        }
+      ],
+      "duration_ms": 692
+    },
+    {
+      "id": "existing-gore",
+      "query": "知识库里，GORE-TEX 外套洗涤是否适合用柔顺剂",
+      "answer": "GORE-TEX 外套一般洗护说明建议使用少量液体洗涤剂，不使用粉状洗涤剂、柔顺剂、去渍剂或漂白剂。具体成衣的制造商洗标仍需先核对，不能把该说明推广到所有材质。\n适用范围：GORE-TEX 外套的一般洗涤，受具体洗标限制。\n限制：只支持摘要中列出的适用范围；具体产品说明与洗标优先，不能泛化到所有衣物。",
+      "traces": [
+        {
+          "name": "care_guide",
+          "status": "success",
+          "summary": "{\"answer_status\": \"evidence_found\", \"attempts\": 1, \"effective_query\": \"知识库里，GORE-TEX 外套洗涤是否适合用柔顺剂 衣物洗护注意事项\", \"query\": \"知识库里，GORE-TEX 外套洗涤是否适合用柔顺剂 衣物洗护注意事项\", ...",
+          "duration_ms": 562
+        }
+      ],
+      "sources": [
+        {
+          "id": "GORE-TEX Brand",
+          "title": "功能外套慎选洗涤剂",
+          "url": "https://www.gore-tex.com/support/care/outerwear"
+        }
+      ],
+      "duration_ms": 559
+    },
+    {
+      "id": "gap-silk",
+      "query": "知识库里，真丝衬衫允许水洗时应怎样清洗和干燥",
+      "answer": "知识库暂未找到直接答案。",
+      "traces": [
+        {
+          "name": "care_guide",
+          "status": "success",
+          "summary": "{\"answer_status\": \"not_found\", \"attempts\": 2, \"effective_query\": \"知识库里，真丝衬衫允许水洗时应怎样清洗和干燥 衣物洗护注意事项 相关资料\", \"query\": \"知识库里，真丝衬衫允许水洗时应怎样清洗和干燥 衣物洗护注意事项\", \"query_r...",
+          "duration_ms": 0
+        }
+      ],
+      "sources": [],
+      "duration_ms": 6
+    },
+    {
+      "id": "gap-down",
+      "query": "知识库里，羽绒服怎么洗涤干燥和收纳",
+      "answer": "知识库暂未找到直接答案。",
+      "traces": [
+        {
+          "name": "care_guide",
+          "status": "success",
+          "summary": "{\"answer_status\": \"not_found\", \"attempts\": 2, \"effective_query\": \"知识库里，羽绒服怎么洗涤干燥和收纳 衣物洗护注意事项 相关资料\", \"query\": \"知识库里，羽绒服怎么洗涤干燥和收纳 衣物洗护注意事项\", \"query_rewritten\":...",
+          "duration_ms": 16
+        }
+      ],
+      "sources": [],
+      "duration_ms": 5
+    },
+    {
+      "id": "negative-tax",
+      "query": "知识库里，年终税务申报需要准备哪些材料",
+      "answer": "我在知识库里检索了\"年终税务申报需要准备哪些材料\"，**没有找到相关条目**。\n\n检索命中的内容都是衣物洗护、尺码和旅行打包类知识（如 UNIQLO 尺码表、REI 旅行打包建议、American Cleaning Institute 收纳指南），与税务申报无关。\n\n说明：\n- 我是出行衣橱助手，知识库主要覆盖衣物洗护、面料、配色、尺码、场景穿搭和旅行打包。\n- 税务申报属于专业财税领域，我没有可靠来源可以引用，不能凭常识替你补造材料清单。\n\n如果你需要，我可以帮你：\n1. 按**出行/衣物**相关主题继续查询（例如出差着装、行李清单）；\n2. 或者你上传一份税务相关的文档到会话中，我可以基于你上传的文档内容帮你整理要点。\n\n需要我帮你做哪一项？",
+      "traces": [
+        {
+          "name": "skill_router",
+          "status": "success",
+          "summary": "knowledge_qa",
+          "duration_ms": 0
+        },
+        {
+          "name": "rag_search",
+          "status": "success",
+          "summary": "{\"answer_status\": \"evidence_found\", \"attempts\": 1, \"effective_query\": \"年终税务申报需要准备哪些材料\", \"query\": \"年终税务申报需要准备哪些材料\", \"query_rewritten\": false, \"results\": [{\"ap...",
+          "duration_ms": 437
+        }
+      ],
+      "sources": [
+        {
+          "id": "UNIQLO Hong Kong & Macau Customer Service",
+          "title": "人体尺寸与商品尺寸区别",
+          "url": "https://faq-hk.uniqlo.com/pkb_Home_UQ_HK?c=category_uq_tw:UQHK_C2&fs=Search&id=kA0Ie000000TOgx&l=en_US&pn=1"
+        },
+        {
+          "id": "REI Co-op",
+          "title": "旅行轻装：上下装互相搭配",
+          "url": "https://www.rei.com/learn/expert-advice/traveling-light.html"
+        },
+        {
+          "id": "American Cleaning Institute",
+          "title": "完全干燥再收纳",
+          "url": "https://www.cleaninginstitute.org/cleaning-tips/clothes/laundry-basics"
+        },
+        {
+          "id": "REI Co-op",
+          "title": "旅行打包根据行程增减衣物",
+          "url": "https://www.rei.com/learn/expert-advice/traveling-light.html"
+        }
+      ],
+      "duration_ms": 29209
+    },
+    {
+      "id": "negative-housing",
+      "query": "知识库里，房屋租赁合同违约金怎么算",
+      "answer": "我检索了知识库，但**没有找到关于房屋租赁合同违约金的相关内容**——当前知识库主要收录的是衣物洗护、面料、尺码和穿搭场景类知识，不包含法律或合同类条目。\n\n因此我不能凭空给出违约金计算规则或编造来源引用。关于这个问题，建议你：\n\n- 查阅《民法典》中关于违约金的规定（如第 585 条关于违约金调整的规则），以正式法律文本为准；\n- 结合你合同中的具体违约金条款、实际损失情况判断；\n- 涉及具体纠纷时，咨询执业律师或当地法律援助机构。\n\n如果你是想问衣物相关的其他问题（比如某件衣服怎么洗、怎么搭配、出行怎么打包），我可以继续帮你查。",
+      "traces": [
+        {
+          "name": "skill_router",
+          "status": "success",
+          "summary": "knowledge_qa",
+          "duration_ms": 0
+        },
+        {
+          "name": "rag_search",
+          "status": "success",
+          "summary": "{\"answer_status\": \"evidence_found\", \"attempts\": 1, \"effective_query\": \"房屋租赁合同违约金怎么算\", \"query\": \"房屋租赁合同违约金怎么算\", \"query_rewritten\": false, \"results\": [{\"applic...",
+          "duration_ms": 1093
+        },
+        {
+          "name": "rag_search",
+          "status": "success",
+          "summary": "{\"answer_status\": \"evidence_found\", \"attempts\": 1, \"effective_query\": \"租赁合同违约金计算标准 法律规定\", \"query\": \"租赁合同违约金计算标准 法律规定\", \"query_rewritten\": false, \"results\": [...",
+          "duration_ms": 719
+        }
+      ],
+      "sources": [
+        {
+          "id": "American Cleaning Institute",
+          "title": "洗涤剂按说明用量",
+          "url": "https://www.cleaninginstitute.org/cleaning-tips/clothes/laundry-basics"
+        },
+        {
+          "id": "UC Davis Career Center",
+          "title": "面试前检查衣物整洁",
+          "url": "https://careercenter.ucdavis.edu/interviews-and-offers/what-to-wear"
+        },
+        {
+          "id": "Woolmark",
+          "title": "羊毛受潮先干燥",
+          "url": "https://www.woolmark.com/care/care-for-wool/"
+        },
+        {
+          "id": "UC Davis Career Center",
+          "title": "职业场合穿搭保留个人选择",
+          "url": "https://careercenter.ucdavis.edu/interviews-and-offers/what-to-wear"
+        },
+        {
+          "id": "American Cleaning Institute",
+          "title": "洗涤剂按说明用量",
+          "url": "https://www.cleaninginstitute.org/cleaning-tips/clothes/laundry-basics"
+        },
+        {
+          "id": "UNIQLO Hong Kong & Macau Customer Service",
+          "title": "成衣尺寸平铺测量方法",
+          "url": "https://faq-hk.uniqlo.com/pkb_Home_UQ_HK?c=category_uq_tw:UQHK_C2&fs=Search&id=kA0Ie000000TOgx&l=en_US&pn=1"
+        },
+        {
+          "id": "American Cleaning Institute",
+          "title": "污渍未除别烘",
+          "url": "https://www.cleaninginstitute.org/cleaning-tips/clothes/laundry-basics"
+        },
+        {
+          "id": "UNIQLO Hong Kong & Macau Customer Service",
+          "title": "平铺胸宽不是人体胸围",
+          "url": "https://faq-hk.uniqlo.com/pkb_Home_UQ_HK?c=category_uq_tw:UQHK_C2&fs=Search&id=kA0Ie000000TOgx&l=en_US&pn=1"
+        }
+      ],
+      "duration_ms": 10205
+    },
+    {
+      "id": "negative-unknown-material",
+      "query": "知识库里，火星纤维夹克要用哪种溶剂清洗",
+      "answer": "GORE-TEX 外套一般洗护说明建议使用少量液体洗涤剂，不使用粉状洗涤剂、柔顺剂、去渍剂或漂白剂。具体成衣的制造商洗标仍需先核对，不能把该说明推广到所有材质。\n适用范围：GORE-TEX 外套的一般洗涤，受具体洗标限制。\n限制：只支持摘要中列出的适用范围；具体产品说明与洗标优先，不能泛化到所有衣物。",
+      "traces": [
+        {
+          "name": "care_guide",
+          "status": "success",
+          "summary": "{\"answer_status\": \"evidence_found\", \"attempts\": 1, \"effective_query\": \"知识库里，火星纤维夹克要用哪种溶剂清洗 衣物洗护注意事项\", \"query\": \"知识库里，火星纤维夹克要用哪种溶剂清洗 衣物洗护注意事项\", \"query_rewritt...",
+          "duration_ms": 672
+        }
+      ],
+      "sources": [
+        {
+          "id": "GORE-TEX Brand",
+          "title": "功能外套慎选洗涤剂",
+          "url": "https://www.gore-tex.com/support/care/outerwear"
+        }
+      ],
+      "duration_ms": 668
+    },
+    {
+      "id": "negative-exact-brand-size",
+      "query": "知识库里，2026款星云品牌X99西装M码胸围多少厘米",
+      "answer": "UNIQLO 香港及澳门上装测量图把胸宽列为半胸宽：衣物完全平铺后，测量腋下左右侧缝之间的宽度。这是成衣的平铺宽度，不能把该数值直接当成人体胸围，也不能据此断言另一件衣物一定合身。\n适用范围：UNIQLO 香港及澳门该页面上装的平铺胸宽测量位置。\n限制：不适用于所有品牌、文胸或未采用相同测量方法的尺码表。",
+      "traces": [
+        {
+          "name": "model_fallback",
+          "status": "fallback",
+          "summary": "模型服务不可用，已切换确定性路由。",
+          "duration_ms": 0
+        },
+        {
+          "name": "rag_search",
+          "status": "success",
+          "summary": "{\"answer_status\": \"evidence_found\", \"attempts\": 1, \"effective_query\": \"知识库里，2026款星云品牌X99西装M码胸围多少厘米\", \"query\": \"知识库里，2026款星云品牌X99西装M码胸围多少厘米\", \"query_rewritten...",
+          "duration_ms": 625
+        }
+      ],
+      "sources": [
+        {
+          "id": "UNIQLO Hong Kong & Macau Customer Service",
+          "title": "平铺胸宽不是人体胸围",
+          "url": "https://faq-hk.uniqlo.com/pkb_Home_UQ_HK?c=category_uq_tw:UQHK_C2&fs=Search&id=kA0Ie000000TOgx&l=en_US&pn=1"
+        }
+      ],
+      "duration_ms": 41930
+    }
+  ]
+}

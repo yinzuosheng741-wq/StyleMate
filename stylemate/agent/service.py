@@ -10,6 +10,7 @@ from httpx import HTTPError
 from langchain_core.messages import AIMessage, HumanMessage
 from openai import APIError
 
+from stylemate.agent.citations import cited_sources
 from stylemate.agent.graph import build_agent_graph
 from stylemate.agent.memory import migrate_legacy_summary, update_conversation_facts
 from stylemate.agent.policy import (
@@ -131,6 +132,7 @@ class AgentService:
                 content = str(getattr(latest, "content", "") or "我暂时没有生成回复，请重试。")
                 traces = [_trace(item) for item in result.get("traces", [])]
                 sources = [_source(item) for item in result.get("sources", []) if _source(item) is not None]
+                sources = cited_sources(content, sources)
             except (
                 RequestExecutionDenied,
                 APIError,
@@ -485,9 +487,11 @@ class AgentService:
         elif name == "recommend_size" and isinstance(result, dict):
             content = f"参考尺码：{result.get('recommended_size', '请提供身高体重')}。{result.get('reference_note', '')}"
         elif name in {"care_guide", "rag_search"} and isinstance(result, dict):
-            snippets = result.get("results", [])
+            snippets = _displayed_evidence(result)
             content = (snippets[0].get("snippet", "知识库暂未找到直接答案。") if snippets
                        else result.get("message") or "知识库暂未找到直接答案。")
+            if len(snippets) > 1:
+                content = "\n\n".join(f"{item.get('title', '资料片段')}\n{item.get('snippet', '')}" for item in snippets)
             if snippets:
                 for label, field in (("适用范围", "applicability"), ("限制", "limitations")):
                     if snippets[0].get(field):
@@ -542,11 +546,15 @@ class AgentService:
         traces = [_trace(payload["trace"])] if isinstance(payload.get("trace"), dict) else []
         source_items = payload.get("sources", [])
         if name in {"care_guide", "rag_search"} and isinstance(result, dict):
-            # The deterministic answer displays only the first snippet. Do not
-            # attribute it to other retrieved documents that were not displayed.
-            snippets = result.get("results", []) if not failed else []
-            url = snippets[0].get("source_url") if snippets else None
-            source_items = [item for item in source_items if isinstance(item, dict) and item.get("url") == url][:1]
+            snippets = _displayed_evidence(result) if not failed else []
+            urls = {item.get("source_url") for item in snippets}
+            seen_urls = set()
+            selected = []
+            for item in source_items:
+                if isinstance(item, dict) and item.get("url") in urls and item.get("url") not in seen_urls:
+                    selected.append(item)
+                    seen_urls.add(item.get("url"))
+            source_items = selected
         sources = [_source(item) for item in source_items if _source(item) is not None]
         return content, traces, sources
 
@@ -567,6 +575,18 @@ class AgentService:
                 summary="",
             )
         )
+
+
+def _displayed_evidence(result: dict[str, Any]) -> list[dict[str, Any]]:
+    """Keep the single-fact built-in answer; retain complementary user passages."""
+    snippets = result.get("results", [])
+    if not snippets:
+        return []
+    first = snippets[0]
+    document_id = first.get("document_id")
+    if not document_id:
+        return [first]
+    return [item for item in snippets if item.get("document_id") == document_id][:2]
 
 
 def _successful_result(payload: dict[str, Any]) -> dict[str, Any]:

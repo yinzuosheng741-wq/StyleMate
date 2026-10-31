@@ -29,8 +29,9 @@ SUBJECTS = {
     "goretex": r"gore[ -]?tex|shakedry",
 }
 
-_GARMENT_ONLY = re.compile(r"毛衣|针织|冲锋衣|功能外套|衣物|衣服|\bsweater\b|\bknit\w*\b|\bshell\b", re.I)
-_UNCONFIRMED_CATEGORY = re.compile(r"毛衣|针织|冲锋衣|功能外套|\bsweater\b|\bknit\w*\b|\bshell\b", re.I)
+_UNCONFIRMED_CATEGORY = re.compile(r"毛衣|针织|冲锋衣|功能外套|夹克|衬衫|外套|大衣|风衣|连衣裙|"
+                                   r"(?<![A-Za-z])(?:sweater|knit[a-z]*|shell|jacket|shirt|coat)(?![A-Za-z])", re.I)
+_GARMENT_ONLY = re.compile(_UNCONFIRMED_CATEGORY.pattern + r"|衣物|衣服", re.I)
 _GENERAL_CARE_FACT = re.compile(r"符号|洗标|分类|污渍|收纳|折叠|用量|洗涤剂|烘干前", re.I)
 _OTHER_DOMAIN_SUBJECT = re.compile(
     r"股票|证券|基金|股价|期货|外汇|变速箱|发动机|汽车|轮胎|电脑|数据库|服务器|程序代码|"
@@ -55,6 +56,13 @@ def care_clarification(query: str) -> str | None:
     if re.search(r"洗|清洁|护理|保养|烘|漂白|柔顺剂|熨|\bwash|\bcare\b", query, re.I):
         return material_clarification(query)
     return None
+
+
+def requests_exact_product_measurement(query: str) -> bool:
+    """Conceptual measuring guidance cannot establish a product's exact dimensions."""
+    dimensions = r"胸围|腰围|肩宽|衣长|袖长|裤长|胸宽|尺寸"
+    return bool(re.search(rf"(?:{dimensions}).{{0,12}}(?:多少|几厘米|几公分|具体数值)|"
+                          rf"(?:多少|几厘米|几公分).{{0,12}}(?:{dimensions})", query))
 
 
 def material_clarification(query: str) -> str | None:

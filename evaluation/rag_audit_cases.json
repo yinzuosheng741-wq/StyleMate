@@ -1,0 +1,40 @@
+{
+  "version": "2026-10-31-rag-audit-v1",
+  "notes": "Project-authored diagnostic cases frozen before the associated retrieval changes; not independent human grading. Coverage gaps are requirements, not automatically negative relevance labels.",
+  "queries": [
+    {"id":"existing-wool-label","kind":"supported","query":"羊毛衫没有洗标能直接放洗衣机吗","relevant":["fabric-wool-label"]},
+    {"id":"existing-wool-shape","kind":"supported","query":"羊毛针织和梭织外套收纳方法有什么不同","relevant":["fabric-wool-shape"]},
+    {"id":"existing-whole-label","kind":"supported","query":"一件衣服的衬里和装饰也要考虑洗护要求吗","relevant":["care-label-complete"]},
+    {"id":"existing-size","kind":"supported","query":"平铺胸宽和人体胸围是同一个量吗","relevant":["size-flat-body-width","size-body-versus-product"]},
+    {"id":"existing-layer","kind":"supported","query":"户外贴身层排汗，中间层的职责是什么","relevant":["layer-base","layer-mid"]},
+    {"id":"existing-interview","kind":"supported","query":"面试前如何检查污渍和毛球","relevant":["interview-neat"]},
+    {"id":"existing-trip","kind":"supported","query":"出差选颜色怎样方便上装下装互相组合","relevant":["travel-mix"]},
+    {"id":"existing-gore","kind":"supported","query":"GORE-TEX 外套洗涤是否适合用柔顺剂","relevant":["care-shell-liquid-detergent"]},
+    {"id":"gap-cotton","kind":"coverage_requirement","query":"纯棉T恤怎样洗涤才能降低缩水风险","capability":"cotton_care"},
+    {"id":"gap-silk","kind":"coverage_requirement","query":"真丝衬衫允许水洗时应怎样清洗和干燥","capability":"silk_care"},
+    {"id":"gap-linen","kind":"coverage_requirement","query":"亚麻衬衫洗后怎么减少褶皱和变形","capability":"linen_care"},
+    {"id":"gap-down","kind":"coverage_requirement","query":"羽绒服怎么洗涤干燥和收纳","capability":"down_care"},
+    {"id":"gap-cashmere","kind":"coverage_requirement","query":"羊绒衫可以用含酶的洗涤剂吗","capability":"cashmere_care"},
+    {"id":"gap-leather","kind":"coverage_requirement","query":"真皮外套和麂皮外套应该怎样清洁","capability":"leather_care"},
+    {"id":"gap-sports","kind":"coverage_requirement","query":"涤纶运动衣和尼龙速干衣的汗味怎么处理","capability":"synthetic_care"},
+    {"id":"gap-blends","kind":"coverage_requirement","query":"棉和羊毛混纺的衣服怎么决定洗涤方式","capability":"blend_care"},
+    {"id":"gap-stains","kind":"coverage_requirement","query":"白色衬衫的血渍和油渍应分别怎么处理","capability":"stain_types"},
+    {"id":"gap-formal","kind":"coverage_requirement","query":"参加婚礼和葬礼分别适合什么着装","capability":"dress_code_cultural"},
+    {"id":"gap-footwear","kind":"coverage_requirement","query":"绒面革鞋和帆布鞋的洗护方式有什么区别","capability":"footwear_care"},
+    {"id":"gap-packing","kind":"coverage_requirement","query":"洗护用品和备用衣物乘机时的携带限制是什么","capability":"airline_regulations"},
+    {"id":"negative-tax","kind":"out_of_scope","query":"年终税务申报需要准备哪些材料"},
+    {"id":"negative-recipe","kind":"out_of_scope","query":"一周减脂食谱如何安排"},
+    {"id":"negative-housing","kind":"out_of_scope","query":"房屋租赁合同违约金怎么算"},
+    {"id":"negative-gibberish","kind":"out_of_scope","query":"zxqv 918273 蓝图磁轨跃迁"},
+    {"id":"negative-unknown-material","kind":"unsupported_specific","query":"火星纤维夹克要用哪种溶剂清洗"},
+    {"id":"negative-exact-brand-size","kind":"unsupported_specific","query":"2026款星云品牌X99西装M码胸围多少厘米"}
+  ],
+  "documents": [
+    {"id":"late-evidence","query":"请问出差衣物的琥珀扣件应怎么处理","sections":[{"title":"配件记录","prefix":"背景资料无处理步骤。","repeat":42,"text":"琥珀扣件应使用软布清理，不可浸泡。"}],"expected":["琥珀扣件应使用软布清理"],"headings_with_blank_lines":true},
+    {"id":"adjacent-headings","query":"请说明银杉扣件和梧桐挂环的处理方式","sections":[{"title":"银杉扣件","prefix":"","repeat":0,"text":"银杉扣件清洁后必须放回编号甲的盒中。"},{"title":"梧桐挂环","prefix":"","repeat":0,"text":"梧桐挂环应放在编号乙的软袋中。"}],"expected":["编号甲","编号乙"],"headings_with_blank_lines":false},
+    {"id":"two-sections","query":"分别说明银杉扣件清洁和梧桐挂环收纳的要求","sections":[{"title":"银杉扣件清洁","prefix":"清洁背景说明。","repeat":18,"text":"银杉扣件只能使用软布轻擦。"},{"title":"梧桐挂环收纳","prefix":"收纳背景说明。","repeat":18,"text":"梧桐挂环必须放入透气袋。"}],"expected":["只能使用软布轻擦","必须放入透气袋"],"headings_with_blank_lines":true},
+    {"id":"pdf-two-pages","query":"银杉扣件如何清洁，梧桐挂环如何收纳","pages":["银杉扣件清洁时必须用甲型软布。","梧桐挂环收纳时必须用乙型软袋。"],"expected":["甲型软布","乙型软袋"]},
+    {"id":"overlap-boundary","query":"请问琥珀扣件的维护步骤","sections":[{"title":"维护","prefix":"甲","repeat":548,"text":"琥珀扣件维护时必须先卸下配件再使用软布擦拭，待完全干燥后放入透气袋并标注物品编号。"}],"expected":["先卸下配件再使用软布擦拭"],"headings_with_blank_lines":true},
+    {"id":"single-fact","query":"梧桐挂环怎么收纳","sections":[{"title":"收纳","prefix":"","repeat":0,"text":"梧桐挂环必须放入透气袋，避免与硬质配件混放。"}],"expected":["放入透气袋"],"headings_with_blank_lines":true}
+  ]
+}

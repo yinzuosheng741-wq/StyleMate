@@ -85,7 +85,7 @@ class PortableCollection:
             ).fetchall()
         decoded = [(key, doc, json.loads(meta), json.loads(vector)) for key, doc, meta, vector in rows]
         return [row for row in decoded if (ids is None or row[0] in ids)
-                and all(row[2].get(key) == value for key, value in (where or {}).items())]
+                and _metadata_matches(row[2], where or {})]
 
     def get(self, *, where=None, ids=None, include=None):
         rows = self._rows(where, ids)
@@ -114,6 +114,28 @@ class PortableCollection:
             output["metadatas"].append([row[2] for _, row in ranked])
             output["distances"].append([distance for distance, _ in ranked])
         return output
+
+
+def _metadata_matches(metadata, where):
+    """Subset of Chroma predicates used by our scoped retrieval, before top-k."""
+    if not isinstance(where, dict):
+        raise ValueError("unsupported_vector_filter")
+    for key, value in where.items():
+        if key == "$and":
+            if not isinstance(value, list) or not value:
+                raise ValueError("unsupported_vector_filter")
+            if not all(_metadata_matches(metadata, child) for child in value):
+                return False
+        elif key.startswith("$"):
+            raise ValueError("unsupported_vector_filter")
+        elif isinstance(value, dict):
+            if set(value) != {"$in"} or not isinstance(value["$in"], list):
+                raise ValueError("unsupported_vector_filter")
+            if metadata.get(key) not in value["$in"]:
+                return False
+        elif metadata.get(key) != value:
+            return False
+    return True
 
 
 def _vector(values):

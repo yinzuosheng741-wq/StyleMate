@@ -1,0 +1,151 @@
+{
+  "validation": {
+    "schema_version": 1,
+    "revision": "24fa82eb7f36097bf3f79ede9e4e100341d7bcc6",
+    "dirty": true,
+    "source_fingerprint": "c3ea782c6de7e3e195a4dc0a6526b0609828242fa909f4999e354a715d5678ca",
+    "started_at": "2026-10-31T06:59:01.905415+00:00",
+    "steps": [
+      {
+        "name": "dependencies",
+        "exit_code": 0,
+        "duration_seconds": 0.954
+      },
+      {
+        "name": "constraints",
+        "exit_code": 0,
+        "duration_seconds": 0.781
+      },
+      {
+        "name": "health",
+        "exit_code": 0,
+        "duration_seconds": 0.109
+      },
+      {
+        "name": "assets",
+        "exit_code": 0,
+        "duration_seconds": 0.344
+      },
+      {
+        "name": "lint",
+        "exit_code": 0,
+        "duration_seconds": 0.141
+      },
+      {
+        "name": "compile",
+        "exit_code": 0,
+        "duration_seconds": 0.171
+      },
+      {
+        "name": "tests",
+        "exit_code": 0,
+        "duration_seconds": 96.657
+      },
+      {
+        "name": "evaluation",
+        "exit_code": 0,
+        "duration_seconds": 4.797
+      }
+    ],
+    "passed": true,
+    "source_unchanged": true
+  },
+  "tests_passed": 526,
+  "quality_gate": {
+    "passed": true,
+    "failures": [],
+    "scope": "fixed offline regression only; not an online-model quality claim",
+    "baseline": "agent_evaluation_knowledge_20261030.json"
+  },
+  "same_corpus_and_datasets_before_after": true,
+  "same_embedding_model_before_after": true,
+  "document_context_retention": {
+    "before": {
+      "chunk_span_coverage": 1.0,
+      "retrieval_span_coverage": 0.5,
+      "skill_context_span_coverage": 0.5
+    },
+    "after": {
+      "chunk_span_coverage": 1.0,
+      "retrieval_span_coverage": 1.0,
+      "skill_context_span_coverage": 1.0
+    }
+  },
+  "known_negative_retrieval_gap_retained": {
+    "passed": 1,
+    "total": 6
+  },
+  "knowledge_counts": {
+    "all_records": 86,
+    "published": 41,
+    "statuses": {
+      "reviewed": 41,
+      "pending_review": 24,
+      "project_rule": 21
+    },
+    "published_topics": {
+      "fabric": 5,
+      "care": 11,
+      "storage": 4,
+      "wardrobe": 2,
+      "size": 3,
+      "weather": 5,
+      "scenario": 7,
+      "style": 1,
+      "color": 3
+    },
+    "summary_characters": {
+      "min": 46,
+      "median": 58,
+      "max": 95
+    },
+    "material_evidence": {
+      "wool": [
+        "fabric-wool-label",
+        "fabric-wool-heat",
+        "fabric-wool-shape",
+        "storage-wool-clean",
+        "fabric-wool-moisture",
+        "wool-reverse",
+        "wool-storage-prep",
+        "wool-woven-brush"
+      ],
+      "cashmere": [],
+      "cotton": [],
+      "silk": [],
+      "leather": [],
+      "down": [],
+      "linen": [],
+      "polyester": [],
+      "nylon": [],
+      "viscose": [],
+      "goretex": [
+        "care-shell-close-zips",
+        "care-shell-liquid-detergent",
+        "fabric-shell-dwr-beading",
+        "care-shell-reactivate-dwr",
+        "wardrobe-maintain-shell-first"
+      ]
+    },
+    "duplicate_contents": 0
+  },
+  "public_portable": {
+    "zip_sha256": "86398a0a59a2b69c71188fd464bd7c9bcbd13e4155cba6569008b7101adbd99d",
+    "private_runtime_files": [],
+    "zip_integrity": true,
+    "no_ui_exit_code": 0
+  },
+  "personal_update": {
+    "preserved_files": 134,
+    "personal_data_hashes_unchanged": true,
+    "exe_matches_public": true
+  },
+  "evidence_sha256": {
+    "rag-audit-before-real-20261031.json": "7979c58fd6bb16037940a49510cee091bc982097f308013407b4ce1fbe989a83",
+    "rag-audit-final-real-20261031.json": "893311e7413dd24373077f0fb8abed0fa26d8ad29ee0e90e0f001ff0f895389d",
+    "rag-answer-samples-20261031.json": "d82a4b7ed9f1d1219d7a0c128b80d720d19df5b61e4c661d240ca8d52e96ddf8",
+    "rag-answer-samples-final-20261031.json": "291dca111d810738f36d06fed5739c232d7fa4c1a34c1510371e3ce898fe77d8",
+    "rag-source-health-20261031.json": "acc2ba0aa0422de87c02a323259af9deeb0d5fb03737688b6f008899ac0c76af"
+  },
+  "scope": "project-authored diagnostics and finite Codex answer review; no independent human faithfulness score; candidate source plan is not default corpus expansion"
+}
