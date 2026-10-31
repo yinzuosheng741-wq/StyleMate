@@ -22,7 +22,7 @@
 
 记录改写时删除了未在指定章节核对的扩展结论，如通用防霉承诺、固定毫升数和对所有衣物的悬挂规则；符号解释不推导某件未提供洗标的衣物可以机洗或烘干。没有复制 GINETEX 图形。
 
-逐条旧记录与本批定位保存在 `artifacts/knowledge_review_20261028.json`。GINETEX 改用实际核对的官方网页，新登记来源；ACI 的访问日期与所有链接该页面的记录保持一致。保留其余待审核条目的隔离状态。
+逐条旧记录与本批定位保存在 `artifacts/reports/knowledge/knowledge_review_20261028.json`。GINETEX 改用实际核对的官方网页，新登记来源；ACI 的访问日期与所有链接该页面的记录保持一致。保留其余待审核条目的隔离状态。
 
 ## 2. 重新计算历史基线
 
@@ -37,7 +37,7 @@
 | 混合 MRR@5 | 16.11% | 25.14% |
 | 混合 nDCG@5 | 16.02% | 24.64% |
 
-报告：`artifacts/agent_evaluation_source_review_20261028.json`。`evaluation_manifest.json` 已切换到本报告；关于页面验证当前语料与三组题集指纹后才显示指标。
+报告：`artifacts/reports/agent/agent_evaluation_source_review_20261028.json`。`evaluation_manifest.json` 已切换到本报告；关于页面验证当前语料与三组题集指纹后才显示指标。
 
 这些数值说明已发布知识覆盖增加后的历史标签命中情况，不代表算法提升、真实语义 embedding 效果或独立用户问题正确率。历史标签没有因此完成独立专家复标；15 个完整覆盖题的条件召回不能代替全部 60 题分母。新增 7 个正向检索回归是开发回归样例，不是独立评测集。
 

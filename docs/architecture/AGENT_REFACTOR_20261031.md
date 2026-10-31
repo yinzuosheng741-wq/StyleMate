@@ -62,7 +62,7 @@
 
 重复三次仍然只有 50 个独立场景。100% 不能推广成真实用户任务完成率；工具集合完全一致没有提高，不能声称路由全面达到 100%。已有天气故障注入场景正常产生工具失败，故处理器成功率也不是 100%。
 
-原始结果：[v2 报告](../artifacts/benchmark-20261031-framework-v2.json)、[真实模型链路报告](../artifacts/benchmark-20261031-framework-live.json)、[完整验证与构建核验摘要](../artifacts/framework-release-20261031.json)。三份结果的源码指纹一致；原题、语料和模型设置与上轮逐项核对一致。本轮模型上下文新增了结果元信息及相关提示，因此指标反映整个改动组合，不能归因于某一个模块。
+原始结果：[v2 报告](../../artifacts/reports/benchmarks/benchmark-20261031-framework-v2.json)、[真实模型链路报告](../../artifacts/reports/benchmarks/benchmark-20261031-framework-live.json)、[完整验证与构建核验摘要](../../artifacts/reports/releases/framework-release-20261031.json)。三份结果的源码指纹一致；原题、语料和模型设置与上轮逐项核对一致。本轮模型上下文新增了结果元信息及相关提示，因此指标反映整个改动组合，不能归因于某一个模块。
 
 完整检查 **512 项测试通过**，较上轮增加 20 项；Agent 代码行覆盖约 **93%**。依赖、锁定约束、健康检查、素材审计、Ruff、编译和原历史质量门槛全部通过，验证期间源码指纹未变。覆盖率只描述离线执行路径，不是功能准确率。
 

@@ -42,7 +42,7 @@ flowchart TD
 
 冲突题为 shell-beading、shell-maintain、para-shell。旧标签要求通用外套问题直接命中品牌技术摘要；当前策略选择先确认适用对象，拒绝这些不带限定的引用。这里记录的是策略与历史标注的冲突，不宣布所有旧标签已经专家复核为错误，也不删除题目以提高分数。
 
-当前报告为 `artifacts/agent_evaluation_care_scope_release_20261028.json`，manifest 已指向它。knowledge_coverage 增加 scope_compatible_fully_covered_cases 和 scope_incompatible_case_ids，区分 ID 存在与范围适配。关于页面的旧覆盖字段来自历史标签 ID 可用性，不能解释为最终回答完整可用；原文语义支持仍需另外标注。
+当前报告为 `artifacts/reports/agent/agent_evaluation_care_scope_release_20261028.json`，manifest 已指向它。knowledge_coverage 增加 scope_compatible_fully_covered_cases 和 scope_incompatible_case_ids，区分 ID 存在与范围适配。关于页面的旧覆盖字段来自历史标签 ID 可用性，不能解释为最终回答完整可用；原文语义支持仍需另外标注。
 
 ## 4. 验证
 

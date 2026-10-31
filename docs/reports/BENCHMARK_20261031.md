@@ -83,9 +83,9 @@ python -m evaluation.benchmark --summarize-input artifacts/new-live-report.json 
 
 脚本拒绝覆盖已有报告；在线运行须明确指定配置目录。原始报告保留每条合成任务的结果与耗时；无私人衣橱、照片、密钥或接口地址。
 
-- [题集](../evaluation/benchmark_cases.json)、[评测脚本](../evaluation/benchmark.py)
-- [完整原始报告](../artifacts/benchmark-20261031-complete.json)
-- [含功能验收口径的分析报告](../artifacts/benchmark-20261031-analysis.json)
-- [输出预算对照](../artifacts/benchmark-20261031-probe-budget.json)
+- [题集](../../evaluation/benchmark_cases.json)、[评测脚本](../../evaluation/benchmark.py)
+- [完整原始报告](../../artifacts/reports/benchmarks/benchmark-20261031-complete.json)
+- [含功能验收口径的分析报告](../../artifacts/reports/benchmarks/benchmark-20261031-analysis.json)
+- [输出预算对照](../../artifacts/reports/benchmarks/benchmark-20261031-probe-budget.json)
 
 本次新增评测逻辑经测试验证，完整本地回归 **471 项通过**。后续优化应固定这套题集与验收口径，再做前后对比；不通过更换题目或删除失败样本制造提升。

@@ -59,6 +59,7 @@ def main():
             ("constraints", ["scripts/lock_runtime.py", "--common"]),
             ("health", ["scripts/healthcheck.py"]),
             ("assets", ["scripts/audit_demo_sources.py"]),
+            ("docs", ["scripts/check_docs.py"]),
             ("lint", ["-m", "ruff", "check", "."]),
             ("compile", ["-m", "compileall", "-q", "stylemate", "evaluation", "scripts", "desktop.py"]),
             ("tests", ["-m", "pytest", "-q", "--junitxml=" + str(output / "junit.xml"),

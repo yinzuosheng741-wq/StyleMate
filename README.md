@@ -19,7 +19,7 @@
 
 ![衣橱助手对话界面示例](docs/assets/chat.png)
 
-> 当前为 Windows 开发预览版，独立分发包已在本机 Windows x64 验证。界面、API 基础连接和业务准确率是不同的验证范围，详见[核验报告](docs/PROJECT_AUDIT_20261030.md)。
+> 当前为 Windows 开发预览版，独立分发包已在本机 Windows x64 验证。界面、API 基础连接和业务准确率是不同的验证范围，详见[核验报告](docs/reports/PROJECT_AUDIT_20261030.md)。
 
 ## 为什么做这个项目
 
@@ -85,7 +85,7 @@ python -m venv .venv
 
 IP 城市定位**默认关闭**，手动指定城市即可查天气。主动开启后，高德可在未指定城市时通过网络出口 IP 推测城市；结果可能受 VPN 影响，不等同于 GPS。可随时关闭在线天气。
 
-“已配置”只表示填写了配置。连接测试验证基础响应，不保证模型工具调用或衣物识别准确率。免费接口条款见 [Open-Meteo](https://open-meteo.com/en/pricing)，完整说明见[便携版指南](docs/PORTABLE_20261030.md)。
+“已配置”只表示填写了配置。连接测试验证基础响应，不保证模型工具调用或衣物识别准确率。免费接口条款见 [Open-Meteo](https://open-meteo.com/en/pricing)，完整说明见[便携版指南](docs/guides/PORTABLE_20261030.md)。
 
 ## 数据、隐私与备份
 
@@ -101,7 +101,7 @@ IP 城市定位**默认关闭**，手动指定城市即可查天气。主动开�
 
 密钥在 UI 中遮挡，配置文件本身**没有加密**。不要公开使用过的个人目录；公开构建包不包含开发者密钥、数据库或草稿。
 
-“创建完整备份”生成数据库在线快照、关联照片及 SHA-256 清单，不包含密钥、界面状态或向量缓存。JSON 清单只是衣物元数据导出，不能代替备份。恢复与升级见[客户端指南](docs/DESKTOP.md)。
+“创建完整备份”生成数据库在线快照、关联照片及 SHA-256 清单，不包含密钥、界面状态或向量缓存。JSON 清单只是衣物元数据导出，不能代替备份。恢复与升级见[客户端指南](docs/guides/DESKTOP.md)。
 
 ## 开发与验证
 
@@ -110,13 +110,13 @@ IP 城市定位**默认关闭**，手动指定城市即可查天气。主动开�
 .venv\Scripts\python.exe scripts/validate.py
 ```
 
-统一验证执行依赖检查、知识和素材审计、Ruff、编译、测试和固定评测质量门槛，输出到 `artifacts/validation/`。测试默认阻断联网，使用隔离数据；真实服务检查单独执行，不把开发者密钥交给 CI。
+统一验证执行依赖检查、知识和素材审计、文档链接检查、Ruff、编译、测试和固定评测质量门槛，输出到 `artifacts/validation/`。测试默认阻断联网，使用隔离数据；真实服务检查单独执行，不把开发者密钥交给 CI。
 
-离线题集按历史兼容、固定回归和扩展验证管理，见[题集维护规则](docs/DATASET_POLICY.md)。本轮保留原题与失败记录的优化对照见[优化与复测结果](docs/OPTIMIZATION_20261031.md)。
+离线题集按历史兼容、固定回归和扩展验证管理，见[题集维护规则](docs/development/DATASET_POLICY.md)。本轮保留原题与失败记录的优化对照见[优化与复测结果](docs/reports/OPTIMIZATION_20261031.md)。
 
-Actions 配置了 Windows 客户端测试和手动打包流程。徽章展示远端状态；本地证据及实际限制见[核验报告](docs/PROJECT_AUDIT_20261030.md)，本地通过不能代替尚未运行的远端 CI。
+Actions 配置了 Windows 客户端测试和手动打包流程。徽章展示远端状态；本地证据及实际限制见[核验报告](docs/reports/PROJECT_AUDIT_20261030.md)，本地通过不能代替尚未运行的远端 CI。
 
-最新的完整使用流程、真实接口复测及缺陷修复记录见[功能测试报告](docs/FUNCTIONAL_TEST_20261030.md)。
+最新的完整使用流程、真实接口复测及缺陷修复记录见[功能测试报告](docs/reports/FUNCTIONAL_TEST_20261030.md)。
 
 Windows 打包：
 
@@ -127,6 +127,8 @@ Windows 打包：
 
 输出目录 `dist/native/出行衣橱助手/`，公开 ZIP 为 `dist/TravelWardrobeAssistant-Windows-Portable.zip`。旧输出存在个人配置或数据库时拒绝覆盖。`portable-lock.txt` 是特定 Windows / Python 环境快照，不作为跨平台锁文件。
 
+文档按使用指南、架构、开发规范、检查报告和优化计划分类，见[文档导航](docs/README.md)；历史 JSON 证据见[评测报告导航](artifacts/README.md)。源码、个人数据、测试输出和分发包的职责及日常清理命令见[目录维护说明](docs/development/REPOSITORY.md)。
+
 ## 架构
 
 ```text
@@ -136,11 +138,13 @@ Qt 原生界面 → 业务服务 → SQLite / 照片 / 会话资料
                     └─ 知识检索 → BM25 / 可选向量 → 来源
 ```
 
-`desktop/` 为页面、配置和备份；`services/` 为应用服务；`agent/` 为编排、工具与记忆；`repositories/` 为存储；`rag/` 为检索；`rules/` 为确定性规则；`evaluation/` 和 `tests/` 保存评测及回归用例。工具使用有界线程池、超时和调用预算；写操作通过带有效期的快照确认，见[框架说明](docs/FRAMEWORK_MAINTENANCE_20261029.md)。
+`desktop/` 为页面、配置和备份；`services/` 为应用服务；`agent/` 为编排、工具与记忆；`repositories/` 为存储；`rag/` 为检索；`rules/` 为确定性规则；`evaluation/` 和 `tests/` 保存评测及回归用例。工具使用有界线程池、超时和调用预算；写操作通过带有效期的快照确认，见[框架说明](docs/architecture/FRAMEWORK_MAINTENANCE_20261029.md)。
 
-任务判定由服务与图复用；桌面和对话共用穿搭 Skill。三个领域 Skill 在动作开始前检查白名单与步骤预算，工具结果分别标记调用状态和业务结果，避免把未找到或需要追问算作业务成功。实现、测试口径与保留限制见 [Agent 执行契约优化](docs/AGENT_REFACTOR_20261031.md)。
+任务判定由服务与图复用；桌面和对话共用穿搭 Skill。三个领域 Skill 在动作开始前检查白名单与步骤预算，工具结果分别标记调用状态和业务结果，避免把未找到或需要追问算作业务成功。实现、测试口径与保留限制见 [Agent 执行契约优化](docs/architecture/AGENT_REFACTOR_20261031.md)。
 
-RAG 的切分、真实混合检索、上下文保留、知识覆盖缺口及来源维护检查见 [RAG 审计与补库建议](docs/RAG_AUDIT_20261031.md)。当前 86 条记录中只有 41 条已审核摘要进入事实检索，不能把主题齐全或固定题集 Recall 当作完整问答能力。
+RAG 的切分、真实混合检索、上下文保留、知识覆盖缺口及来源维护检查见 [RAG 审计与补库建议](docs/reports/RAG_AUDIT_20261031.md)。当前 86 条记录中只有 41 条已审核摘要进入事实检索，不能把主题齐全或固定题集 Recall 当作完整问答能力。
+
+后续 [关键点复核与改进清单](docs/reports/RAG_CRITICAL_REVIEW_20261031.md)提供 23 个工具/Skill/图/选中衣物契约用例、生产 Top K 对照和 8 个待审读挑战；当前仍有 9 个契约问题，属于开发诊断结果。可运行 `python -m evaluation.rag_critical --output artifacts/rag-critical-next.json` 重放；加 `--require-pass` 可在契约不满足时返回非零退出码。运行成功不代表问题已修复，详见[总体优化方案](docs/plans/RAG_OPTIMIZATION_PLAN.md)。
 
 ## 已知限制与常见问题
 

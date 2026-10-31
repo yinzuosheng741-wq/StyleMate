@@ -19,7 +19,7 @@
 
 来源：[FTC 护理说明问答](https://www.ftc.gov/business-guidance/resources/clothes-captioning-complying-care-labeling-rule)、[UNIQLO 香港及澳门测量说明](https://faq-hk.uniqlo.com/pkb_Home_UQ_HK?c=category_uq_tw:UQHK_C2&fs=Search&id=kA0Ie000000TOgx&l=en_US&pn=1)。新加坡原链接本次读取失败，因此没有用其搜索摘要完成审核，改用实际打开并核对的香港及澳门页面。FTC 仅用于部件护理说明，不据该旧页面提供现行法律判断。只发布中文摘要与定位，不复制网页正文和测量图。
 
-总量由 64 增至 66：21 条已审核来源摘要、21 条项目启发、24 条待审核。测量摘要都声明 UNIQLO 适用范围，不把品牌指南当成跨品牌统一标准；无法核验的棉缩水条目继续隔离。逐条前后内容及来源保存在 `artifacts/knowledge_review_20261029.json`。
+总量由 64 增至 66：21 条已审核来源摘要、21 条项目启发、24 条待审核。测量摘要都声明 UNIQLO 适用范围，不把品牌指南当成跨品牌统一标准；无法核验的棉缩水条目继续隔离。逐条前后内容及来源保存在 `artifacts/reports/knowledge/knowledge_review_20261029.json`。
 
 ## 当前离线结果与取舍
 
@@ -33,7 +33,7 @@
 | 混合 MRR@5 | 19.72% | 21.81% |
 | 混合 nDCG@5 | 19.57% | 21.67% |
 
-当前报告：`artifacts/agent_evaluation_measurement_20261029.json`。4 条范围冲突题仍保留：3 条未知冲锋衣与 GORE-TEX 专属资料冲突，1 条羊毛题包含通用部件护理 gold，不能作为羊毛专项护理证据。没有通过删除低分题提高成绩。
+当前报告：`artifacts/reports/agent/agent_evaluation_measurement_20261029.json`。4 条范围冲突题仍保留：3 条未知冲锋衣与 GORE-TEX 专属资料冲突，1 条羊毛题包含通用部件护理 gold，不能作为羊毛专项护理证据。没有通过删除低分题提高成绩。
 
 这些变化反映审核知识覆盖与业务路由的改变；不证明在线 embedding、回答准确率或独立用户问题的改善。新增检索与聊天回归是开发用例，不是新的留出集。有限范围过滤也不等于语义蕴含验证。
 

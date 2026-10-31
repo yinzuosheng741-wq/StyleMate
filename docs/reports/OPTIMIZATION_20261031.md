@@ -56,6 +56,6 @@ python -m evaluation.benchmark --cases evaluation/benchmark_validation_cases.jso
 python scripts/validate.py
 ```
 
-证据：[同口径对照](../artifacts/benchmark-20261031-comparison.json)、[优化后原始报告](../artifacts/benchmark-20261031-optimized-live.json)、[v2 离线报告](../artifacts/benchmark-20261031-v2-offline.json)、[题集覆盖审计](../artifacts/dataset-audit-20261031.json)、[维护规则](DATASET_POLICY.md)。
+证据：[同口径对照](../../artifacts/reports/benchmarks/benchmark-20261031-comparison.json)、[优化后原始报告](../../artifacts/reports/benchmarks/benchmark-20261031-optimized-live.json)、[v2 离线报告](../../artifacts/reports/benchmarks/benchmark-20261031-v2-offline.json)、[题集覆盖审计](../../artifacts/reports/benchmarks/dataset-audit-20261031.json)、[维护规则](../development/DATASET_POLICY.md)。
 
 后续优先事项：补全口语化说法、改善未知领域拒答、引入独立人工相关性和回答验收标注。应先冻结下一轮验证样本，再优化；避免不断针对验证失败改规则后仍宣称盲测提升。

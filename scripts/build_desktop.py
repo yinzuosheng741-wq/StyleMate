@@ -12,6 +12,17 @@ from scripts.package_notices import copy_notices  # noqa: E402
 from stylemate.branding import APP_NAME, ARCHIVE_STEM  # noqa: E402
 
 
+def copy_user_guides(output: Path):
+    """Preserve guide/screenshot relative paths in the extracted application."""
+    docs = output / "docs"
+    (docs / "guides").mkdir(parents=True, exist_ok=True)
+    for name in ("DESKTOP.md", "PORTABLE_20261030.md"):
+        shutil.copyfile(ROOT / "docs/guides" / name, docs / "guides" / name)
+    (docs / "assets").mkdir(exist_ok=True)
+    for name in ("service-setup.png", "weather-setup.png"):
+        shutil.copyfile(ROOT / "docs/assets" / name, docs / "assets" / name)
+
+
 def main():
     output = ROOT / "dist/native" / APP_NAME
     if any((output / name).exists() for name in ("data/stylemate.db", "data/config/services.env", ".env")):
@@ -39,14 +50,7 @@ def main():
         "衣橱、配置和界面状态都保存在本目录 data/ 下；退出后可整个文件夹迁移。\n"
         "data/config/services.env 保存私有密钥，不要分享自己使用过的整个文件夹。\n"
         "公开分发请使用项目生成的不含个人数据的 ZIP。\n", encoding="utf-8")
-    # Keep local Markdown links and screenshots usable in the extracted package.
-    docs = output / "docs"
-    docs.mkdir(exist_ok=True)
-    for name in ("DESKTOP.md", "PORTABLE_20261030.md"):
-        shutil.copyfile(ROOT / "docs" / name, docs / name)
-    (docs / "assets").mkdir(exist_ok=True)
-    for name in ("service-setup.png", "weather-setup.png"):
-        shutil.copyfile(ROOT / "docs/assets" / name, docs / "assets" / name)
+    copy_user_guides(output)
     shutil.copyfile(ROOT / "LICENSE", output / "LICENSE")
     copy_notices(output)
     forbidden = [path for path in output.rglob("*") if path.is_file() and
