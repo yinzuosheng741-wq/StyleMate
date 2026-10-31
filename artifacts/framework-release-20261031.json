@@ -1,0 +1,78 @@
+{
+  "validation": {
+    "schema_version": 1,
+    "revision": "73f9555dc3f7694811cd6a551d94a83375b51e03",
+    "dirty": true,
+    "source_fingerprint": "be669340679d90481fd39dd0cbddfa989b2103b0449d93d68f35d9dfd11e8a40",
+    "started_at": "2026-10-31T06:15:19.105083+00:00",
+    "steps": [
+      {
+        "name": "dependencies",
+        "exit_code": 0,
+        "duration_seconds": 0.984
+      },
+      {
+        "name": "constraints",
+        "exit_code": 0,
+        "duration_seconds": 0.734
+      },
+      {
+        "name": "health",
+        "exit_code": 0,
+        "duration_seconds": 0.078
+      },
+      {
+        "name": "assets",
+        "exit_code": 0,
+        "duration_seconds": 0.297
+      },
+      {
+        "name": "lint",
+        "exit_code": 0,
+        "duration_seconds": 0.125
+      },
+      {
+        "name": "compile",
+        "exit_code": 0,
+        "duration_seconds": 0.203
+      },
+      {
+        "name": "tests",
+        "exit_code": 0,
+        "duration_seconds": 94.219
+      },
+      {
+        "name": "evaluation",
+        "exit_code": 0,
+        "duration_seconds": 5.61
+      }
+    ],
+    "passed": true,
+    "source_unchanged": true
+  },
+  "tests_passed": 512,
+  "agent_line_coverage_percent": 92.95054007959068,
+  "quality_gate": {
+    "passed": true,
+    "failures": [],
+    "scope": "fixed offline regression only; not an online-model quality claim",
+    "baseline": "agent_evaluation_knowledge_20261030.json"
+  },
+  "portable_smoke": {
+    "zip_sha256": "60dd9c0515b3de9101a3d26d11381baeefc488a7892c4a2ec73a9606939a54b0",
+    "private_runtime_files": [],
+    "zip_integrity": true,
+    "no_ui_exit_code": 0
+  },
+  "personal_update": {
+    "preserved_files": 134,
+    "personal_data_hashes_unchanged": true,
+    "exe_matches_public": true
+  },
+  "benchmark_same_original_dataset_corpus_and_model_settings": true,
+  "benchmarks": {
+    "benchmark-20261031-framework-live.json": "ddb189179d851610752e759d4a73394217916f41cbe42ed9ad30bd4ca52492d7",
+    "benchmark-20261031-framework-v2.json": "8b5d528fbbf86f911a28810196aeffab915d23cee60f22fea027a6b3f8d36ef2"
+  },
+  "scope": "local dirty-source validation bound by fingerprint; no claim of external held-out accuracy or service SLA"
+}

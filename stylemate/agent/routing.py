@@ -5,10 +5,18 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 
+from stylemate.rag.query_planning import care_clarification
+
 WRITE_TOOLS = frozenset({"add_garment", "update_garment", "delete_garment"})
 MEASUREMENT_KNOWLEDGE_TERMS = ("尺码表", "商品尺寸", "成衣尺寸", "人体尺寸", "平铺", "胸宽", "测量方法")
 CONCEPT_KNOWLEDGE_TERMS = ("色轮", "配色原理", "同类色", "类似色", "邻近色", "互补色", "叠穿原理", "分层原理")
 OUTFIT_INTENT_TERMS = ("搭配", "穿什么", "怎么穿", "搭一套", "搭一身", "配一套", "上班穿", "穿一套", "穿搭", "怎么配")
+CARE_INTENT_TERMS = ("洗", "清洁", "护理", "保养", "柔顺剂", "漂白", "去渍", "烘干", "晾晒", "熨烫", "洗标", "洗涤剂")
+KNOWLEDGE_INTENT_TERMS = CARE_INTENT_TERMS + MEASUREMENT_KNOWLEDGE_TERMS + (
+    "知识库", "羊毛", "材质", "面料", "gore-tex", "功能外套", "拒水", "防水", "紫外线",
+    "防晒", "高温", "寒冷", "温差", "分层", "色轮", "配色", "收纳", "污渍",
+)
+_COLLOQUIAL_OUTFIT = re.compile(r"(?:给我|帮我|替我|想|要).{0,8}(?:搭|配)(?:一)?(?:身|套)(?:衣服|穿搭|上班|通勤|日常|出游|约会)")
 SKILL_TOOLS = {
     "knowledge_qa": frozenset({"care_guide", "rag_search", "get_garment"}),
     "outfit_planning": frozenset({"get_user_location", "get_weather", "search_wardrobe",
@@ -21,7 +29,7 @@ SKILL_TOOLS = {
                                     "get_weather", "get_user_location", "rag_search"}),
 }
 _TERMS = {
-    "knowledge_qa": ("洗", "护理", "面料", "材质", "知识", "保养", "柔顺剂", "分层", "care", "wash") + MEASUREMENT_KNOWLEDGE_TERMS + CONCEPT_KNOWLEDGE_TERMS,
+    "knowledge_qa": KNOWLEDGE_INTENT_TERMS + CONCEPT_KNOWLEDGE_TERMS + ("知识", "care", "wash"),
     "outfit_planning": ("穿", "通勤", "天气", "尺码", "outfit", "weather", "size") + OUTFIT_INTENT_TERMS,
     "travel_planning": ("旅行", "旅游", "出差", "行李", "travel", "packing", "trip"),
     "wardrobe_management": ("衣橱", "衣柜", "库存", "查询", "找", "wardrobe", "search"),
@@ -79,9 +87,50 @@ class SkillRoute:
     skills: tuple[str, ...]
     allowed_tools: frozenset[str]
     reason: str
+    intent: str = "auto"
+    deterministic: bool = False
+    clarification: str = ""
 
 
-def route_skills(text: str, available: set[str]) -> SkillRoute:
+def is_outfit_intent(text: str) -> bool:
+    return any(term in text for term in OUTFIT_INTENT_TERMS) or bool(_COLLOQUIAL_OUTFIT.search(text))
+
+
+def task_intent(text: str) -> str:
+    """One ordered decision for service fallbacks and graph diagnostics.
+
+    Resolving owned objects, travel follow-ups and user authorization remains at
+    their trusted boundaries; a text label cannot grant any of those privileges.
+    """
+    lower = text.casefold()
+    if re.search(r"删除|移除|删掉|\bdelete\b|\bremove\b", text, re.I) and "delete_garment" not in explicit_write_tools(text):
+        return "delete_explanation"
+    if any(term in text for term in ("推荐购买", "买什么", "购买建议")):
+        return "purchase"
+    if ("知识库" in text or any(term in text for term in CONCEPT_KNOWLEDGE_TERMS)) and not any(term in lower for term in CARE_INTENT_TERMS):
+        return "knowledge"
+    if any(term in text for term in ("旅行", "旅游", "行李")):
+        return "travel"
+    if any(term in lower for term in CARE_INTENT_TERMS):
+        return "care"
+    if is_outfit_intent(text):
+        return "outfit"
+    if any(term in text for term in ("天气", "定位", "城市")):
+        return "weather"
+    if any(term in lower for term in KNOWLEDGE_INTENT_TERMS):
+        return "knowledge"
+    if any(term in text for term in ("缺", "补齐", "补充")):
+        return "wardrobe_gap"
+    if "delete_garment" in explicit_write_tools(text):
+        return "delete"
+    if any(term in text for term in ("衣橱", "衣柜", "搜索")):
+        return "wardrobe_search"
+    if any(term in text for term in ("风格", "分析")):
+        return "item_style"
+    return "auto"
+
+
+def route_skills(text: str, available: set[str], *, travel_follow_up: bool = False) -> SkillRoute:
     """Union applicable read skills; write proposals require current-turn intent.
 
     This is a routing policy, not user authentication. Bound tool closures still
@@ -89,6 +138,15 @@ def route_skills(text: str, available: set[str]) -> SkillRoute:
     """
     normalized = text.casefold()
     skills = tuple(name for name, terms in _TERMS.items() if any(term in normalized for term in terms))
+    intent = task_intent(text)
+    if travel_follow_up and intent not in {"delete_explanation", "purchase", "knowledge"}:
+        intent = "travel"
+    intent_skill = {"knowledge": "knowledge_qa", "care": "knowledge_qa", "outfit": "outfit_planning",
+                    "travel": "travel_planning", "purchase": "purchase_planning", "weather": "outfit_planning",
+                    "wardrobe_gap": "wardrobe_management", "wardrobe_search": "wardrobe_management",
+                    "item_style": "wardrobe_management"}.get(intent)
+    if intent_skill:
+        skills = tuple(dict.fromkeys((*skills, intent_skill)))
     allowed: set[str] = set()
     for skill in skills:
         allowed.update(SKILL_TOOLS[skill])
@@ -102,5 +160,9 @@ def route_skills(text: str, available: set[str]) -> SkillRoute:
     if not skills:
         # Ambiguous requests retain read recall without silently granting writes.
         allowed = available - WRITE_TOOLS
+    deterministic = intent in {"delete_explanation", "delete", "purchase", "travel", "care", "outfit"} or any(
+        term in text for term in MEASUREMENT_KNOWLEDGE_TERMS
+    )
     return SkillRoute(skills or ("read_fallback",), frozenset(allowed & available),
-                      "explicit_write_proposal" if writes else "bounded_read_route")
+                      "explicit_write_proposal" if writes else "bounded_read_route", intent, deterministic,
+                      care_clarification(text) or "")

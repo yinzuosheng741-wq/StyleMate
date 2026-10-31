@@ -3,13 +3,13 @@
 from __future__ import annotations
 
 import re
-from time import perf_counter
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from stylemate.domain.models import AgentTrace, AgentTraceStep, SkillOutcome, SkillSpec
+from stylemate.domain.models import SkillOutcome, SkillSpec
 from stylemate.rag.models import RetrievalHit
 from stylemate.rag.query_planning import knowledge_compatible
+from stylemate.skills.runtime import SkillRun
 
 
 class KnowledgeQuery(BaseModel):
@@ -39,84 +39,47 @@ class KnowledgeQASkill:
         conversation_id: str,
         request: KnowledgeQuery,
     ) -> SkillOutcome:
-        started = perf_counter()
-        steps: list[AgentTraceStep] = []
+        run = SkillRun(self.spec, request, trace_name="KnowledgeQASkill")
+        request = run.request
         query = _normalize_query(request.query)
+        with run.step("hybrid_retrieval") as step:
+            hits = self.retriever.search(query, owner_id, conversation_id, top_k=request.top_k) if self.retriever else []
+            if not hits:
+                step.status = "fallback"
         if self.retriever is None:
-            steps.append(_step("hybrid_retrieval", "fallback", "retriever unavailable"))
-            return self._outcome(
-                request.query,
-                query,
-                [],
-                steps,
-                started,
-                attempts=0,
-                rewritten=False,
-            )
-
-        hits = self.retriever.search(
-            query, owner_id, conversation_id, top_k=request.top_k
-        )
-        valid_hits = _valid_cited_hits(hits, request.query)
-        steps.append(
-            _step(
-                "hybrid_retrieval",
-                "success" if hits else "fallback",
-                f"retrieved {len(hits)} candidates",
-            )
-        )
-        steps.append(
-            _step(
-                "source_validation",
-                "success" if valid_hits else "fallback",
-                f"checked source URL format and finite task scope for {len(valid_hits)} results; semantic support not verified",
-            )
-        )
+            return self._outcome(request.query, query, [], run, attempts=0, rewritten=False)
+        with run.step("source_validation") as step:
+            valid_hits = _valid_cited_hits(hits, request.query)
+            if not valid_hits:
+                step.status = "fallback"
         attempts = 1
         rewritten = False
         effective_query = query
         if not valid_hits:
             rewritten = True
             attempts = 2
-            effective_query = _rewrite_query(query)
-            retry_hits = self.retriever.search(
-                effective_query,
-                owner_id,
-                conversation_id,
-                top_k=request.top_k,
-            )
-            valid_hits = _valid_cited_hits(retry_hits, request.query)
-            steps.append(
-                _step(
-                    "query_rewrite",
-                    "success" if valid_hits else "fallback",
-                    "one bounded retrieval retry completed",
-                )
-            )
-        return self._outcome(
-            request.query,
-            effective_query,
-            valid_hits,
-            steps,
-            started,
-            attempts=attempts,
-            rewritten=rewritten,
-        )
+            with run.step("query_rewrite") as step:
+                effective_query = _rewrite_query(query)
+                retry_hits = self.retriever.search(effective_query, owner_id, conversation_id, top_k=request.top_k)
+                valid_hits = _valid_cited_hits(retry_hits, request.query)
+                if not valid_hits:
+                    step.status = "fallback"
+        return self._outcome(request.query, effective_query, valid_hits, run,
+                             attempts=attempts, rewritten=rewritten)
 
     def _outcome(
         self,
         original_query: str,
         effective_query: str,
         hits: list[RetrievalHit],
-        steps: list[AgentTraceStep],
-        started: float,
+        run: SkillRun,
         *,
         attempts: int,
         rewritten: bool,
     ) -> SkillOutcome:
         results = [_result_payload(hit) for hit in hits]
         status = "success" if results else "fallback"
-        return SkillOutcome(
+        return run.finish(
             status=status,
             data={
                 "query": original_query,
@@ -135,13 +98,7 @@ class KnowledgeQASkill:
                     for item in results
                 ],
             },
-            trace=AgentTrace(
-                skill_name="KnowledgeQASkill",
-                steps=steps[: self.spec.max_steps],
-                duration_ms=max(0, round((perf_counter() - started) * 1000)),
-                status=status,
-            ),
-            user_message=(
+            message=(
                 "已找到带来源的相关知识。"
                 if results
                 else "知识库暂未找到带有效来源格式的相关资料。"
@@ -200,15 +157,3 @@ def _result_payload(hit: RetrievalHit) -> dict:
         "applicability": hit.applicability,
         "limitations": hit.limitations,
     }
-
-
-def _step(name: str, status: str, summary: str) -> AgentTraceStep:
-    return AgentTraceStep(
-        name=name,
-        status=status,
-        summary=summary,
-        duration_ms=0,
-    )
-
-
-__all__ = ["KnowledgeQASkill", "KnowledgeQuery"]

@@ -29,6 +29,7 @@ class AgentState(TypedDict, total=False):
     tool_calls: Annotated[int, operator.add]
     allowed_tools: list[str]
     active_skills: list[str]
+    task_intent: str
     care_clarification: str
     original_query: str
 

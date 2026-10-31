@@ -12,6 +12,7 @@ from pydantic import BaseModel
 
 from stylemate.agent.middleware import ToolContext, ToolExecutor
 from stylemate.agent.policy import denied_tool_payload, record_outfits
+from stylemate.agent.tool_results import READ_TOOL_RESULT_MODELS, execution_payload
 from stylemate.agent.tool_schemas import (
     READ_TOOL_SCHEMAS,
     WRITE_TOOL_SCHEMAS,
@@ -137,6 +138,7 @@ def _read_tool(
                 retry_once=retry_once,
                 validates_inventory_ids=validates_inventory,
                 arguments_model=arguments_model,
+                result_model=READ_TOOL_RESULT_MODELS.get(name),
             ),
             safe_arguments,
             context,
@@ -145,7 +147,7 @@ def _read_tool(
         if name == "recommend_inventory_outfit" and result.status != "failed" and isinstance(result.data, dict):
             record_outfits(context.owner_id, context.conversation_id, result.data, context.wardrobe_repository)
         payload = {
-            "result": {"message": result.user_message} if result.status == "failed" else result.data,
+            **execution_payload(result),
             "trace": result.trace.model_dump(mode="json"),
             "sources": (result.data or {}).get("sources", [])
             if isinstance(result.data, dict)
@@ -207,6 +209,10 @@ def _write_tools(writes: WriteActionToolkit) -> list[BaseTool]:
                 summary=summary,
                 duration_ms=max(0, round((monotonic() - started) * 1000)),
             ).model_dump(mode="json")
+            payload.update({"outcome": "success" if status == "success" else "error",
+                            "execution_status": status,
+                            "reason_code": "pending_confirmation" if status == "success" else "invalid_write_proposal",
+                            "retryable": False, "missing_conditions": []})
             return json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
 
         call.__name__ = name

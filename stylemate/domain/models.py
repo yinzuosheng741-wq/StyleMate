@@ -70,6 +70,7 @@ class ToolSpec(BaseModel):
     retry_once: bool = False
     validates_inventory_ids: bool = False
     arguments_model: type[BaseModel] | None = None
+    result_model: type[BaseModel] | None = None
 
 
 class ToolExecution(BaseModel):
@@ -77,6 +78,10 @@ class ToolExecution(BaseModel):
     data: Any = None
     user_message: str
     trace: AgentTraceStep
+    outcome: Literal["success", "empty", "not_found", "needs_clarification", "unavailable", "error"] = "success"
+    reason_code: str = "completed"
+    retryable: bool = False
+    missing_conditions: list[str] = Field(default_factory=list)
 
 
 class KnowledgeSource(BaseModel):

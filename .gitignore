@@ -41,6 +41,9 @@ artifacts/*
 !artifacts/benchmark-20261031-v2-offline.json
 !artifacts/dataset-audit-20261031.json
 !artifacts/benchmark-20261031-comparison.json
+!artifacts/benchmark-20261031-framework-live.json
+!artifacts/benchmark-20261031-framework-v2.json
+!artifacts/framework-release-20261031.json
 dist/
 data/desktop/
 data/config/

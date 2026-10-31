@@ -11,7 +11,9 @@ from time import monotonic
 
 logger = logging.getLogger(__name__)
 _current = ContextVar("stylemate_run_diagnostics", default=None)
-_COUNTERS = ("model_calls", "tool_attempts", "tool_successes", "tool_failures", "capacity_rejections")
+_COUNTERS = ("model_calls", "tool_attempts", "tool_successes", "tool_failures", "capacity_rejections",
+             "tool_outcome_success", "tool_outcome_empty", "tool_outcome_not_found",
+             "tool_outcome_needs_clarification", "tool_outcome_unavailable", "tool_outcome_error")
 
 
 class RunObservation:
@@ -34,7 +36,7 @@ class RunObservation:
     def finish(self):
         with self._lock:
             self._closed = True
-            return {"schema_version": 1, "run_id": self.run_id, "outcome": self.outcome,
+            return {"schema_version": 2, "run_id": self.run_id, "outcome": self.outcome,
                     "duration_ms": max(0, round((monotonic() - self.started) * 1000)),
                     "tool_calls": self.tool_calls, **self.counts}
 

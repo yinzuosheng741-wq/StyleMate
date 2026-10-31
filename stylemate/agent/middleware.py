@@ -15,6 +15,7 @@ from pydantic import BaseModel, ValidationError
 from stylemate.agent.execution import READ_TOOL_RUNNER, ToolCapacityExceeded
 from stylemate.agent.policy import remaining_request_seconds
 from stylemate.agent.telemetry import record_counter
+from stylemate.agent.tool_results import business_metadata
 from stylemate.domain.models import AgentTraceStep, ToolExecution, ToolSpec
 from stylemate.repositories.base import WardrobeRepository
 
@@ -42,6 +43,7 @@ class ToolExecutor:
     def execute(self, spec, arguments, context, handler):
         result = self._execute(spec, arguments, context, handler)
         record_counter("tool_successes" if result.status == "success" else "tool_failures")
+        record_counter(f"tool_outcome_{result.outcome}")
         return result
 
     def _execute(
@@ -79,6 +81,11 @@ class ToolExecutor:
                         "推荐结果包含无效衣物，已停止展示。",
                         "inventory ownership validation failed",
                     )
+                if spec.result_model is not None:
+                    try:
+                        spec.result_model.model_validate(data)
+                    except (ValidationError, TypeError, ValueError):
+                        return self._failure(spec.name, started, "工具返回的数据格式无效，已停止展示。", "invalid_tool_result")
                 return ToolExecution(
                     status="success",
                     data=data,
@@ -89,6 +96,7 @@ class ToolExecutor:
                         summary=_safe_summary(data),
                         duration_ms=_duration_ms(started),
                     ),
+                    **business_metadata(spec.name, data),
                 )
             except ToolCapacityExceeded:
                 record_counter("capacity_rejections")
@@ -149,6 +157,14 @@ class ToolExecutor:
     def _failure(name: str, started: float, user_message: str, reason: str) -> ToolExecution:
         return ToolExecution(
             status="failed",
+            outcome="error",
+            reason_code={"invalid arguments": "invalid_arguments",
+                         "inventory ownership validation failed": "inventory_ownership_failed",
+                         "network timeout": "network_timeout", "tool unavailable": "tool_unavailable"}.get(reason, reason)
+            if reason in {"read_executor_permission_denied", "invalid arguments", "request_deadline_exceeded",
+                          "inventory ownership validation failed", "tool_capacity_exhausted", "tool_wait_timeout",
+                          "network timeout", "invalid_tool_result", "tool unavailable"} else "tool_exception",
+            retryable=reason in {"tool_capacity_exhausted", "tool_wait_timeout", "network timeout"},
             data=None,
             user_message=user_message,
             trace=AgentTraceStep(

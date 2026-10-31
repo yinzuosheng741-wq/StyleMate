@@ -1,18 +1,16 @@
 """Small deterministic outfit-planning workflow."""
 
-import time
 from collections.abc import Callable
 
 from stylemate.agent.tools.location_weather import WeatherResult
 from stylemate.domain.models import (
-    AgentTrace,
-    AgentTraceStep,
     OutfitRequest,
     SkillOutcome,
     SkillSpec,
 )
 from stylemate.repositories.base import WardrobeRepository
 from stylemate.rules.outfit_rules import plan_outfits
+from stylemate.skills.runtime import SkillRun
 
 
 class OutfitPlanningSkill:
@@ -35,54 +33,47 @@ class OutfitPlanningSkill:
         self.weather_loader = weather_loader
 
     def run(self, owner_id: str, request: OutfitRequest) -> SkillOutcome:
-        started = time.perf_counter()
-        steps: list[AgentTraceStep] = []
-        garments = self.repository.list_garments(owner_id)
-        profile = self.repository.get_profile(owner_id)
-        request = request.model_copy(
-            update={
-                "style_preference": request.style_preference
-                or profile.get("style_preference")
-                or None,
-                "color_preference": request.color_preference
-                or profile.get("color_preference")
-                or None,
-                "fit_preference": request.fit_preference
-                or profile.get("fit_preference")
-                or None,
-            }
-        )
-        steps.append(self._step("load_wardrobe", "success", "Wardrobe loaded"))
+        run = SkillRun(self.spec, request, trace_name="OutfitPlanningSkill")
+        request = run.request
+        with run.step("load_wardrobe"):
+            garments = self.repository.list_garments(owner_id)
+            profile = self.repository.get_profile(owner_id)
+            request = request.model_copy(update={
+                key: getattr(request, key) or profile.get(key) or None
+                for key in ("style_preference", "color_preference", "fit_preference")
+            })
+            owned_ids = {garment.id for garment in garments}
+            candidate_ids = [key for key in request.candidate_garment_ids if key in owned_ids]
+        if request.candidate_garment_ids and not candidate_ids:
+            return run.finish(status="fallback", data={"recommendations": []},
+                              message="指定的候选衣物当前不可用，请重新选择衣橱中的单品；本次未扩大候选范围。")
+        request = request.model_copy(update={"candidate_garment_ids": candidate_ids})
 
         weather_available = True
         weather_note = ""
-        if self.weather_loader is not None and request.city:
-            try:
-                weather = self.weather_loader(request.city)
-            except Exception:
-                weather_available = False
-                steps.append(self._step("weather", "fallback", "Weather unavailable"))
-            else:
-                weather_available = weather.available
-                if weather.available:
-                    weather_note = self._weather_note(weather)
-                    request = request.model_copy(
-                        update={
+        # Explicit weather already supplied by the caller wins. The agent tool
+        # uses no loader: weather remains an explicit, separately budgeted tool.
+        if self.weather_loader is not None and request.city and request.temperature_c is None and not request.weather_condition:
+            with run.step("weather") as step:
+                try:
+                    weather = self.weather_loader(request.city)
+                except Exception:
+                    weather_available = False
+                else:
+                    weather_available = weather.available
+                    if weather.available:
+                        weather_note = self._weather_note(weather)
+                        request = request.model_copy(update={
                             "temperature_c": weather.temperature_c,
                             "weather_condition": weather.summary,
-                        }
-                    )
-                    steps.append(self._step("weather", "success", "Weather checked"))
-                else:
-                    steps.append(self._step("weather", "fallback", "Weather unavailable"))
+                        })
+                if not weather_available:
+                    step.status = "fallback"
 
-        recommendations = plan_outfits(request, garments)
-        if weather_note:
-            recommendations = [
-                recommendation.model_copy(update={"weather_note": weather_note})
-                for recommendation in recommendations
-            ]
-        steps.append(self._step("plan_outfits", "success", "Outfits planned"))
+        with run.step("plan_outfits"):
+            recommendations = plan_outfits(request, garments, limit=3)
+            if weather_note:
+                recommendations = [item.model_copy(update={"weather_note": weather_note}) for item in recommendations]
         status = "success" if recommendations and weather_available else "fallback"
         if not recommendations:
             message = "未找到满足当前天气、季节和排除条件的组合；请检查上装与下装或连衣裙，雨雪天还需鞋履，低温时需外套。"
@@ -90,20 +81,11 @@ class OutfitPlanningSkill:
             message = "天气信息暂不可用，已根据衣柜生成穿搭建议。"
         else:
             message = "已根据你的衣柜生成穿搭建议。"
-        return SkillOutcome(
+        return run.finish(
             status=status,
-            data={
-                "recommendations": [
-                    item.model_dump(mode="json") for item in recommendations
-                ]
-            },
-            trace=self._trace(steps, started, status),
-            user_message=message,
+            data={"recommendations": [item.model_dump(mode="json") for item in recommendations]},
+            message=message,
         )
-
-    @staticmethod
-    def _step(name: str, status: str, summary: str) -> AgentTraceStep:
-        return AgentTraceStep(name=name, status=status, summary=summary, duration_ms=0)
 
     @staticmethod
     def _weather_note(weather: WeatherResult) -> str:
@@ -111,12 +93,3 @@ class OutfitPlanningSkill:
         if weather.temperature_c is not None:
             note = f"{note}，{weather.temperature_c:g}°C"
         return note
-
-    @staticmethod
-    def _trace(steps: list[AgentTraceStep], started: float, status: str) -> AgentTrace:
-        return AgentTrace(
-            skill_name="OutfitPlanningSkill",
-            steps=steps,
-            duration_ms=int((time.perf_counter() - started) * 1000),
-            status=status,
-        )

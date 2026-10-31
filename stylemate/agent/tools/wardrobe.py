@@ -13,7 +13,7 @@ from stylemate.agent.tool_schemas import (
     WardrobeSearchArguments,
 )
 from stylemate.domain.models import OutfitRequest
-from stylemate.rules.outfit_rules import plan_outfits
+from stylemate.skills.outfit_planning import OutfitPlanningSkill
 
 
 def search_wardrobe(arguments: dict[str, Any], context: ToolContext) -> dict[str, Any]:
@@ -34,42 +34,9 @@ def get_garment(arguments: dict[str, Any], context: ToolContext) -> dict[str, An
 def recommend_inventory_outfit(arguments: dict[str, Any], context: ToolContext) -> dict[str, Any]:
     """Use the deterministic planner with inventory from this owner only."""
     values = OutfitArguments.model_validate(arguments)
-    garments = context.wardrobe_repository.list_garments(context.owner_id)
-    profile = context.wardrobe_repository.get_profile(context.owner_id)
-    owned_ids = {garment.id for garment in garments}
-    candidate_ids = [
-        garment_id
-        for garment_id in values.candidate_garment_ids
-        if garment_id in owned_ids
-    ]
-    if values.candidate_garment_ids and not candidate_ids:
-        return {"recommendations": [], "message": "指定的候选衣物当前不可用，请重新选择衣橱中的单品；本次未扩大候选范围。"}
-    request = OutfitRequest(
-        scene=values.scene,
-        target_date=values.target_date,
-        city=values.city,
-        target_season=values.target_season,
-        temperature_c=values.temperature_c,
-        weather_condition=values.weather_condition,
-        style_preference=values.style_preference
-        or profile.get("style_preference")
-        or None,
-        color_preference=values.color_preference
-        or profile.get("color_preference")
-        or None,
-        fit_preference=values.fit_preference
-        or profile.get("fit_preference")
-        or None,
-        extra_constraints=values.extra_constraints,
-        candidate_garment_ids=candidate_ids,
-        required_garment_id=values.required_garment_id,
-    )
-    recommendations = plan_outfits(request, garments, limit=3)
-    return {
-        "recommendations": [
-            recommendation.model_dump(mode="json") for recommendation in recommendations[:3]
-        ]
-    }
+    request = OutfitRequest(**values.model_dump())
+    outcome = OutfitPlanningSkill(context.wardrobe_repository).run(context.owner_id, request)
+    return {**outcome.data, "message": outcome.user_message}
 
 
 def wardrobe_gap_check(arguments: dict[str, Any], context: ToolContext) -> dict[str, Any]:

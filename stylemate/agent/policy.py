@@ -8,6 +8,7 @@ from time import monotonic
 
 from pydantic import ValidationError
 
+from stylemate.agent.tool_results import error_payload
 from stylemate.domain.models import OutfitRecommendation
 
 
@@ -75,7 +76,7 @@ def denied_tool_payload(name: str, owner_id: str, conversation_id: str) -> str |
     if not code:
         policy.calls += 1
         return None
-    return json.dumps({"result": {"message": "本轮工具权限或预算受限，请调整问题后重试。"},
+    return json.dumps({**error_payload("本轮工具权限或预算受限，请调整问题后重试。", code),
                        "trace": {"name": name, "status": "failed", "summary": code,
                                  "duration_ms": 0}}, ensure_ascii=False)
 

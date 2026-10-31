@@ -18,10 +18,9 @@ from stylemate.agent.policy import (
     remaining_request_seconds,
 )
 from stylemate.agent.routing import (
-    CONCEPT_KNOWLEDGE_TERMS,
-    MEASUREMENT_KNOWLEDGE_TERMS,
-    OUTFIT_INTENT_TERMS,
-    explicit_write_tools,
+    CARE_INTENT_TERMS,
+    is_outfit_intent,
+    route_skills,
 )
 from stylemate.agent.state import initial_state
 from stylemate.agent.telemetry import current_run_id, observe_run
@@ -39,41 +38,7 @@ from stylemate.services.profile_service import PROFILE_KEYS, ProfileService
 
 NO_KEY_MESSAGE = "AI 对话需要配置 LLM_API_KEY；当前仍可使用天气、尺码、衣橱和知识库工具。"
 MODEL_FALLBACK_MESSAGE = "模型服务当前不可用；仍可使用天气、尺码、衣橱和知识库工具。"
-CARE_INTENT_TERMS = (
-    "洗",
-    "清洁",
-    "护理",
-    "保养",
-    "柔顺剂",
-    "漂白",
-    "去渍",
-    "烘干",
-    "晾晒",
-    "熨烫",
-    "洗标",
-    "洗涤剂",
-)
-KNOWLEDGE_INTENT_TERMS = CARE_INTENT_TERMS + MEASUREMENT_KNOWLEDGE_TERMS + (
-    "知识库",
-    "羊毛",
-    "材质",
-    "面料",
-    "gore-tex",
-    "功能外套",
-    "拒水",
-    "防水",
-    "紫外线",
-    "防晒",
-    "高温",
-    "寒冷",
-    "温差",
-    "分层",
-    "尺码表",
-    "色轮",
-    "配色",
-    "收纳",
-    "污渍",
-)
+
 
 
 def _deadline_result():
@@ -100,12 +65,12 @@ class AgentService:
 
     def chat(self, owner_id: str, conversation_id: str, text: str, *, garment_id: str | None = None) -> ConversationMessage:
         from stylemate.agent.policy import request_policy
-        from stylemate.agent.routing import route_skills
         from stylemate.agent.tool_schemas import READ_TOOL_SCHEMAS, WRITE_TOOL_SCHEMAS
 
         if not isinstance(text, str) or not text.strip() or len(text) > 4000:
             raise ValueError("消息不能为空且不能超过 4000 个字符")
-        route = route_skills(text, set(READ_TOOL_SCHEMAS) | set(WRITE_TOOL_SCHEMAS))
+        route = route_skills(text, set(READ_TOOL_SCHEMAS) | set(WRITE_TOOL_SCHEMAS),
+                             travel_follow_up=_is_travel_follow_up(self.repository.load_conversation(owner_id, conversation_id), text))
         item_intent = _item_question(text)
         requested_id = _garment_id(text)
         matching = []
@@ -139,7 +104,6 @@ class AgentService:
         if not isinstance(text, str) or not text.strip() or len(text) > 4000:
             raise ValueError("消息不能为空且不能超过 4000 个字符")
         state = self.repository.load_conversation(owner_id, conversation_id)
-        shortcut = self._shortcut_route(owner_id, conversation_id, text, state=state)
         if ambiguous_item:
             content, traces, sources = "找到多件同名衣物，请先在衣橱中选择具体的单品。", [], []
         elif garment_id and _item_exclusion(text):
@@ -148,7 +112,7 @@ class AgentService:
             content, traces, sources = self._selected_item_route(owner_id, conversation_id, text, garment_id)
         elif _item_question(text) and re.search(r"这件|这条|这双|这个|它", text) and not garment_id:
             content, traces, sources = "请先选择要咨询的衣物，或提供衣物的准确名称。", [], []
-        elif shortcut is not None:
+        elif (shortcut := self._shortcut_route(owner_id, conversation_id, text, state=state)) is not None:
             content, traces, sources = shortcut
         elif _is_deterministic_intent(text) or _is_travel_follow_up(state, text):
             content, traces, sources = self._route_without_model(
@@ -353,23 +317,19 @@ class AgentService:
     ):
         """Route deterministic intents before falling back to the model message."""
         toolkit = self._toolkit(owner_id, conversation_id)
-        lower = text.lower()
-        if re.search(r"删除|移除|删掉|\bdelete\b|\bremove\b", text, re.I) and not (
-            explicit_write_tools(text) & {"delete_garment"}
-        ):
+        continuing_travel = _is_travel_follow_up(state, text) if state else False
+        intent = route_skills(text, set(), travel_follow_up=continuing_travel).intent
+        if intent == "delete_explanation":
             return "本次不会删除衣物。如需删除，请明确指定单品，并在变更预览中确认。", [], []
-        if any(term in text for term in ("推荐购买", "买什么", "购买建议")):
+        if intent == "purchase":
             return self._call_named(toolkit, "recommend_purchases", {"scene": "日常"})
         # Explicit knowledge questions should not become packing or outfit
         # requests merely because they mention travel or 搭配. Care questions
         # retain the dedicated material/label safety handling below.
-        if ("知识库" in text or any(term in text for term in CONCEPT_KNOWLEDGE_TERMS)) and not any(
-            word in lower for word in CARE_INTENT_TERMS
-        ):
+        if intent == "knowledge":
             return self._call_named(toolkit, "rag_search", {"query": text})
         destination = _travel_destination(text)
-        continuing_travel = _is_travel_follow_up(state, text) if state else False
-        if any(term in text for term in ("旅行行李", "旅游", "旅行", "行李清单")) or continuing_travel:
+        if intent == "travel":
             if not destination and continuing_travel and state and state.facts.locations:
                 destination = state.facts.locations[-1]
             if not destination:
@@ -388,31 +348,26 @@ class AgentService:
                 days=days,
                 activities=_travel_activities(text),
             )
-        if any(word in lower for word in CARE_INTENT_TERMS):
+        if intent == "care":
             material = "羊毛" if "羊毛" in text else text[:80]
             return self._call_named(toolkit, "care_guide", {"material": material})
         size = _size_values(text)
         if size:
             return self._call_named(toolkit, "recommend_size", size)
-        if any(word in text for word in OUTFIT_INTENT_TERMS):
+        if intent == "outfit":
             return self._outfit_route(toolkit, owner_id, text)
-        if any(word in text for word in ("天气", "定位", "城市")):
+        if intent == "weather":
             city = _city(text)
             return self._call_named(toolkit, "get_weather" if "天气" in text else "get_user_location", {"city": city})
-        if any(word in lower for word in KNOWLEDGE_INTENT_TERMS):
-            material = "羊毛" if "羊毛" in text else text[:80]
-            if any(word in lower for word in CARE_INTENT_TERMS):
-                return self._call_named(toolkit, "care_guide", {"material": material})
-            return self._call_named(toolkit, "rag_search", {"query": text})
-        if any(word in text for word in ("缺", "补齐", "补充")):
+        if intent == "wardrobe_gap":
             return self._call_named(toolkit, "wardrobe_gap_check", {"season": _season(text)})
-        if any(word in lower for word in ("删除", "delete")):
+        if intent == "delete":
             return self._call_named(toolkit, "delete_garment", {"garment_id": _garment_id(text)})
-        if any(word in text for word in ("衣橱", "衣柜", "搜索")):
+        if intent == "wardrobe_search":
             return self._call_named(
                 toolkit, "search_wardrobe", _wardrobe_filters(text)
             )
-        if any(word in text for word in ("风格", "分析")):
+        if intent == "item_style":
             return self._call_named(toolkit, "item_style_analysis", {"garment_id": _garment_id(text)})
         return NO_KEY_MESSAGE, [], []
 
@@ -481,7 +436,7 @@ class AgentService:
             content, traces, sources = self._call_named(toolkit, "care_guide", {"material": material})
             return (f"关于「{name}」（已记录材质：{material}）：\n{content}\n请以整件衣物的洗护标签为准。",
                     [*item_traces, *traces], sources)
-        if any(term in text for term in ("搭配", "穿", "配什么", "怎么配")):
+        if is_outfit_intent(text) or any(term in text for term in ("穿", "配什么")):
             args = _outfit_arguments(text)
             args["required_garment_id"] = garment_id
             weather_text = ""
@@ -701,23 +656,7 @@ def _is_travel_follow_up(state: ConversationState | None, text: str) -> bool:
 
 
 def _is_deterministic_intent(text: str) -> bool:
-    return any(
-        term in text
-        for term in MEASUREMENT_KNOWLEDGE_TERMS + OUTFIT_INTENT_TERMS + (
-            "删除", "移除", "删掉",
-            "搭配",
-            "穿什么",
-            "推荐购买",
-            "买什么",
-            "购买建议",
-            "洗护",
-            "洗涤",
-            "护理",
-            "旅行",
-            "旅游",
-            "行李",
-        )
-    )
+    return route_skills(text, set()).deterministic
 
 
 def _season(text: str) -> str:
@@ -732,7 +671,7 @@ def _item_exclusion(text: str) -> bool:
 def _item_question(text: str) -> bool:
     if re.search(r"删除|移除|修改|编辑|更新|新增|添加|录入", text):
         return False
-    return any(term in text.lower() for term in (*CARE_INTENT_TERMS, "搭配", "穿", "配什么", "怎么配", "材质", "适合"))
+    return is_outfit_intent(text) or any(term in text.lower() for term in (*CARE_INTENT_TERMS, "穿", "配什么", "材质", "适合"))
 
 
 def _garment_id(text: str) -> str:

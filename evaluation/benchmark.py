@@ -21,6 +21,7 @@ from stylemate.agent.policy import current_outfits, request_policy
 from stylemate.agent.routing import route_skills
 from stylemate.agent.service import AgentService
 from stylemate.agent.state import initial_state
+from stylemate.agent.telemetry import observe_run
 from stylemate.agent.tools.location_weather import LocationResult, WeatherResult
 from stylemate.config.portable import ServiceConfigStore, apply_environment
 from stylemate.config.runtime import RuntimeSettings
@@ -148,6 +149,11 @@ def summarize_tasks(rows):
     # Text checks are finite acceptance contracts; they are not semantic grading.
     functional = [all(ok for key, ok in r["checks"].items() if key != "exact_tool_set") for r in rows]
     unique = {key: [functional[i] for i, row in enumerate(rows) if row['id'] == key] for key in {r['id'] for r in rows}}
+    outcomes = Counter()
+    for row in rows:
+        for key, value in row.get("diagnostics", {}).items():
+            if key.startswith("tool_outcome_"):
+                outcomes[key.removeprefix("tool_outcome_")] += value
     return {"trials": len(rows), "unique_cases": len({r['id'] for r in rows}),
             "functional_task_success": proportion(sum(functional), len(rows)),
             "all_repeats_successful_cases": proportion(sum(all(v) for v in unique.values()), len(unique)),
@@ -157,6 +163,8 @@ def summarize_tasks(rows):
             "tool_set_macro_f1": round(statistics.mean(f1_scores), 4) if f1_scores else None,
             "mean_logical_tool_calls": round(statistics.mean(len(r.get("actual_tools", [])) for r in rows), 3) if rows else None,
             "tool_execution_success": proportion(sum(s != "failed" for s in tools), len(tools)),
+            "read_tool_business_outcomes": dict(outcomes),
+            "business_outcome_scope": "read handler results only; clarification/empty results are not business successes",
             "inventory_unchanged": proportion(sum(r["checks"].get("inventory_unchanged", False) for r in rows), len(rows)),
             "latency": distribution([r["duration_ms"] for r in rows]),
             "failure_categories": dict(Counter(key for r in rows for key, ok in r["checks"].items() if not ok)),
@@ -257,8 +265,9 @@ def online_graph(cases, model, repeats):
             route = route_skills(case["input"], {t.name for t in toolkit.tools})
             before, started = snapshot(app), time.perf_counter()
             previous_calls = len(calls)
+            observations = []
             try:
-                with request_policy("benchmark-owner", "thread", route.allowed_tools):
+                with observe_run(observations.append), request_policy("benchmark-owner", "thread", route.allowed_tools):
                     state = build_agent_graph(ObservedModel(model, calls), toolkit.tools).invoke(
                         initial_state(case["input"], owner_id="benchmark-owner", conversation_id="thread"))
                     outfits = current_outfits("benchmark-owner", "thread")
@@ -280,6 +289,7 @@ def online_graph(cases, model, repeats):
                              "duration_ms": (time.perf_counter() - started) * 1000, "error_type": type(exc).__name__})
             print(f"live graph {case['id']} repeat {repeat + 1}: {'pass' if rows[-1]['passed'] else 'fail'}", flush=True)
             rows[-1]["model_invocations"] = len(calls) - previous_calls
+            rows[-1]["diagnostics"] = observations[-1] if observations else {}
     usage = Counter()
     for call in calls:
         for key in ("input_tokens", "output_tokens", "total_tokens"):

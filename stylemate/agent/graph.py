@@ -15,7 +15,7 @@ from stylemate.agent.policy import check_request_deadline
 from stylemate.agent.routing import route_skills
 from stylemate.agent.state import AgentState, model_messages
 from stylemate.agent.telemetry import record_counter
-from stylemate.rag.query_planning import care_clarification
+from stylemate.agent.tool_results import error_payload
 
 logger = logging.getLogger(__name__)
 
@@ -39,7 +39,8 @@ def build_agent_graph(model, tools: list[BaseTool]):
         decision = route_skills(text, set(tool_map))
         logger.info("skill_route_finished skills=%s tools=%d", decision.skills, len(decision.allowed_tools))
         return {"allowed_tools": sorted(decision.allowed_tools), "active_skills": list(decision.skills),
-                "care_clarification": care_clarification(text) or "", "original_query": text,
+                "task_intent": decision.intent,
+                "care_clarification": decision.clarification, "original_query": text,
                 "traces": [{"name": "skill_router", "status": "success",
                             "summary": ", ".join(decision.skills), "duration_ms": 0}]}
 
@@ -95,7 +96,7 @@ def build_agent_graph(model, tools: list[BaseTool]):
         count = 0
         for call in getattr(message, "tool_calls", []) or []:
             if state.get("tool_calls", 0) + count >= MAX_TOOL_CALLS:
-                messages.append(ToolMessage(content=json.dumps({"result": {"message": _STOP_MESSAGE}}, ensure_ascii=False), tool_call_id=call.get("id", "limit"), name=call.get("name", "tool")))
+                messages.append(ToolMessage(content=json.dumps(error_payload(_STOP_MESSAGE, "tool_budget_exhausted"), ensure_ascii=False), tool_call_id=call.get("id", "limit"), name=call.get("name", "tool")))
                 continue
             name, args = call.get("name", ""), call.get("args", {}) or {}
             tool = tool_map.get(name)
@@ -111,13 +112,21 @@ def build_agent_graph(model, tools: list[BaseTool]):
                 except Exception:
                     raw = {"result": {"message": "工具暂时不可用。"}, "trace": {"name": name, "status": "failed", "summary": "tool invocation failed", "duration_ms": 0}}
             trace = raw.get("trace")
+            # Include business outcome in model context instead of dropping it.
+            # Synthetic policy/unknown-tool errors share the same vocabulary.
+            raw.setdefault("execution_status", (trace or {}).get("status", "failed") if isinstance(trace, dict) else "failed")
+            raw.setdefault("outcome", "error" if raw["execution_status"] == "failed" else "success")
+            raw.setdefault("reason_code", "tool_execution_error" if raw["outcome"] == "error" else "completed")
+            raw.setdefault("retryable", False)
+            raw.setdefault("missing_conditions", [])
             if isinstance(trace, dict):
                 traces.append(trace)
             if isinstance(raw.get("sources"), list):
                 sources.extend(item for item in raw["sources"] if isinstance(item, dict))
             if isinstance(raw.get("pending_action"), dict):
                 pending = raw["pending_action"]
-            messages.append(ToolMessage(content=json.dumps({"result": raw.get("result", {})}, ensure_ascii=False, default=str, separators=(",", ":")), tool_call_id=call.get("id", name), name=name))
+            model_payload = {key: raw[key] for key in ("result", "outcome", "execution_status", "reason_code", "retryable", "missing_conditions")}
+            messages.append(ToolMessage(content=json.dumps(model_payload, ensure_ascii=False, default=str, separators=(",", ":")), tool_call_id=call.get("id", name), name=name))
             count += 1
         update: dict[str, Any] = {"messages": messages, "traces": traces, "sources": sources, "tool_calls": count}
         if pending is not None:
