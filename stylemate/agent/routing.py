@@ -8,6 +8,7 @@ from dataclasses import dataclass
 WRITE_TOOLS = frozenset({"add_garment", "update_garment", "delete_garment"})
 MEASUREMENT_KNOWLEDGE_TERMS = ("尺码表", "商品尺寸", "成衣尺寸", "人体尺寸", "平铺", "胸宽", "测量方法")
 CONCEPT_KNOWLEDGE_TERMS = ("色轮", "配色原理", "同类色", "类似色", "邻近色", "互补色", "叠穿原理", "分层原理")
+OUTFIT_INTENT_TERMS = ("搭配", "穿什么", "怎么穿", "搭一套", "搭一身", "配一套", "上班穿", "穿一套", "穿搭", "怎么配")
 SKILL_TOOLS = {
     "knowledge_qa": frozenset({"care_guide", "rag_search", "get_garment"}),
     "outfit_planning": frozenset({"get_user_location", "get_weather", "search_wardrobe",
@@ -21,7 +22,7 @@ SKILL_TOOLS = {
 }
 _TERMS = {
     "knowledge_qa": ("洗", "护理", "面料", "材质", "知识", "保养", "柔顺剂", "分层", "care", "wash") + MEASUREMENT_KNOWLEDGE_TERMS + CONCEPT_KNOWLEDGE_TERMS,
-    "outfit_planning": ("穿", "搭配", "搭一套", "通勤", "天气", "尺码", "outfit", "weather", "size"),
+    "outfit_planning": ("穿", "通勤", "天气", "尺码", "outfit", "weather", "size") + OUTFIT_INTENT_TERMS,
     "travel_planning": ("旅行", "旅游", "出差", "行李", "travel", "packing", "trip"),
     "wardrobe_management": ("衣橱", "衣柜", "库存", "查询", "找", "wardrobe", "search"),
     "purchase_planning": ("购买", "买", "缺少", "添置", "purchase", "buy"),
@@ -91,6 +92,8 @@ def route_skills(text: str, available: set[str]) -> SkillRoute:
     allowed: set[str] = set()
     for skill in skills:
         allowed.update(SKILL_TOOLS[skill])
+    if re.search(r"配色|色轮|互补色|邻近色|类似色", text) and not re.search(r"洗|护理|保养|烘|熨|漂白|柔顺剂", text):
+        allowed.discard("care_guide")
     writes = explicit_write_tools(text)
     if writes:
         allowed.update(SKILL_TOOLS["wardrobe_management"])

@@ -15,6 +15,7 @@ from stylemate.agent.policy import check_request_deadline
 from stylemate.agent.routing import route_skills
 from stylemate.agent.state import AgentState, model_messages
 from stylemate.agent.telemetry import record_counter
+from stylemate.rag.query_planning import care_clarification
 
 logger = logging.getLogger(__name__)
 
@@ -38,11 +39,23 @@ def build_agent_graph(model, tools: list[BaseTool]):
         decision = route_skills(text, set(tool_map))
         logger.info("skill_route_finished skills=%s tools=%d", decision.skills, len(decision.allowed_tools))
         return {"allowed_tools": sorted(decision.allowed_tools), "active_skills": list(decision.skills),
+                "care_clarification": care_clarification(text) or "", "original_query": text,
                 "traces": [{"name": "skill_router", "status": "success",
                             "summary": ", ".join(decision.skills), "duration_ms": 0}]}
 
     def assistant(state: AgentState) -> dict[str, Any]:
         check_request_deadline()
+        clarification = state.get("care_clarification")
+        if clarification:
+            # Resolve a missing material before invoking a model that might
+            # silently rewrite "sweater" into "wool". Keep the public care-tool
+            # result/trace, then finish with the same clarification boundary.
+            if state.get("tool_calls", 0) == 0 and "care_guide" in state.get("allowed_tools", []):
+                return {"messages": [AIMessage(content="", tool_calls=[{
+                    "name": "care_guide", "args": {"material": state.get("original_query", "")[:80]},
+                    "id": "material-clarification",
+                }])]}
+            return {"messages": [AIMessage(content=clarification)]}
         if (
             state.get("model_calls", 0) >= MAX_MODEL_CALLS
             or state.get("tool_calls", 0) >= MAX_TOOL_CALLS

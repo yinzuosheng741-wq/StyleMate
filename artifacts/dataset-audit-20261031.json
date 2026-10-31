@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "original_benchmark_unchanged": true,
+  "legacy_retrieval_cases": 60,
+  "legacy_coverage": {
+    "published_records": 41,
+    "fully_covered_cases": 17,
+    "partially_covered_cases": 2,
+    "uncovered_cases": 41,
+    "complete_coverage_rate": 0.2833,
+    "scope_compatible_fully_covered_cases": 13,
+    "scope_incompatible_case_ids": [
+      "shell-beading",
+      "shell-maintain",
+      "para-wool-care",
+      "para-shell"
+    ],
+    "note": "ID availability of historical labels, not semantic support. Scope-incompatible labels are reported separately; raw metrics retain all cases."
+  },
+  "v2": {
+    "version": "2026-10-31-v2",
+    "tasks": 50,
+    "retrieval": 40,
+    "positive_retrieval": 28,
+    "negative_retrieval": 12,
+    "partitions": {
+      "regression": {
+        "tasks": 30,
+        "retrieval": 24
+      },
+      "validation": {
+        "tasks": 20,
+        "retrieval": 16
+      }
+    }
+  },
+  "not_external_blind_test": true
+}

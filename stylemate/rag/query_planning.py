@@ -32,6 +32,29 @@ SUBJECTS = {
 _GARMENT_ONLY = re.compile(r"毛衣|针织|冲锋衣|功能外套|衣物|衣服|\bsweater\b|\bknit\w*\b|\bshell\b", re.I)
 _UNCONFIRMED_CATEGORY = re.compile(r"毛衣|针织|冲锋衣|功能外套|\bsweater\b|\bknit\w*\b|\bshell\b", re.I)
 _GENERAL_CARE_FACT = re.compile(r"符号|洗标|分类|污渍|收纳|折叠|用量|洗涤剂|烘干前", re.I)
+_OTHER_DOMAIN_SUBJECT = re.compile(
+    r"股票|证券|基金|股价|期货|外汇|变速箱|发动机|汽车|轮胎|电脑|数据库|服务器|程序代码|"
+    r"血压|糖尿病|药物剂量|抗生素|食谱|炒菜|烹饪|\b(?:stock|investment|engine|database|antibiotic)\b", re.I,
+)
+_CLOTHING_SUBJECT = re.compile(
+    r"衣|裤|衫|裙|鞋|袜|帽|围巾|穿|搭配|面料|洗标|尺码|胸围|羊毛|羊绒|真丝|亚麻|"
+    r"\b(?:garment|clothing|outfit|shirt|trouser|jacket|wool|silk|linen)\b", re.I,
+)
+
+
+def is_outside_builtin_scope(query: str) -> bool:
+    """Finite explicit-subject boundary, not a general intent classifier.
+
+    A travel or care question can mention a car/computer while still asking
+    about clothing. Uploaded user documents retain their own scoped channel.
+    """
+    return bool(_OTHER_DOMAIN_SUBJECT.search(query) and not _CLOTHING_SUBJECT.search(query))
+
+
+def care_clarification(query: str) -> str | None:
+    if re.search(r"洗|清洁|护理|保养|烘|漂白|柔顺剂|熨|\bwash|\bcare\b", query, re.I):
+        return material_clarification(query)
+    return None
 
 
 def material_clarification(query: str) -> str | None:
@@ -45,6 +68,8 @@ def material_clarification(query: str) -> str | None:
 
 def knowledge_compatible(query: str, *, title: str, content: str, topic: str) -> bool:
     """Reject explicit subject/topic mismatches; this is not entailment scoring."""
+    if is_outside_builtin_scope(query):
+        return False
     requested = {key for key, pattern in SUBJECTS.items() if re.search(pattern, query, re.I)}
     available = {key for key, pattern in SUBJECTS.items()
                  if re.search(pattern, f"{title} {content}", re.I)}

@@ -37,6 +37,10 @@ artifacts/*
 !artifacts/benchmark-20261031-complete.json
 !artifacts/benchmark-20261031-analysis.json
 !artifacts/benchmark-20261031-probe-budget.json
+!artifacts/benchmark-20261031-optimized-live.json
+!artifacts/benchmark-20261031-v2-offline.json
+!artifacts/dataset-audit-20261031.json
+!artifacts/benchmark-20261031-comparison.json
 dist/
 data/desktop/
 data/config/

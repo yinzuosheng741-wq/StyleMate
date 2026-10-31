@@ -1,0 +1,260 @@
+{
+  "schema_version": 1,
+  "same_dataset_and_corpus": true,
+  "same_model_settings": true,
+  "notes": [
+    "Small repeated scenario sample; not independent user traffic.",
+    "After includes two deterministic material-precondition turns, each with zero model invocations.",
+    "Live timing includes variable provider/network latency.",
+    "Original question labels and failed task records retained."
+  ],
+  "reports": {
+    "before": {
+      "file": "benchmark-20261031-analysis.json",
+      "sha256": "561101ec2bacfc69b0db2a7eaa2cf4b3a3707aa93cfe149ba0b3876b13a6c3a6"
+    },
+    "after": {
+      "file": "benchmark-20261031-optimized-live.json",
+      "sha256": "3b28d46e371734da3cd56a017e31ef72f872cb4e417d18d84d6da8e1c022dfa4"
+    }
+  },
+  "metrics": {
+    "offline_tasks": {
+      "functional_task_success": {
+        "before": {
+          "passed": 84,
+          "total": 90,
+          "rate": 0.9333,
+          "wilson_95": [
+            0.8621,
+            0.9691
+          ]
+        },
+        "after": {
+          "passed": 90,
+          "total": 90,
+          "rate": 1.0,
+          "wilson_95": [
+            0.9591,
+            1.0
+          ]
+        }
+      },
+      "expected_tool_hit": {
+        "before": {
+          "passed": 69,
+          "total": 72,
+          "rate": 0.9583,
+          "wilson_95": [
+            0.8845,
+            0.9857
+          ]
+        },
+        "after": {
+          "passed": 72,
+          "total": 72,
+          "rate": 1.0,
+          "wilson_95": [
+            0.9493,
+            1.0
+          ]
+        }
+      },
+      "exact_tool_set": {
+        "before": {
+          "passed": 78,
+          "total": 90,
+          "rate": 0.8667,
+          "wilson_95": [
+            0.7813,
+            0.9221
+          ]
+        },
+        "after": {
+          "passed": 81,
+          "total": 90,
+          "rate": 0.9,
+          "wilson_95": [
+            0.8208,
+            0.9465
+          ]
+        }
+      },
+      "tool_set_macro_f1": {
+        "before": 0.9111,
+        "after": 0.9667
+      },
+      "tool_execution_success": {
+        "before": {
+          "passed": 96,
+          "total": 102,
+          "rate": 0.9412,
+          "wilson_95": [
+            0.8776,
+            0.9728
+          ]
+        },
+        "after": {
+          "passed": 102,
+          "total": 105,
+          "rate": 0.9714,
+          "wilson_95": [
+            0.9193,
+            0.9902
+          ]
+        }
+      },
+      "mean_logical_tool_calls": {
+        "before": 1.133,
+        "after": 1.167
+      },
+      "latency": {
+        "before": {
+          "n": 90,
+          "mean_ms": 2.266,
+          "p50_ms": 0.97,
+          "p95_ms": 5.321,
+          "p99_ms": 43.147
+        },
+        "after": {
+          "n": 90,
+          "mean_ms": 2.365,
+          "p50_ms": 1.197,
+          "p95_ms": 5.632,
+          "p99_ms": 36.358
+        }
+      }
+    },
+    "online_graph": {
+      "functional_task_success": {
+        "before": {
+          "passed": 17,
+          "total": 20,
+          "rate": 0.85,
+          "wilson_95": [
+            0.6396,
+            0.9476
+          ]
+        },
+        "after": {
+          "passed": 19,
+          "total": 20,
+          "rate": 0.95,
+          "wilson_95": [
+            0.7639,
+            0.9911
+          ]
+        }
+      },
+      "expected_tool_hit": {
+        "before": {
+          "passed": 20,
+          "total": 20,
+          "rate": 1.0,
+          "wilson_95": [
+            0.8389,
+            1.0
+          ]
+        },
+        "after": {
+          "passed": 20,
+          "total": 20,
+          "rate": 1.0,
+          "wilson_95": [
+            0.8389,
+            1.0
+          ]
+        }
+      },
+      "exact_tool_set": {
+        "before": {
+          "passed": 15,
+          "total": 20,
+          "rate": 0.75,
+          "wilson_95": [
+            0.5313,
+            0.8881
+          ]
+        },
+        "after": {
+          "passed": 16,
+          "total": 20,
+          "rate": 0.8,
+          "wilson_95": [
+            0.584,
+            0.9193
+          ]
+        }
+      },
+      "tool_set_macro_f1": {
+        "before": 0.89,
+        "after": 0.9019
+      },
+      "tool_execution_success": {
+        "before": {
+          "passed": 33,
+          "total": 33,
+          "rate": 1.0,
+          "wilson_95": [
+            0.8957,
+            1.0
+          ]
+        },
+        "after": {
+          "passed": 34,
+          "total": 34,
+          "rate": 1.0,
+          "wilson_95": [
+            0.8985,
+            1.0
+          ]
+        }
+      },
+      "mean_logical_tool_calls": {
+        "before": 1.65,
+        "after": 1.7
+      },
+      "latency": {
+        "before": {
+          "n": 20,
+          "mean_ms": 12382.4,
+          "p50_ms": 6905.337,
+          "p95_ms": 35905.352,
+          "p99_ms": 47384.443
+        },
+        "after": {
+          "n": 20,
+          "mean_ms": 8718.404,
+          "p50_ms": 5124.09,
+          "p95_ms": 25553.312,
+          "p99_ms": 32881.051
+        }
+      }
+    }
+  },
+  "observed_mean_latency_reduction_percent": 29.59,
+  "unknown_material_model_invocations": [
+    0,
+    0
+  ],
+  "unsupported_query_abstention": {
+    "before": {
+      "passed": 2,
+      "total": 4,
+      "rate": 0.5,
+      "wilson_95": [
+        0.15,
+        0.85
+      ]
+    },
+    "after": {
+      "passed": 4,
+      "total": 4,
+      "rate": 1.0,
+      "wilson_95": [
+        0.5101,
+        1.0
+      ]
+    }
+  }
+}

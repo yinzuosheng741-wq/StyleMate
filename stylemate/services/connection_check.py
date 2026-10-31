@@ -40,7 +40,8 @@ def check_service(kind, values, session=None):
                 content = [{"type": "text", "text": "Name the image color in one word."},
                            {"type": "image_url", "image_url": {"url": "data:image/png;base64," + base64.b64encode(image.getvalue()).decode()}}]
             endpoint = "/chat/completions"
-            body = {"model": model, "messages": [{"role": "user", "content": content}], "max_tokens": 64}
+            body = {"model": model, "messages": [{"role": "user", "content": content}],
+                    "max_tokens": 600 if kind == "text" else 64}
         response = session.post(base.rstrip("/") + endpoint, headers={"Authorization": "Bearer " + key},
                                 json=body, timeout=(5, 25), allow_redirects=False)
         if response.status_code != 200:
@@ -51,6 +52,10 @@ def check_service(kind, values, session=None):
         valid = bool(data.get("data") and data["data"][0].get("embedding")) if kind == "embedding" else bool(
             data.get("choices") and data["choices"][0].get("message", {}).get("content"))
         if not valid:
+            choice = (data.get("choices") or [{}])[0] if kind != "embedding" else {}
+            if choice.get("finish_reason") == "length":
+                return {"ok": False, "reason": "output_budget_exhausted",
+                        "message": "接口已连接，但输出预算耗尽，尚未获得最终回复；请检查模型的思考模式或输出限制。"}
             return {"ok": False, "message": "接口已响应，但返回内容不符合该能力的格式。"}
         return {"ok": True, "message": f"测试通过 · {time.monotonic() - started:.1f} 秒"}
     except requests.Timeout:

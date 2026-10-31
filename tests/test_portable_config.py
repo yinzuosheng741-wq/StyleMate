@@ -118,7 +118,15 @@ def test_model_probe_sends_minimal_request_and_redacts_error():
     assert not result["ok"] and "401" in result["message"]
     assert "private-key" not in str(result)
     assert session.calls[0][1]["allow_redirects"] is False
-    assert session.calls[0][1]["json"]["max_tokens"] == 64
+    assert session.calls[0][1]["json"]["max_tokens"] == 600
+
+
+def test_probe_distinguishes_connected_but_exhausted_output_from_transport_failure():
+    session = FakeSession([{"choices": [{"finish_reason": "length", "message": {
+        "content": "", "reasoning_content": "synthetic reasoning"}}]}])
+    result = check_service("text", configured(), session)
+    assert not result["ok"] and result["reason"] == "output_budget_exhausted"
+    assert "已连接" in result["message"]
 
 
 @pytest.mark.parametrize("kind,prefix,model,response", [

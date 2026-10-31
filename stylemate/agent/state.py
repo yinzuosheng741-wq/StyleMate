@@ -29,6 +29,8 @@ class AgentState(TypedDict, total=False):
     tool_calls: Annotated[int, operator.add]
     allowed_tools: list[str]
     active_skills: list[str]
+    care_clarification: str
+    original_query: str
 
 
 def initial_state(text: str, *, owner_id: str = "", conversation_id: str = "", facts: ConversationFacts | dict[str, Any] | None = None, summary: str = "", app_mode: str = "demo", profile: dict[str, str] | None = None, messages: list[BaseMessage] | None = None) -> AgentState:

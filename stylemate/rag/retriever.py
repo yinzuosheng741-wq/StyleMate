@@ -241,6 +241,11 @@ class HybridRetriever:
             query, title=candidate.title, content=candidate.content, topic=candidate.topic,
         )]
         candidate_map = {candidate.key: candidate for candidate in candidates}
+        if not candidates:
+            self.last_audit = {"lexical_candidates": 0, "vector_candidates": 0,
+                               "applicability_filtered": before_filter, "vector_failed": False,
+                               "scope_applied": True, "selected": 0}
+            return []
         recall_limit = max(top_k, top_k * RECALL_MULTIPLIER)
         rankings: list[list[str]] = []
         lexical_count = 0

@@ -41,6 +41,28 @@ ROOT = Path(__file__).resolve().parents[1]
 CASES = Path(__file__).with_name("benchmark_cases.json")
 
 
+def load_cases(path):
+    data = json.loads(path.read_text(encoding="utf-8"))
+    paths = [path]
+    if data.get("extends"):
+        base_path = (path.parent / data["extends"]).resolve()
+        if base_path.parent != path.parent.resolve():
+            raise ValueError("dataset parent must be in the evaluation directory")
+        base = json.loads(base_path.read_text(encoding="utf-8"))
+        paths.append(base_path)
+        for section in ("tasks", "retrieval"):
+            data[section] = [dict(c, split="regression") for c in base[section]] + [dict(c, split="validation") for c in data[section]]
+    published = {r.id for r in load_builtin_records(ROOT / "data/knowledge/records.jsonl") if r.is_published_evidence}
+    for section, text_key in (("tasks", "input"), ("retrieval", "query")):
+        ids = [c["id"] for c in data[section]]
+        if len(set(ids)) != len(ids) or not all(c.get(text_key, "").strip() for c in data[section]):
+            raise ValueError("duplicate IDs or blank questions")
+    for case in data["retrieval"]:
+        if not set(case["relevant"]) <= published:
+            raise ValueError("new benchmark labels must reference published records")
+    return data, paths
+
+
 def distribution(values):
     if not values:
         return {"n": 0, "mean_ms": None, "p50_ms": None, "p95_ms": None, "p99_ms": None}
@@ -190,6 +212,7 @@ def retrieval(cases, embedding, label):
             dcg = sum(1 / math.log2(i + 1) for i, key in enumerate(ranked, 1) if key in relevant)
             ideal = sum(1 / math.log2(i + 1) for i in range(1, min(5, len(relevant)) + 1))
             rows.append({"id": case["id"], "retrieved_ids": ranked, "relevant_ids": case["relevant"],
+                         "split": case.get("split", "regression"),
                          "recall_at_5": len(set(ranked) & relevant) / len(relevant) if relevant else None,
                          "precision_at_5": len(set(ranked) & relevant) / 5 if relevant else None,
                          "hit_at_1": bool(ranked and ranked[0] in relevant) if relevant else None,
@@ -233,6 +256,7 @@ def online_graph(cases, model, repeats):
             toolkit = app._toolkit("benchmark-owner", "thread")
             route = route_skills(case["input"], {t.name for t in toolkit.tools})
             before, started = snapshot(app), time.perf_counter()
+            previous_calls = len(calls)
             try:
                 with request_policy("benchmark-owner", "thread", route.allowed_tools):
                     state = build_agent_graph(ObservedModel(model, calls), toolkit.tools).invoke(
@@ -255,11 +279,12 @@ def online_graph(cases, model, repeats):
                              "checks": {"exception_free": False}, "passed": False,
                              "duration_ms": (time.perf_counter() - started) * 1000, "error_type": type(exc).__name__})
             print(f"live graph {case['id']} repeat {repeat + 1}: {'pass' if rows[-1]['passed'] else 'fail'}", flush=True)
+            rows[-1]["model_invocations"] = len(calls) - previous_calls
     usage = Counter()
     for call in calls:
         for key in ("input_tokens", "output_tokens", "total_tokens"):
             usage[key] += (call["usage"] or {}).get(key, 0)
-    return {"scope": "real model; synthetic inventory; mocked 22C weather; finite contract assertions, not human answer grading",
+    return {"scope": "real model where permitted; deterministic precondition guards; synthetic inventory; mocked 22C weather; finite contract assertions, not human answer grading",
             "summary": summarize_tasks(rows), "model_call_latency": distribution([c["duration_ms"] for c in calls]),
             "provider_reported_tokens": dict(usage), "ttft_ms": None, "cost": None, "rows": rows}
 
@@ -274,6 +299,7 @@ def api_probes(values, repeats):
             started = time.perf_counter()
             result = check_service(kind, configured)
             rows.append({"repeat": repeat, "ok": bool(result.get("ok")),
+                         "reason": result.get("reason", ""),
                          "duration_ms": (time.perf_counter() - started) * 1000})
             print(f"api {kind} repeat {repeat + 1}: {'pass' if rows[-1]['ok'] else 'fail'}", flush=True)
         reports[kind] = {"success": proportion(sum(r["ok"] for r in rows), len(rows)),
@@ -311,6 +337,7 @@ def main():
     parser.add_argument("--repeats", type=int, default=3)
     parser.add_argument("--model-repeats", type=int, default=2)
     parser.add_argument("--api-repeats", type=int, default=3)
+    parser.add_argument("--cases", type=Path, default=CASES)
     parser.add_argument("--summarize-input", type=Path, help="recompute metrics from retained raw trials without new API calls")
     args = parser.parse_args()
     if min(args.repeats, args.model_repeats, args.api_repeats) < 1:
@@ -331,19 +358,26 @@ def main():
         report["raw_report_sha256"] = hashlib.sha256(args.summarize_input.read_bytes()).hexdigest()
         args.output.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
         return 0
-    data = json.loads(CASES.read_text(encoding="utf-8"))
+    data, case_paths = load_cases(args.cases.resolve())
+    from scripts.validate import source_fingerprint
+
     report = {"schema_version": 1, "dataset_version": data["version"], "environment": {"python": platform.python_version(),
               "platform": platform.system(), "git_revision": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()},
               "fingerprints": {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest()
-                               for p in (CASES, ROOT / "data/knowledge/records.jsonl")},
+                               for p in (*case_paths, ROOT / "data/knowledge/records.jsonl")},
               "limits": ["small project-authored dataset, not held-out external user traffic",
                          "repeats share cases; Wilson intervals are descriptive per-trial approximations",
                          "P95/P99 from small samples are exploratory", "answer faithfulness needs human review",
                          "no comparable before/after baseline exists for the new dataset"]}
     report["started_at"] = datetime.now(timezone.utc).isoformat()
+    report["source_fingerprint"] = source_fingerprint()
     def save():
         args.output.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
     report["offline_tasks"] = offline_tasks(data["tasks"], args.repeats)
+    report["offline_task_partitions"] = {
+        split: summarize_tasks([r for r in report["offline_tasks"]["rows"]
+                                if r["id"] in {c["id"] for c in data["tasks"] if c.get("split", "regression") == split}])
+        for split in sorted({c.get("split", "regression") for c in data["tasks"]})}
     report["sqlite_consistency"] = sqlite_consistency(args.output.parent)
     report["offline_retrieval"] = retrieval(data["retrieval"], OfflineHashEmbedding(), "offline_hash")
     save()
