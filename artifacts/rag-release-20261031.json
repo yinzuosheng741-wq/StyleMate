@@ -1,20 +1,20 @@
 {
   "validation": {
     "schema_version": 1,
-    "revision": "24fa82eb7f36097bf3f79ede9e4e100341d7bcc6",
+    "revision": "cce7e34b2675f9b068bb3aa77c0f73780dff582a",
     "dirty": true,
-    "source_fingerprint": "c3ea782c6de7e3e195a4dc0a6526b0609828242fa909f4999e354a715d5678ca",
-    "started_at": "2026-10-31T06:59:01.905415+00:00",
+    "source_fingerprint": "dd7a1b3f8259eaeb039e43e9f8e5bf37d558c53480b3c7c8594e2dbb50b90802",
+    "started_at": "2026-10-31T07:12:26.408443+00:00",
     "steps": [
       {
         "name": "dependencies",
         "exit_code": 0,
-        "duration_seconds": 0.954
+        "duration_seconds": 0.969
       },
       {
         "name": "constraints",
         "exit_code": 0,
-        "duration_seconds": 0.781
+        "duration_seconds": 0.797
       },
       {
         "name": "health",
@@ -24,33 +24,33 @@
       {
         "name": "assets",
         "exit_code": 0,
-        "duration_seconds": 0.344
+        "duration_seconds": 0.313
       },
       {
         "name": "lint",
         "exit_code": 0,
-        "duration_seconds": 0.141
+        "duration_seconds": 0.125
       },
       {
         "name": "compile",
         "exit_code": 0,
-        "duration_seconds": 0.171
+        "duration_seconds": 0.172
       },
       {
         "name": "tests",
         "exit_code": 0,
-        "duration_seconds": 96.657
+        "duration_seconds": 97.437
       },
       {
         "name": "evaluation",
         "exit_code": 0,
-        "duration_seconds": 4.797
+        "duration_seconds": 4.61
       }
     ],
     "passed": true,
     "source_unchanged": true
   },
-  "tests_passed": 526,
+  "tests_passed": 527,
   "quality_gate": {
     "passed": true,
     "failures": [],
@@ -130,7 +130,7 @@
     "duplicate_contents": 0
   },
   "public_portable": {
-    "zip_sha256": "86398a0a59a2b69c71188fd464bd7c9bcbd13e4155cba6569008b7101adbd99d",
+    "zip_sha256": "c06c9673bb5aaa3dd1580357a5af1d79967c8206cf239367f33c23c53f59e3e4",
     "private_runtime_files": [],
     "zip_integrity": true,
     "no_ui_exit_code": 0
@@ -147,5 +147,67 @@
     "rag-answer-samples-final-20261031.json": "291dca111d810738f36d06fed5739c232d7fa4c1a34c1510371e3ce898fe77d8",
     "rag-source-health-20261031.json": "acc2ba0aa0422de87c02a323259af9deeb0d5fb03737688b6f008899ac0c76af"
   },
-  "scope": "project-authored diagnostics and finite Codex answer review; no independent human faithfulness score; candidate source plan is not default corpus expansion"
+  "scope": "project-authored diagnostics and finite Codex answer review; no independent human faithfulness score; candidate source plan is not default corpus expansion",
+  "rag_validation": {
+    "schema_version": 1,
+    "revision": "24fa82eb7f36097bf3f79ede9e4e100341d7bcc6",
+    "dirty": true,
+    "source_fingerprint": "c3ea782c6de7e3e195a4dc0a6526b0609828242fa909f4999e354a715d5678ca",
+    "started_at": "2026-10-31T06:59:01.905415+00:00",
+    "steps": [
+      {
+        "name": "dependencies",
+        "exit_code": 0,
+        "duration_seconds": 0.954
+      },
+      {
+        "name": "constraints",
+        "exit_code": 0,
+        "duration_seconds": 0.781
+      },
+      {
+        "name": "health",
+        "exit_code": 0,
+        "duration_seconds": 0.109
+      },
+      {
+        "name": "assets",
+        "exit_code": 0,
+        "duration_seconds": 0.344
+      },
+      {
+        "name": "lint",
+        "exit_code": 0,
+        "duration_seconds": 0.141
+      },
+      {
+        "name": "compile",
+        "exit_code": 0,
+        "duration_seconds": 0.171
+      },
+      {
+        "name": "tests",
+        "exit_code": 0,
+        "duration_seconds": 96.657
+      },
+      {
+        "name": "evaluation",
+        "exit_code": 0,
+        "duration_seconds": 4.797
+      }
+    ],
+    "passed": true,
+    "source_unchanged": true
+  },
+  "rag_measurement_revision": "cce7e34b2675f9b068bb3aa77c0f73780dff582a",
+  "ui_followup": {
+    "only_python_changes_since_rag_measurement": [
+      "stylemate/desktop/chat_view.py",
+      "tests/test_native_desktop.py"
+    ],
+    "rag_components_unchanged": true,
+    "initial_remote_ci_failure_url": "https://github.com/yinzuosheng741-wq/travel-wardrobe-assistant/actions/runs/41179278647",
+    "initial_remote_failure": "525 passed, 1 failed: fixed timer raced with later text layout range",
+    "fix": "follow scrollbar range changes until explicit user scroll; retain original assertions"
+  }
 }

@@ -223,6 +223,24 @@ def test_chat_user_and_assistant_rows_have_distinct_alignment(window):
     assert user_x > assistant_x
 
 
+def test_chat_follows_late_layout_range_changes_and_respects_user_scroll(window):
+    from PySide6.QtWidgets import QAbstractSlider
+
+    transcript = window.transcript
+    transcript.set_messages([ConversationMessage(role="assistant", content="测试回复")], {})
+    scroll = transcript.verticalScrollBar()
+    scroll.setRange(0, 500)
+    assert scroll.value() == 500
+    scroll.triggerAction(QAbstractSlider.SliderAction.SliderSingleStepSub)
+    user_position = scroll.value()
+    assert user_position < 500
+    scroll.setRange(0, 800)
+    assert scroll.value() == user_position
+    scroll.triggerAction(QAbstractSlider.SliderAction.SliderToMaximum)
+    scroll.setRange(0, 1000)
+    assert scroll.value() == 1000
+
+
 def test_chat_shows_sent_message_immediately_and_retains_draft_on_failure(window, monkeypatch):
     window.navigate(2)
     release = threading.Event()

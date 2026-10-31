@@ -6,7 +6,7 @@ import math
 import re
 from html import escape
 
-from PySide6.QtCore import Qt, QTimer, QUrl
+from PySide6.QtCore import Qt, QUrl
 from PySide6.QtGui import QFontMetrics
 from PySide6.QtWidgets import QFrame, QHBoxLayout, QLabel, QScrollArea, QSizePolicy, QTextBrowser, QVBoxLayout, QWidget
 
@@ -87,6 +87,23 @@ class ChatTranscript(QScrollArea):
         self.rows.setAlignment(Qt.AlignmentFlag.AlignTop)
         self.user_bubbles = []
         self.message_widgets = []
+        self._follow_tail = True
+        scroll = self.verticalScrollBar()
+        scroll.rangeChanged.connect(self._restore_tail)
+        scroll.actionTriggered.connect(self._scroll_action)
+        scroll.sliderMoved.connect(self._slider_moved)
+
+    def _restore_tail(self, *_args):
+        if self._follow_tail:
+            scroll = self.verticalScrollBar()
+            scroll.setValue(scroll.maximum())
+
+    def _scroll_action(self, _action):
+        scroll = self.verticalScrollBar()
+        self._follow_tail = scroll.sliderPosition() >= scroll.maximum()
+
+    def _slider_moved(self, position):
+        self._follow_tail = position >= self.verticalScrollBar().maximum()
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
@@ -98,6 +115,7 @@ class ChatTranscript(QScrollArea):
             bubble.setFixedWidth(min(desired, width))
 
     def set_messages(self, messages, garments, *, waiting=False):
+        self._follow_tail = True
         while self.rows.count():
             item = self.rows.takeAt(0)
             if item.widget():
@@ -178,7 +196,9 @@ class ChatTranscript(QScrollArea):
             working.setObjectName("messageMeta")
             self.rows.addWidget(working)
         self._resize_bubbles()
-        QTimer.singleShot(50, lambda: self.verticalScrollBar().setValue(self.verticalScrollBar().maximum()))
+        # Rich-text height and viewport range may settle after any fixed timer.
+        # Follow range changes until the user explicitly scrolls away.
+        self._restore_tail()
 
     def plain_text(self):
         return "\n".join(widget.toPlainText() if isinstance(widget, QTextBrowser) else widget.text()
